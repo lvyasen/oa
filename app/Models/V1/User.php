@@ -32,4 +32,5 @@ class User extends Model
         $where['id'] = $userId;
         DB::table($this->table)->where($where)->update($data);
     }
+    
 }

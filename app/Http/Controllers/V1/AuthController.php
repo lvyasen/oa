@@ -27,8 +27,8 @@
         public function signUp(Request $request)
         {
             $request->validate([
-                                   'mobile'        => 'required|string',
-                                   'email'         => 'required|string|email',
+                                   'mobile'        => 'required|string|unique:users',
+                                   'email'         => 'required|string|email|unique:users',
                                    'password'      => 'required|string',
                                    'age'           => 'string',
                                    'name'          => 'required|string',
@@ -114,6 +114,7 @@
          */
         public function getUserInfo(Request $request)
         {
+
             $userInfo = $request->user();
             if ($userInfo){
                 //更新用户
