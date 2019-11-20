@@ -117,6 +117,7 @@
             'mobile' => '手机号',
             'password' => '密码',
             'email' => '邮箱',
+            'department_name' => '部门名称',
         ],
 
     ];

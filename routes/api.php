@@ -38,7 +38,17 @@
      */
     $api->version('v1', ['middleware' => 'api:auth','namespace'=>'\App\Http\Controllers\V1'], function ($api) {
         $api->post('getUserInfo', 'AuthController@getUserInfo');
-        $api->post('addMenu', 'MenuController@addMenu');//添加菜单
+        $api->post('addMenu', 'DepartmentController@addMenu');//添加菜单
+        /**
+         * 用户管理
+         */
+        $api->post('getUserList', 'UsersController@getUserList');//用户列表
+        /**
+         * 部门管理
+         */
+        $api->post('addDepartment', 'DepartmentController@addDepartment');//添加部门
+        $api->post('delDepartment', 'DepartmentController@delDepartment');//删除部门
+        $api->post('editDepartment', 'DepartmentController@editDepartment');//修改部门
         /**
          * 操作相关
          */
@@ -48,8 +58,8 @@
     /**
      * 无需用户信息
      */
-    $api->version('v1', function ($api) {
-        $api->post('signUp', '\App\Http\Controllers\V1\AuthController@signUp');
-        $api->post('login', '\App\Http\Controllers\V1\AuthController@logIn');
-        $api->post('getDepartmentList', '\App\Http\Controllers\V1\DepartmentController@getDepartmentList');
+    $api->version('v1',['namespace'=>'\App\Http\Controllers\V1'], function ($api) {
+        $api->post('signUp', 'AuthController@signUp');
+        $api->post('login', 'AuthController@logIn');
+        $api->post('getDepartmentList', 'DepartmentController@getDepartmentList');
     });

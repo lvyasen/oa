@@ -32,5 +32,25 @@ class User extends Model
         $where['id'] = $userId;
         DB::table($this->table)->where($where)->update($data);
     }
-    
+
+    /**
+     * 获取用户列表
+     * @param        $where
+     * @param string $order
+     * @param int    $page
+     * @param int    $pageNum
+     *
+     * @return mixed
+     * getUserList
+     * author: walker
+     * Date: 2019/11/20
+     * Time: 18:43
+     * Note:
+     */
+    public function getUserList($where,$order='',$page=1,$pageNum=20)
+    {
+
+        $pageStart = ($page-1)*$pageNum;
+        return $this->where($where)->limit($pageNum)->offset($pageStart)->get()->toArray();
+    }
 }

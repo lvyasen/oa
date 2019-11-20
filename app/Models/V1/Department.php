@@ -69,6 +69,18 @@
             return $this->where($where)->update(['status' => $status]);
         }
 
+        /**
+         * 编辑部门
+         * @param $departmentId
+         * @param $data
+         *
+         * @return bool
+         * editDepartment
+         * author: walker
+         * Date: 2019/11/20
+         * Time: 18:30
+         * Note:
+         */
         public function editDepartment($departmentId, $data)
         {
             if (empty($departmentId)) return false;
