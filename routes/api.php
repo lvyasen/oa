@@ -56,6 +56,10 @@
         $api->post('editRoleStatus', 'RoleController@editRoleStatus');//修改角色状态
         $api->post('editRole', 'RoleController@editRole');//修改角色
         $api->post('getRoleList', 'RoleController@getRoleList');//获取角色列表
+        /**
+         * 系统管理
+         */
+        $api->post('getSystemLog', 'SystemController@getSystemLog');//获取角色列表
     });
     /**
      * 无需用户信息

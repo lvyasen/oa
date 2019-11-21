@@ -2,6 +2,7 @@
 
     namespace App\Http\Controllers\V1;
 
+    use App\Dictionary\Code;
     use App\Http\Controllers\Controller;
     use App\Models\V1\System;
     use Illuminate\Http\Request;
@@ -29,8 +30,45 @@
             $model->user_id     = $request->user()->id;
             $model->params      = json_encode($request->input(), true);
             $model->ip          = $request->getClientIp();
+            $model->user_name   = $request->user()->name;
             $model->add_time    = time();
             $model->save();
         }
 
+        /**
+         * 获取系统日志列表
+         *
+         * @param Request $request
+         * getSystemLog
+         * author: walker
+         * Date: 2019/11/21
+         * Time: 18:35
+         * Note:
+         */
+        public function getSystemLog(Request $request)
+        {
+            $page      = $request->page ?: 1;
+            $pageNum   = $request->pageNum ?: 10;
+            $pageStart = ($page - 1) * $pageNum;
+            $where     = [];
+            $startTime = strtotime($request->start_time)?:strtotime('-7 days');
+            $endTime = $request->end_time?strtotime($request->end_time):time();
+            if ($request->user_name) $where['user_name'] = $request->user();
+            $logList = System::where($where)
+                             ->whereBetween('add_time', [$startTime,$endTime])
+                             ->offset($pageStart)
+                             ->limit($pageNum)
+                             ->orderBy('add_time', 'DESC')
+                             ->get()
+                             ->toArray();
+            $count = System::where($where)
+                           ->whereBetween('add_time', [$startTime,$endTime])
+                            ->count();
+            $data = [];
+            $data['list']=$logList;
+            $data['count']=$count;
+            ajaxReturn(200, Code::$com[200], $data);
+        }
+
     }
+
