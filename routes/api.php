@@ -16,33 +16,20 @@
     Route::middleware('auth:api')->get('/user', function(Request $request) {
         return $request->user();
     });
-//    Route::group([
-//                     'prefix' => 'auth',
-//                 ], function() {
-//
-//        Route::post('logIn', '\App\Http\Controllers\V1\AuthController@logIn');
-//        Route::post('signUp', '\App\Http\Controllers\V1\AuthController@signUp');
-//
-//
-//        Route::group([
-//                         'middleware' => 'auth:api',
-//                     ], function() {
-//            Route::get('logout', '\App\Http\Controllers\V1\AuthController@logout');
-//            Route::post('getUserInfo', '\App\Http\Controllers\V1\AuthController@user');
-//        });
-//    });
+
 
     $api = app('Dingo\Api\Routing\Router');
     /**
      * 需要用户信息
      */
     $api->version('v1', ['middleware' => 'api:auth','namespace'=>'\App\Http\Controllers\V1'], function ($api) {
-        $api->post('getUserInfo', 'AuthController@getUserInfo');
         $api->post('addMenu', 'DepartmentController@addMenu');//添加菜单
         /**
          * 用户管理
          */
         $api->post('getUserList', 'UsersController@getUserList');//用户列表
+        $api->post('getUserInfo', 'AuthController@getUserInfo');//获取用户信息
+        $api->post('logout', 'AuthController@logout');//用户退出登录
         /**
          * 部门管理
          */
