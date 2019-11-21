@@ -30,6 +30,7 @@
 
     /**
      * 获取客户端IP地址
+     *
      * @return mixed|string
      * getIp
      * author: walker
@@ -39,18 +40,18 @@
      */
     function getIp()
     {
-        if ($_SERVER["HTTP_CLIENT_IP"] && strcasecmp($_SERVER["HTTP_CLIENT_IP"], "unknown")) {
+        if ($_SERVER["HTTP_CLIENT_IP"] && strcasecmp($_SERVER["HTTP_CLIENT_IP"], "unknown")){
             $ip = $_SERVER["HTTP_CLIENT_IP"];
         } else {
-            if ($_SERVER["HTTP_X_FORWARDED_FOR"] && strcasecmp($_SERVER["HTTP_X_FORWARDED_FOR"], "unknown")) {
+            if ($_SERVER["HTTP_X_FORWARDED_FOR"] && strcasecmp($_SERVER["HTTP_X_FORWARDED_FOR"], "unknown")){
                 $ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
             } else {
-                if ($_SERVER["REMOTE_ADDR"] && strcasecmp($_SERVER["REMOTE_ADDR"], "unknown")) {
+                if ($_SERVER["REMOTE_ADDR"] && strcasecmp($_SERVER["REMOTE_ADDR"], "unknown")){
                     $ip = $_SERVER["REMOTE_ADDR"];
                 } else {
                     if (isset ($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'],
                                                                                                  "unknown")
-                    ) {
+                    ){
                         $ip = $_SERVER['REMOTE_ADDR'];
                     } else {
                         $ip = "unknown";
@@ -63,23 +64,29 @@
 
     /**
      * 无限极分类树 getTree($categories)
+     *
      * @param array $data
-     * @param int $parent_id
-     * @param int $level
+     * @param int   $parent_id
+     * @param int   $level
+     *
      * @return array
      */
-    function getTree($data = [], $parent_id = 0, $level = 0)
+    function getMenuTree($data = [], $parent_id = 0, $level = 0)
     {
         $tree = [];
-        if ($data && is_array($data)) {
+        if ($data && is_array($data)){
             foreach ($data as $v) {
-                if ($v['parent_id'] == $parent_id) {
-                    $tree[] = [
-                        'id' => $v['id'],
-                        'level' => $level,
-                        'cat_name' => $v['cat_name'],
-                        'parent_id' => $v['parent_id'],
-                        'children' => getTree($data, $v['id'], $level + 1),
+                if ($v['pid'] == $parent_id){
+
+                    $tree[]  = [
+                        'menu_id'   => $v['menu_id'],
+                        'level'     => $level,
+                        'menu_name' => $v['menu_name'],
+                        'url'       => $v['url'],
+                        'icon'      => $v['icon'],
+                        'pid'       => $v['pid'],
+                        'sort'      => $v['sort'],
+                        'children'  => getMenuTree($data, $v['menu_id'], $level + 1),
                     ];
                 }
             }
@@ -87,5 +94,44 @@
         return $tree;
     }
 
+    /**
+     * 循环获取子孙树 getSubTree($categories)
+     *
+     * @param array $data
+     * @param int   $id
+     * @param int   $level
+     *
+     * @return array
+     */
+    function getSubTree($id, $data = [], $pid = 0, $level = 0)
+    {
+        static $tree = [];
+
+        foreach ($data as $key => $value) {
+            if ($value['pid'] == $pid){
+                $value['level'] = $level;
+                $tree[]         = $value;
+                getSubTree($id, $data, $value[$id], $level + 1);
+            }
+        }
+        return $tree;
+    }
+
+    /**
+     * 断点调试
+     *
+     * @param $data
+     * fp
+     * author: walker
+     * Date: 2019/11/21
+     * Time: 15:58
+     * Note:
+     */
+    function fp($data)
+    {
+        echo "<pre>";
+        print_r($data);
+        die();
+    }
 
 

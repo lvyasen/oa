@@ -40,10 +40,22 @@
          * 权限管理
          */
         $api->post('addPermission', 'PermissionController@addPermission');//添加权限
+        $api->post('editPermission', 'PermissionController@editPermission');//修改权限
+        $api->post('editPermissionStatus', 'PermissionController@editPermissionStatus');//修改权限
         /**
          * 菜单管理
          */
         $api->post('addMenu', 'MenuController@addMenu');//添加菜单
+        $api->post('getMenuList', 'MenuController@getMenuList');//菜单列表
+        $api->post('editMenuStatus', 'MenuController@editMenuStatus');//修改菜单状态
+        /**
+         * 角色管理
+         */
+        $api->post('addRole', 'RoleController@addRole');//添加角色
+        $api->post('getRoleInfo', 'RoleController@getRoleInfo');//获取角色信息
+        $api->post('editRoleStatus', 'RoleController@editRoleStatus');//修改角色状态
+        $api->post('editRole', 'RoleController@editRole');//修改角色
+        $api->post('getRoleList', 'RoleController@getRoleList');//获取角色列表
     });
     /**
      * 无需用户信息
