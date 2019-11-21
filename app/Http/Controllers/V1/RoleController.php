@@ -25,13 +25,14 @@
             $model            = new Role();
             $model->role_name = $request->role_name;
             $model->status    = 1;
-            $res = $model->save();
-            if(empty($res)) ajaxReturn(4002,Code::$com[4002]);
-            ajaxReturn(200,Code::$com[200]);
+            $res              = $model->save();
+            if (empty($res)) ajaxReturn(4002, Code::$com[4002]);
+            ajaxReturn(200, Code::$com[200]);
         }
 
         /**
          * 删除角色
+         *
          * @param Request $request
          * delRole
          * author: walker
@@ -44,8 +45,48 @@
             $request->validate([
                                    'role_id' => 'required|string',
                                ]);
+            $where            = [];
+            $where['role_id'] = $request->role_id;
+            $res              = Role::where($where)->update(['is_del' => 1]);
+            if (empty($res)) ajaxReturn(4002, Code::$com[4002]);
+            ajaxReturn(200, Code::$com[200]);
+        }
+
+        /**
+         * 修改角色
+         * @param Request $request
+         * editRole
+         * author: walker
+         * Date: 2019/11/21
+         * Time: 10:40
+         * Note:
+         */
+        public function editRole(Request $request)
+        {
+            $request->validate([
+                                   'role_id' => 'required|string',
+                                   'role_name' => 'required|string|max:60',
+                               ]);
             $where = [];
             $where['role_id'] = $request->role_id;
-//            Role::where($where)->
+            $update = [];
+            $update['role_name'] = $request->role_name;
+            $res = Role::where($where)->update($update);
+            if(empty($res)) ajaxReturn(4003,Code::$com[4003]);
+            ajaxReturn(200,Code::$com[200]);
+        }
+
+        /**
+         * 获取角色列表
+         * @param Request $request
+         * getRoleList
+         * author: walker
+         * Date: 2019/11/21
+         * Time: 10:46
+         * Note:
+         */
+        public function getRoleList(Request $request)
+        {
+
         }
     }

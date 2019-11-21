@@ -18,4 +18,9 @@
     class Permission extends Model
     {
 
+        protected $table      = 'permission';
+        protected $primaryKey = 'permission_id';
+        protected $dateFormat = 'U';
+        const CREATED_AT = 'add_time';
+        const UPDATED_AT  = 'update_time';
     }

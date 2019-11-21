@@ -6,6 +6,7 @@
     use App\Http\Controllers\Controller;
     use App\Models\V1\User;
     use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\DB;
 
     class UsersController extends Controller
     {
@@ -26,12 +27,10 @@
             $page     = $request->page ?: 1;
             $pageNum  = $request->pageNum ?: 20;
             $mobile   = $request->mobile;
-            $where    = [];
+            $userName   = $request->user_name;
 
-            if ( !empty($mobile)) $where['mobile'] = $mobile;
-            
             $model = new User();
-            $list  = $model->getUserList($where, $order);
+            $list  = $model->getUserList($userName,$mobile, $order);
             ajaxReturn(200, Code::$com[200], $list);
         }
     }

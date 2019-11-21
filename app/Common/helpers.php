@@ -61,3 +61,31 @@
         return ($ip);
     }
 
+    /**
+     * 无限极分类树 getTree($categories)
+     * @param array $data
+     * @param int $parent_id
+     * @param int $level
+     * @return array
+     */
+    function getTree($data = [], $parent_id = 0, $level = 0)
+    {
+        $tree = [];
+        if ($data && is_array($data)) {
+            foreach ($data as $v) {
+                if ($v['parent_id'] == $parent_id) {
+                    $tree[] = [
+                        'id' => $v['id'],
+                        'level' => $level,
+                        'cat_name' => $v['cat_name'],
+                        'parent_id' => $v['parent_id'],
+                        'children' => getTree($data, $v['id'], $level + 1),
+                    ];
+                }
+            }
+        }
+        return $tree;
+    }
+
+
+
