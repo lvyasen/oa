@@ -42,8 +42,8 @@
                     $list[$key]['department_num'] = DB::table('users')->where($where)->count('id');
                 }
             }
-            $tree = getDepartmentTree($list);
-            $data = [];
+            $tree         = getDepartmentTree($list);
+            $data         = [];
             $data['list'] = $tree;
             ajaxReturn(200, Code::$com[200], $data);
         }
@@ -70,6 +70,7 @@
             $data                       = [];
             $data['department_name']    = $request->department_name;
             $data['department_manager'] = $request->department_manager;
+            $data['pid']                = $request->pid;
             $data['desc']               = $request->desc;
             $departmentId               = $request->department_id;
             $model                      = new Department();
@@ -81,6 +82,7 @@
 
         /**
          * 修改部门状态
+         *
          * @param Request $request
          * editDepartmentStatus
          * author: walker
@@ -125,6 +127,7 @@
             $model->department_name    = $request->department_name;
             $model->department_manager = $request->department_manager;
             $model->desc               = $request->desc;
+            $model->pid                = $request->pid;
             $model->status             = 1;
             $result                    = $model->save();
             if (empty($result)) ajaxReturn(4003, Code::$com[4003]);

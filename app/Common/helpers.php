@@ -78,7 +78,7 @@
             foreach ($data as $v) {
                 if ($v['pid'] == $parent_id){
 
-                    $tree[]  = [
+                    $tree[] = [
                         'menu_id'   => $v['menu_id'],
                         'level'     => $level,
                         'menu_name' => $v['menu_name'],
@@ -93,20 +93,35 @@
         }
         return $tree;
     }
+
+    /**
+     * 获取部门列表
+     *
+     * @param array $data
+     * @param int   $parent_id
+     * @param int   $level
+     *
+     * @return array
+     * getDepartmentTree
+     * author: walker
+     * Date: 2019/11/22
+     * Time: 15:38
+     * Note:
+     */
     function getDepartmentTree($data = [], $parent_id = 0, $level = 0)
     {
         $tree = [];
         if ($data && is_array($data)){
             foreach ($data as $v) {
                 if ($v['pid'] == $parent_id){
-                    $tree[]  = [
-                        'department_id'   => $v['department_id'],
-                        'department_name'   => $v['department_name'],
-                        'department_manager'   => $v['department_manager'],
-                        'department_num'   => $v['department_num'],
-                        'pid'   => $v['pid'],
-                        'level'     => $level,
-                        'children'  => getDepartmentTree($data, $v['department_id'], $level + 1),
+                    $tree[] = [
+                        'department_id'      => $v['department_id'],
+                        'department_name'    => $v['department_name'],
+                        'department_manager' => $v['department_manager'],
+                        'department_num'     => $v['department_num'],
+                        'pid'                => $v['pid'],
+                        'level'              => $level,
+                        'children'           => getDepartmentTree($data, $v['department_id'], $level + 1),
                     ];
                 }
             }
