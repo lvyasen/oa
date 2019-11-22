@@ -51,9 +51,47 @@
             $request->validate([
                                    'user_id' => 'required|string',
                                ]);
-            $res = Common::editStatus('users','id',$request->user_id);
+            $res = Common::editStatus('users', 'id', $request->user_id);
             if (empty($res)) ajaxReturn(4003, Code::$com[4003]);
             SystemController::sysLog($request, '修改用户状态');
             ajaxReturn(200, Code::$com[200]);
         }
+
+        /**
+         * 修改用户
+         *
+         * @param Request $request
+         * editUser
+         * author: walker
+         * Date: 2019/11/22
+         * Time: 10:04
+         * Note:
+         */
+        public function editUser(Request $request)
+        {
+            $request->validate([
+                                   'user_id'       => 'required|string',
+                                   'user_name'     => 'required|string|max:60',
+                                   'mobile'        => 'unique:users',
+                                   'sex'           => 'string',
+                                   'age'           => 'string',
+                                   'department_id' => 'required|string',
+                                   'password'      => 'string',
+
+                               ]);
+
+            $model                = User::find($request->user_id);
+            $model->name          = $request->user_name;
+            $model->sex           = $request->sex;
+            $model->age           = $request->age;
+            $model->department_id = $request->department_id;
+            if ( !empty($request->password)) $model->password = bcrypt($request->password);
+            if ( !empty($request->mobile)) $model->mobile = $request->mobile;
+            $result = $model->save();
+            if (empty($result)) ajaxReturn(4002, Code::$com[4002]);
+            SystemController::sysLog($request, '修改用户信息');
+            ajaxReturn(200, Code::$com[200]);
+        }
+
+
     }

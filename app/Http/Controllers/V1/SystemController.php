@@ -67,6 +67,7 @@
             $data = [];
             $data['list']=$logList;
             $data['count']=$count;
+            $data['page']=$page;
             ajaxReturn(200, Code::$com[200], $data);
         }
 

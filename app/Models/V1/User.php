@@ -8,7 +8,7 @@
     class User extends Model
     {
         //指定表名
-        protected $table = "users as u";
+        protected $table = "users";
         //    public static $table
 
         /**
@@ -53,17 +53,27 @@
         {
 
             $pageStart = ($page - 1) * $pageNum;
-            $field     = 'u.name,u.email,u.mobile,u.created_at,u.status,d.department_name,r.role_name,
-        u.id,ur.user_id,ur.role_id,r.role_id,u.department_id,d.department_id';
-            return $this->where('name','like', "%$userName%")
-                        ->where('mobile','like',"%$mobile%")
-                        ->selectRaw($field)
-                        ->leftjoin('user_role as ur', 'u.id', '=', 'ur.user_id')
-                        ->leftjoin('role as r', 'ur.role_id', '=', 'r.role_id')
-                        ->leftjoin('department as d', 'u.department_id', '=', 'd.department_id')
-                        ->limit($pageNum)
-                        ->offset($pageStart)
-                        ->get()
-                        ->toArray();
+            $field     = 'users.name,users.email,users.mobile,users.created_at,users.status,d.department_name,r.role_name,
+        users.id,ur.user_id,ur.role_id,r.role_id,users.department_id,d.department_id';
+            $list = [];
+            $list['list'] = $this->where('name','like', "%$userName%")
+                                 ->where('mobile','like',"%$mobile%")
+                                 ->selectRaw($field)
+                                 ->leftjoin('user_role as ur', 'users.id', '=', 'ur.user_id')
+                                 ->leftjoin('role as r', 'ur.role_id', '=', 'r.role_id')
+                                 ->leftjoin('department as d', 'users.department_id', '=', 'd.department_id')
+                                 ->limit($pageNum)
+                                 ->offset($pageStart)
+                                 ->get()
+                                 ->toArray();
+            $list['count'] = $this->where('name','like', "%$userName%")
+                                  ->where('mobile','like',"%$mobile%")
+                                  ->selectRaw($field)
+                                  ->leftjoin('user_role as ur', 'users.id', '=', 'ur.user_id')
+                                  ->leftjoin('role as r', 'ur.role_id', '=', 'r.role_id')
+                                  ->leftjoin('department as d', 'users.department_id', '=', 'd.department_id')
+                                  ->count();
+            $list['page']=$page;
+            return $list;
         }
     }

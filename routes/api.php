@@ -30,7 +30,8 @@
         $api->post('getUserList', 'UsersController@getUserList');//用户列表
         $api->post('getUserInfo', 'AuthController@getUserInfo');//获取用户信息
         $api->post('logout', 'AuthController@logout');//用户退出登录
-        $api->post('editUserStatus', 'UsersController@editUserStatus');//用户退出登录
+        $api->post('editUserStatus', 'UsersController@editUserStatus');//修改用户状态
+        $api->post('editUser', 'UsersController@editUser');//修改用户信息
         /**
          * 部门管理
          */
