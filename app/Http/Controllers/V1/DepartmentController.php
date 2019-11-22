@@ -69,13 +69,14 @@
                                    'pid'                => 'required|string',
                                ]);
             $data                       = [];
-            $data['department_name']    = $request->department_name;
+
             $data['department_manager'] = $request->department_manager;
             $data['pid']                = $request->pid;
             $data['desc']               = $request->desc;
             $data['manager_user_id']    = $request->manager_user_id;
             $departmentId               = $request->department_id;
             $model                      = new Department();
+            if(!empty($request->department_name))$data['department_name']    = $request->department_name;
             $result                     = $model->editDepartment($departmentId, $data);
             if (empty($result)) ajaxReturn(4003, Code::$com[4003]);
             SystemController::sysLog($request, '修改部门');

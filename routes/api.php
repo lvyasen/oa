@@ -60,6 +60,13 @@
         $api->post('editRole', 'RoleController@editRole');//修改角色
         $api->post('getRoleList', 'RoleController@getRoleList');//获取角色列表
         /**
+         * 指标管理
+         */
+        $api->post('addQuota', 'QuotaController@addQuota');//添加部门指标
+        $api->post('editQuota', 'QuotaController@editQuota');//修改部门指标
+        $api->post('delQuota', 'QuotaController@delQuota');//删除部门指标
+        $api->post('getQuotaList', 'QuotaController@getQuotaList');//获取部门列表
+        /**
          * 系统管理
          */
         $api->post('getSystemLog', 'SystemController@getSystemLog');//获取角色列表

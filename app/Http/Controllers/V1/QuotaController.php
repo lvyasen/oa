@@ -27,7 +27,6 @@
                                    'department_id'   => 'required|string',
                                    'department_name' => 'required|string',
                                    'quota_name'      => 'required|string',
-
                                ]);
 
             $model                  = new Quota();
