@@ -6,6 +6,7 @@
     use App\Http\Controllers\Controller;
     use App\Models\V1\Department;
     use App\Models\V1\System;
+    use App\Models\V1\User;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
 
@@ -62,7 +63,6 @@
         {
             $request->validate([
                                    'department_name'    => 'required|string|max:30|unique:department',
-                                   'department_manager' => 'required|string|max:30',
                                    'desc'               => 'required|string|max:255',
                                    'department_id'      => 'required|string',
                                    'manager_user_id'    => 'required|string',
@@ -70,12 +70,13 @@
                                ]);
             $data                       = [];
             $data['department_name']    = $request->department_name;
-            $data['department_manager'] = $request->department_manager;
+            $data['department_manager'] =User::getUserInfo($request->manager_user_id)->name;
             $data['pid']                = $request->pid;
             $data['desc']               = $request->desc;
             $data['manager_user_id']    = $request->manager_user_id;
             $departmentId               = $request->department_id;
             $model                      = new Department();
+
             $result                     = $model->editDepartment($departmentId, $data);
             if (empty($result)) ajaxReturn(4003, Code::$com[4003]);
             SystemController::sysLog($request, '修改部门');
@@ -121,15 +122,14 @@
 
             $request->validate([
                                    'department_name'    => 'required|string|max:30',
-                                   'department_manager' => 'required|string|max:30',
                                    'manager_user_id'    => 'required|string',
                                    'desc'               => 'required|string|max:255',
                                    'pid'                => 'required|string',
                                ]);
             $model                     = new Department();
             $model->department_name    = $request->department_name;
-            $model->department_manager = $request->department_manager;
             $model->manager_user_id    = $request->manager_user_id;
+            $model->department_manager =User::getUserInfo($request->manager_user_id)->name;
             $model->desc               = $request->desc;
             $model->pid                = $request->pid;
             $model->status             = 1;

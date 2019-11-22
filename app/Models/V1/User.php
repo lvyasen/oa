@@ -143,4 +143,25 @@
             }
             return true;
         }
+
+        /**
+         * 获取用户信息
+         *
+         * @param        $userId
+         * @param string $field
+         *
+         * @return bool
+         * getUserInfo
+         * author: walker
+         * Date: 2019/11/22
+         * Time: 17:07
+         * Note:
+         */
+        public static function getUserInfo($userId, $field = 'name')
+        {
+            if (empty($userId)) return false;
+            $where       = [];
+            $where['id'] = $userId;
+            return DB::table('users')->where($where)->selectRaw($field)->first();
+        }
     }
