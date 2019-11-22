@@ -120,6 +120,7 @@
                         'department_manager' => $v['department_manager'],
                         'department_num'     => $v['department_num'],
                         'pid'                => $v['pid'],
+                        'desc'                => $v['desc'],
                         'level'              => $level,
                         'children'           => getDepartmentTree($data, $v['department_id'], $level + 1),
                     ];

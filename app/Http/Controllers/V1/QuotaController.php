@@ -107,11 +107,12 @@
          */
         public function getQuotaList(Request $request)
         {
-            $page         = $request->page ?: 1;
-            $pageNum      = $request->pageNum ?: 10;
-            $pageStart    = ($page - 1) * $pageNum;
-            $departmentId = $request->department_id;
-            $where        = [];
+            $page            = $request->page ?: 1;
+            $pageNum         = $request->pageNum ?: 10;
+            $pageStart       = ($page - 1) * $pageNum;
+            $departmentId    = $request->department_id;
+            $where           = [];
+            $where['is_del'] = 0;
             if ( !empty($departmentId)) $where['department_id'] = $departmentId;
             $list          = DB::table('quota')->where($where)->offset($pageStart)->limit($pageNum)->get();
             $count         = DB::table('quota')->where($where)->count();
