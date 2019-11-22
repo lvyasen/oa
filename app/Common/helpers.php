@@ -93,6 +93,26 @@
         }
         return $tree;
     }
+    function getDepartmentTree($data = [], $parent_id = 0, $level = 0)
+    {
+        $tree = [];
+        if ($data && is_array($data)){
+            foreach ($data as $v) {
+                if ($v['pid'] == $parent_id){
+                    $tree[]  = [
+                        'department_id'   => $v['department_id'],
+                        'department_name'   => $v['department_name'],
+                        'department_manager'   => $v['department_manager'],
+                        'department_num'   => $v['department_num'],
+                        'pid'   => $v['pid'],
+                        'level'     => $level,
+                        'children'  => getMenuTree($data, $v['department_id'], $level + 1),
+                    ];
+                }
+            }
+        }
+        return $tree;
+    }
 
     /**
      * 循环获取子孙树 getSubTree($categories)

@@ -42,7 +42,10 @@
                     $list[$key]['department_num'] = DB::table('users')->where($where)->count('id');
                 }
             }
-            ajaxReturn(200, Code::$com[200], $list);
+            $tree = getDepartmentTree($list);
+            $data = [];
+            $data['list'] = $tree;
+            ajaxReturn(200, Code::$com[200], $data);
         }
 
         /**
