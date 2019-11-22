@@ -61,7 +61,7 @@
         public function editDepartment(Request $request)
         {
             $request->validate([
-                                   'department_name'    => 'max:30|unique:department',
+                                   'department_name'    => 'required|string|max:30|unique:department',
                                    'department_manager' => 'required|string|max:30',
                                    'desc'               => 'required|string|max:255',
                                    'department_id'      => 'required|string',
@@ -69,14 +69,13 @@
                                    'pid'                => 'required|string',
                                ]);
             $data                       = [];
-
+            $data['department_name']    = $request->department_name;
             $data['department_manager'] = $request->department_manager;
             $data['pid']                = $request->pid;
             $data['desc']               = $request->desc;
             $data['manager_user_id']    = $request->manager_user_id;
             $departmentId               = $request->department_id;
             $model                      = new Department();
-            if(!empty($request->department_name))$data['department_name']    = $request->department_name;
             $result                     = $model->editDepartment($departmentId, $data);
             if (empty($result)) ajaxReturn(4003, Code::$com[4003]);
             SystemController::sysLog($request, '修改部门');
