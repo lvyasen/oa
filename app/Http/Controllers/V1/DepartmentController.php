@@ -79,7 +79,7 @@
         public function editDepartment(Request $request)
         {
             $request->validate([
-                                   'department_name' => 'required|string|max:30|unique:department',
+                                   'department_name' => 'required|string|max:30',
                                    'desc'            => 'required|string|max:255',
                                    'department_id'   => 'required|string',
                                    'manager_user_id' => 'required|string',
