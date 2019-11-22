@@ -23,7 +23,7 @@
          */
         public function addMenu(Request $request)
         {
-            $user = $request->user();
+
             $request->validate([
                                    'menu_name' => 'required|string|max:30|unique:menu',
                                    'pid'       => 'required|string',
@@ -42,6 +42,7 @@
             if (empty($result)) ajaxReturn(4002, Code::$com[4002]);
             SystemController::sysLog($request, '添加菜单');
             ajaxReturn(200, Code::$com[200]);
+            
         }
 
         /**
