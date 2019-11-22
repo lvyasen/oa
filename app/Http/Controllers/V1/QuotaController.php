@@ -24,14 +24,15 @@
         public function addQuota(Request $request)
         {
             $request->validate([
-                                   'department_id'   => 'required|string',
-                                   'department_name' => 'required|string',
+                                   'department_id'   => 'required|string|exists:department,department_id',
                                    'quota_name'      => 'required|string',
                                ]);
 
+            $departmentName = DB::table('department')->where(['department_id'=>$request->department_id])
+                            ->select('department_name')->first()->department_name;
             $model                  = new Quota();
             $model->department_id   = $request->department_id;
-            $model->department_name = $request->department_name;
+            $model->department_name = $departmentName;
             $model->quota_name      = $request->quota_name;
             $model->quota_desc      = $request->quota_desc;
             $result                 = $model->save();
@@ -53,15 +54,16 @@
         public function editQuota(Request $request)
         {
             $request->validate([
-                                   'department_id'   => 'required|string',
+                                   'department_id'   => 'required|string|exists:department,department_id',
                                    'quota_id'        => 'required|string',
-                                   'department_name' => 'required|string',
                                    'quota_name'      => 'required|string',
                                ]);
 
+            $departmentName = DB::table('department')->where(['department_id'=>$request->department_id])
+                                ->select('department_name')->first()->department_name;
             $model                  = Quota::find($request->quota_id);
             $model->department_id   = $request->department_id;
-            $model->department_name = $request->department_name;
+            $model->department_name = $departmentName;
             $model->quota_name      = $request->quota_name;
             $model->quota_desc      = $request->quota_desc;
             if ( !empty($request->mobile)) $model->mobile = $request->mobile;
@@ -106,7 +108,7 @@
          */
         public function getQuotaList(Request $request)
         {
-            $page            = $request->page ?: 1;
+            $page            = (int) $request->page ?: 1;
             $pageNum         = $request->pageNum ?: 10;
             $pageStart       = ($page - 1) * $pageNum;
             $departmentId    = $request->department_id;

@@ -39,6 +39,7 @@
         $api->post('addDepartment', 'DepartmentController@addDepartment');//添加部门
         $api->post('delDepartment', 'DepartmentController@delDepartment');//删除部门
         $api->post('editDepartment', 'DepartmentController@editDepartment');//修改部门
+        $api->post('getDepartmentAllList', 'DepartmentController@getDepartmentAllList');//修改部门
         /**
          * 权限管理
          */
