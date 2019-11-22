@@ -65,6 +65,7 @@
                                    'department_manager' => 'required|string|max:30',
                                    'desc'               => 'required|string|max:255',
                                    'department_id'      => 'required|string',
+                                   'manager_user_id'    => 'required|string',
                                    'pid'                => 'required|string',
                                ]);
             $data                       = [];
@@ -72,6 +73,7 @@
             $data['department_manager'] = $request->department_manager;
             $data['pid']                = $request->pid;
             $data['desc']               = $request->desc;
+            $data['manager_user_id']    = $request->manager_user_id;
             $departmentId               = $request->department_id;
             $model                      = new Department();
             $result                     = $model->editDepartment($departmentId, $data);
@@ -120,12 +122,14 @@
             $request->validate([
                                    'department_name'    => 'required|string|max:30',
                                    'department_manager' => 'required|string|max:30',
+                                   'manager_user_id'    => 'required|string',
                                    'desc'               => 'required|string|max:255',
                                    'pid'                => 'required|string',
                                ]);
             $model                     = new Department();
             $model->department_name    = $request->department_name;
             $model->department_manager = $request->department_manager;
+            $model->manager_user_id    = $request->manager_user_id;
             $model->desc               = $request->desc;
             $model->pid                = $request->pid;
             $model->status             = 1;
