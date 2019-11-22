@@ -79,6 +79,15 @@
             ajaxReturn(200, Code::$com[200]);
         }
 
+        /**
+         * 修改部门状态
+         * @param Request $request
+         * editDepartmentStatus
+         * author: walker
+         * Date: 2019/11/22
+         * Time: 15:31
+         * Note:
+         */
         public function editDepartmentStatus(Request $request)
         {
             $request->validate([

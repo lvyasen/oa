@@ -106,7 +106,7 @@
                         'department_num'   => $v['department_num'],
                         'pid'   => $v['pid'],
                         'level'     => $level,
-                        'children'  => getMenuTree($data, $v['department_id'], $level + 1),
+                        'children'  => getDepartmentTree($data, $v['department_id'], $level + 1),
                     ];
                 }
             }
