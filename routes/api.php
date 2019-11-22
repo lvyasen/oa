@@ -32,6 +32,7 @@
         $api->post('logout', 'AuthController@logout');//用户退出登录
         $api->post('editUserStatus', 'UsersController@editUserStatus');//修改用户状态
         $api->post('editUser', 'UsersController@editUser');//修改用户信息
+        $api->post('getUserMenu', 'UsersController@getUserMenu');//获取用户菜单
         /**
          * 部门管理
          */

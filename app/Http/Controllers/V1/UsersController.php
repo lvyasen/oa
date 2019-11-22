@@ -72,25 +72,46 @@
             $request->validate([
                                    'user_id'       => 'required|string',
                                    'user_name'     => 'required|string|max:60',
+                                   'email'         => 'required|string|max:60|email',
                                    'mobile'        => 'unique:users',
                                    'sex'           => 'string',
                                    'age'           => 'string',
                                    'department_id' => 'required|string',
-                                   'password'      => 'string',
-
                                ]);
 
             $model                = User::find($request->user_id);
             $model->name          = $request->user_name;
             $model->sex           = $request->sex;
             $model->age           = $request->age;
+            $model->email         = $request->email;
             $model->department_id = $request->department_id;
             if ( !empty($request->password)) $model->password = bcrypt($request->password);
             if ( !empty($request->mobile)) $model->mobile = $request->mobile;
+            $role_list = json_decode($request->role_list,true);
+            if ( !empty($role_list)) User::addUserRole($request->user()->id, $role_list);
             $result = $model->save();
             if (empty($result)) ajaxReturn(4002, Code::$com[4002]);
             SystemController::sysLog($request, '修改用户信息');
             ajaxReturn(200, Code::$com[200]);
+        }
+
+        /**
+         * 获取用户菜单列表
+         *
+         * @param Request $request
+         * getUserMenu
+         * author: walker
+         * Date: 2019/11/22
+         * Time: 12:02
+         * Note:
+         */
+        public function getUserMenu(Request $request)
+        {
+            $userId       = $request->user()->id;
+            $menuList     = User::getUserMenu($userId);
+            $data         = [];
+            $data['list'] = $menuList;
+            ajaxReturn(200, Code::$com[200], $data);
         }
 
 

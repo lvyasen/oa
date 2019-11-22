@@ -46,7 +46,8 @@
                                  'password'      => bcrypt($request->password),
                                  'login_ip'      => $request->getClientIp(),
                              ]);
-
+            $role_list = json_decode($request->role_list,true);
+            if ( !empty($role_list)) \App\Models\V1\User::addUserRole($request->user()->id, $role_list);
             $user->save();
             ajaxReturn(200, Code::$com[200]);
 

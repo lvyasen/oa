@@ -118,6 +118,8 @@
             $where           = [];
             $where['status'] = 1;
             $list            = Role::where($where)->get()->toArray();
-            ajaxReturn(200, Code::$com[200], $list);
+            $data = [];
+            $data['list']=$list;
+            ajaxReturn(200, Code::$com[200], $data);
         }
     }
