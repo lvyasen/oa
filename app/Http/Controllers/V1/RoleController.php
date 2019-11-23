@@ -22,13 +22,12 @@
             $request->validate([
                                    'role_name' => 'required|string|max:30|unique:role',
                                    'menu_list' => 'string',
-                                   'status'    => 'required|string',
                                ]);
             $model            = new Role();
             $model->role_name = $request->role_name;
             $model->menu_list = $request->menu_list;
             $model->role_desc = $request->role_desc;
-            $model->status    = $request->status;
+            $model->status    = $request->status?:1;
             $res              = $model->save();
             if (empty($res)) ajaxReturn(4002, Code::$com[4002]);
             ajaxReturn(200, Code::$com[200]);
@@ -49,13 +48,13 @@
             $request->validate([
                                    'role_id'   => 'required|string',
                                    'role_name' => 'required|string|max:60',
-                                   'status'    => 'required|string',
                                ]);
             $where               = [];
             $where['role_id']    = $request->role_id;
             $update              = [];
             $update['role_name'] = $request->role_name;
             $update['role_desc'] = $request->role_desc;
+            $update['status'] = $request->status?:1;
             $res                 = Role::where($where)->update($update);
             if (empty($res)) ajaxReturn(4003, Code::$com[4003]);
             ajaxReturn(200, Code::$com[200]);

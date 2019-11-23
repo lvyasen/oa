@@ -3,9 +3,14 @@
     namespace App\Http\Controllers\V1;
 
     use App\Dictionary\Code;
+    use App\Exports\SystemExport;
+    use App\Exports\UsersExport;
     use App\Http\Controllers\Controller;
     use App\Models\V1\System;
     use Illuminate\Http\Request;
+
+    use Maatwebsite\Excel\Facades\Excel;
+    use function foo\func;
 
     class SystemController extends Controller
     {
@@ -68,6 +73,8 @@
             $data['list']=$logList;
             $data['count']=$count;
             $data['page']=$page;
+            Excel::download(new UsersExport(),'test.xlsx');
+            die();
             ajaxReturn(200, Code::$com[200], $data);
         }
 
