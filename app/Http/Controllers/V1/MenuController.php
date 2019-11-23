@@ -57,7 +57,6 @@
             $model           = new Menu();
             $where           = [];
             $where['is_del'] = 0;
-            $where['status'] = 1;
             $menuList        = Menu::where($where)->get()->toArray();
             $treeList        = getMenuTree($menuList);
             ajaxReturn(200, Code::$com[200], $treeList);

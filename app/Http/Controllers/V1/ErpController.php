@@ -23,10 +23,7 @@
             print_r($re);
         }
 
-        public function getWarehouse()
-        {
 
-        }
 
         /**
          * Erp SOAP请求封装
