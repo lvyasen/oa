@@ -52,6 +52,7 @@
         $api->post('addMenu', 'MenuController@addMenu');//添加菜单
         $api->post('getMenuList', 'MenuController@getMenuList');//菜单列表
         $api->post('editMenuStatus', 'MenuController@editMenuStatus');//修改菜单状态
+        $api->post('editMenu', 'MenuController@editMenu');//修改菜单状态
         /**
          * 角色管理
          */

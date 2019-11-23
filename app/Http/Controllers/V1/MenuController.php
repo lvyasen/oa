@@ -27,7 +27,6 @@
             $request->validate([
                                    'menu_name' => 'required|string|max:30|unique:menu',
                                    'pid'       => 'required|string',
-                                   'sort'      => 'string',
                                    'icon'      => 'string',
                                    'url'       => 'string',
                                ]);
@@ -42,7 +41,7 @@
             if (empty($result)) ajaxReturn(4002, Code::$com[4002]);
             SystemController::sysLog($request, '添加菜单');
             ajaxReturn(200, Code::$com[200]);
-            
+
         }
 
         /**
@@ -86,5 +85,37 @@
             ajaxReturn(200, Code::$com[200]);
         }
 
+        /**
+         * 修改菜单
+         *
+         * @param Request $request
+         * editMenu
+         * author: walker
+         * Date: 2019/11/23
+         * Time: 11:07
+         * Note:
+         */
+        public function editMenu(Request $request)
+        {
+            $request->validate([
+                                   'menu_id'   => 'required|string',
+                                   'icon'      => 'required|string',
+                                   'url'       => 'required|string',
+                                   'menu_name' => 'required|string',
+                                   'status' => 'required|string',
+                               ]);
+
+            $model            = Menu::find($request->menu_id);
+            $model->pid       = $request->pid;
+            $model->menu_name = $request->menu_name;
+            $model->sort      = $request->sort;
+            $model->icon      = $request->icon;
+            $model->status      = $request->status;
+            $model->url       = $request->url;
+            $result           = $model->save();
+            if (empty($result)) ajaxReturn(4002, Code::$com[4002]);
+            SystemController::sysLog($request, '修改菜单信息');
+            ajaxReturn(200, Code::$com[200]);
+        }
 
     }
