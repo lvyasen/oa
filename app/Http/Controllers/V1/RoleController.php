@@ -27,6 +27,7 @@
             $model            = new Role();
             $model->role_name = $request->role_name;
             $model->menu_list = $request->menu_list;
+            $model->role_desc = $request->role_desc;
             $model->status    = $request->status;
             $res              = $model->save();
             if (empty($res)) ajaxReturn(4002, Code::$com[4002]);
@@ -54,6 +55,7 @@
             $where['role_id']    = $request->role_id;
             $update              = [];
             $update['role_name'] = $request->role_name;
+            $update['role_desc'] = $request->role_desc;
             $res                 = Role::where($where)->update($update);
             if (empty($res)) ajaxReturn(4003, Code::$com[4003]);
             ajaxReturn(200, Code::$com[200]);

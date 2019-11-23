@@ -85,6 +85,8 @@
                         'url'       => $v['url'],
                         'icon'      => $v['icon'],
                         'pid'       => $v['pid'],
+                        'add_time'  => $v['add_time'],
+                        'status'    => $v['status'],
                         'sort'      => $v['sort'],
                         'children'  => getMenuTree($data, $v['menu_id'], $level + 1),
                     ];
@@ -120,7 +122,7 @@
                         'department_manager' => $v['department_manager'],
                         'department_num'     => $v['department_num'],
                         'pid'                => $v['pid'],
-                        'desc'                => $v['desc'],
+                        'desc'               => $v['desc'],
                         'level'              => $level,
                         'children'           => getDepartmentTree($data, $v['department_id'], $level + 1),
                     ];

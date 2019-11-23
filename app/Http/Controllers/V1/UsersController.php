@@ -30,9 +30,11 @@
             $pageNum  = $request->pageNum ?: 20;
             $mobile   = $request->mobile;
             $userName = $request->user_name;
-
+            $department_id = $request->department_id;
+            $where = [];
+            if($department_id)$where['department_id'] = $request->department_id;
             $model = new User();
-            $list  = $model->getUserList($userName, $mobile, $order);
+            $list  = $model->getUserList($where,$userName, $mobile, $order);
             ajaxReturn(200, Code::$com[200], $list);
         }
 

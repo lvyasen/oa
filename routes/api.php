@@ -68,6 +68,17 @@
         $api->post('delQuota', 'QuotaController@delQuota');//删除部门指标
         $api->post('getQuotaList', 'QuotaController@getQuotaList');//获取部门列表
         /**
+         * 站点管理
+         */
+        $api->post('addWebsite', 'WebsiteController@addWebsite');//添加站点
+        $api->post('editWebsite', 'WebsiteController@editWebsite');//修改站点
+        $api->post('getWebsiteList', 'WebsiteController@getWebsiteList');//获取站点列表
+        $api->post('delWebsite', 'WebsiteController@delWebsite');//删除站点
+        /**
+         * Erp接口相关
+         */
+        $api->post('test', 'ErpController@test');//测试站点
+        /**
          * 系统管理
          */
         $api->post('getSystemLog', 'SystemController@getSystemLog');//获取角色列表

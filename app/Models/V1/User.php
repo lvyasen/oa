@@ -49,7 +49,7 @@
          * Time: 18:43
          * Note:
          */
-        public function getUserList($userName = '', $mobile = '', $order = '', $page = 1, $pageNum = 20)
+        public function getUserList($where,$userName = '', $mobile = '', $order = '', $page = 1, $pageNum = 20)
         {
 
             $pageStart     = ($page - 1) * $pageNum;
