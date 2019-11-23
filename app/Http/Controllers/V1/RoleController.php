@@ -54,6 +54,7 @@
             $update              = [];
             $update['role_name'] = $request->role_name;
             $update['role_desc'] = $request->role_desc;
+            $update['menu_list'] = $request->menu_list;
             $update['status'] = $request->status?:1;
             $res                 = Role::where($where)->update($update);
             if (empty($res)) ajaxReturn(4003, Code::$com[4003]);
