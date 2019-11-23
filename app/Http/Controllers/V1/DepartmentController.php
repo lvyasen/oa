@@ -179,5 +179,22 @@
             ajaxReturn(200, Code::$com[200]);
         }
 
+        /**
+         * 获取部门用户列表
+         * @param Request $request
+         * getDepartmentUsers
+         * author: walker
+         * Date: 2019/11/23
+         * Time: 17:22
+         * Note:
+         */
+        public function getDepartmentUsers(Request $request)
+        {
+            $request->validate([
+                                   'department_id' => 'required|string|max:30|exists:department',
+                               ]);
+
+        }
+
 
     }

@@ -69,6 +69,13 @@
         $api->post('delQuota', 'QuotaController@delQuota');//删除部门指标
         $api->post('getQuotaList', 'QuotaController@getQuotaList');//获取部门列表
         /**
+         * 用户指标管理
+         */
+        $api->post('addUserQuota', 'UserQuotaController@addUserQuota');//添加用户指标
+        $api->post('editUserQuota', 'UserQuotaController@editUserQuota');//修改用户指标
+        $api->post('getUserQuotaList', 'UserQuotaController@getUserQuotaList');//获取用户指标列表
+        $api->post('delUserQuota', 'UserQuotaController@delUserQuota');//删除用户指标
+        /**
          * 站点管理
          */
         $api->post('addWebsite', 'WebsiteController@addWebsite');//添加站点

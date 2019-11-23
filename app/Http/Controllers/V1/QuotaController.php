@@ -35,6 +35,7 @@
             $model->department_name = $departmentName;
             $model->quota_name      = $request->quota_name;
             $model->quota_desc      = $request->quota_desc;
+            $model->quota_type      = 1;
             $result                 = $model->save();
             if (empty($result)) ajaxReturn(4002, Code::$com[4002]);
             SystemController::sysLog($request, '添加部门指标');
