@@ -25,9 +25,7 @@ class UsersExport implements FromCollection
     {
         fp($this->data);
         $excelData = [];
-        foreach ($this->data as $key => $val) {
 
-        }
         //todo 业务
         return [
             ['编号', '姓名', '年龄'],

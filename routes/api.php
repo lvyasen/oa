@@ -42,6 +42,15 @@
         $api->post('getDepartmentAllList', 'DepartmentController@getDepartmentAllList');//修改部门
         $api->post('getDepartmentUsers', 'DepartmentController@getDepartmentUsers');//获取部门用户列表
         /**
+         * 物料管理
+         */
+        $api->post('addMaterial', 'MaterialController@addMaterial');//添加物料
+        $api->post('editMaterial', 'MaterialController@editMaterial');//添加物料
+        $api->post('delMaterial', 'MaterialController@delMaterial');//删除物料
+        $api->post('getMaterialList', 'MaterialController@getMaterialList');//获取物料列表
+        $api->post('editMateriaStatus', 'MaterialController@editMateriaStatus');//物料审核
+
+        /**
          * 权限管理
          */
         $api->post('addPermission', 'PermissionController@addPermission');//添加权限
@@ -99,12 +108,12 @@
         $api->post('signUp', 'AuthController@signUp');
         $api->post('login', 'AuthController@logIn');
         $api->post('getDepartmentList', 'DepartmentController@getDepartmentList');
-//        $api->post('test', 'CommonController@test');//测试站点
-//        $api->any('test',function(){
-////            $analyticsData = Analytics::fetchVisitorsAndPageViews(\Spatie\Analytics\Period::days(7));
-//            $analyticsData = storage_path('app/analytics/service-account-credentials.json');
-//            fp($analyticsData);
-//                    });//测试站点
+        //        $api->post('test', 'CommonController@test');//测试站点
+        //        $api->any('test',function(){
+        ////            $analyticsData = Analytics::fetchVisitorsAndPageViews(\Spatie\Analytics\Period::days(7));
+        //            $analyticsData = storage_path('app/analytics/service-account-credentials.json');
+        //            fp($analyticsData);
+        //                    });//测试站点
 
     });
 
