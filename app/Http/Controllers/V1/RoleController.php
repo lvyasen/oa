@@ -118,7 +118,7 @@
         public function getRoleList(Request $request)
         {
             $where           = [];
-            $where['status'] = 1;
+//            $where['status'] = 1;
             $list            = Role::where($where)->get()->toArray();
             $data = [];
             $data['list']=$list;

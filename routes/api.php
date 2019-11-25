@@ -40,6 +40,7 @@
         $api->post('delDepartment', 'DepartmentController@delDepartment');//删除部门
         $api->post('editDepartment', 'DepartmentController@editDepartment');//修改部门
         $api->post('getDepartmentAllList', 'DepartmentController@getDepartmentAllList');//修改部门
+        $api->post('getDepartmentUsers', 'DepartmentController@getDepartmentUsers');//获取部门用户列表
         /**
          * 权限管理
          */
@@ -85,7 +86,7 @@
         /**
          * Erp接口相关
          */
-        $api->post('test', 'ErpController@test');//测试站点
+
         /**
          * 系统管理
          */
@@ -98,4 +99,12 @@
         $api->post('signUp', 'AuthController@signUp');
         $api->post('login', 'AuthController@logIn');
         $api->post('getDepartmentList', 'DepartmentController@getDepartmentList');
+//        $api->post('test', 'CommonController@test');//测试站点
+//        $api->any('test',function(){
+////            $analyticsData = Analytics::fetchVisitorsAndPageViews(\Spatie\Analytics\Period::days(7));
+//            $analyticsData = storage_path('app/analytics/service-account-credentials.json');
+//            fp($analyticsData);
+//                    });//测试站点
+
     });
+

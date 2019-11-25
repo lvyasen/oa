@@ -73,7 +73,7 @@
             $data['list']=$logList;
             $data['count']=$count;
             $data['page']=$page;
-
+//            return   Excel::download(new UsersExport($logList),'test.xlsx');
 
             ajaxReturn(200, Code::$com[200], $data);
         }

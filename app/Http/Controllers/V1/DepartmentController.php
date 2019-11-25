@@ -181,6 +181,7 @@
 
         /**
          * 获取部门用户列表
+         *
          * @param Request $request
          * getDepartmentUsers
          * author: walker
@@ -191,9 +192,23 @@
         public function getDepartmentUsers(Request $request)
         {
             $request->validate([
-                                   'department_id' => 'required|string|max:30|exists:department',
+                                   'department_id' => 'required|string|exists:department',
                                ]);
-
+            $page            = (int)$request->page ?: 1;
+            $pageNum         = $request->pageNum ?: 10;
+            $pageStart       = ($page - 1) * $pageNum;
+            $departmentId    = $request->department_id;
+            $where           = [];
+            $where['status'] = 1;
+            if ( !empty($departmentId)) $where['department_id'] = $departmentId;
+            $table = DB::table('users');
+            $list          = $table->where($where)->offset($pageStart)->limit($pageNum)->get();
+            $count         = $table->where($where)->count();
+            $data          = [];
+            $data['list']  = $list;
+            $data['page']  = $page;
+            $data['count'] = $count;
+            ajaxReturn(200, Code::$com[200], $data);
         }
 
 
