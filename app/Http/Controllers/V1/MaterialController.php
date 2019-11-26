@@ -144,6 +144,10 @@
         public function getMaterialList(Request $request)
         {
 
+            $request->validate([
+                                   'start_time' => 'nullable|date',
+                                   'end_time' => 'nullable|date',
+                               ]);
             $page            = (int)$request->page ?: 1;
             $pageNum         = $request->pageNum ?: 10;
             $pageStart       = ($page - 1) * $pageNum;
@@ -151,7 +155,7 @@
             $where['is_del'] = 0;
             if ( !empty($request->status)) $where['status'] = $request->status;
             $startTime = $request->start_time ? strtotime($request->start_time) : 0;
-            $endTime   = $request->end_time ? strtotime($request->end) : time();
+            $endTime   = $request->end_time ? strtotime($request->end_time) : time();
             $table     = DB::table('material');
             $table->whereBetween('buy_time', [$startTime, $endTime]);
             $list          = $table->where($where)->offset($pageStart)->limit($pageNum)->get();
@@ -160,8 +164,8 @@
             $data['list']  = $list;
             $data['page']  = $page;
             $data['count'] = $count;
-            if($request->download){
-                return   Excel::download(new MaterialExport(toArr($list)),'物料列表.xlsx');
+            if ($request->download){
+                return Excel::download(new MaterialExport(toArr($list)), '物料列表.xlsx');
             };
             ajaxReturn(200, Code::$com[200], $data);
         }
@@ -183,9 +187,9 @@
                                    'status'           => 'required|integer',
                                ]);
             $table = DB::table('material');
-            $ids   = json_decode($request->material_cost_id,true);
+            $ids   = json_decode($request->material_cost_id, true);
 
-            $res   = $table->whereIn('material_cost_id',$ids)->update(['status' => $request->status]);
+            $res = $table->whereIn('material_cost_id', $ids)->update(['status' => $request->status]);
             if (empty($res)) ajaxReturn(4003, Code::$com[4003]);
             SystemController::sysLog($request, '物料审核');
             ajaxReturn(200, Code::$com[200]);
