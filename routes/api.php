@@ -100,7 +100,8 @@
          */
 
         $api->post('getGaApiData', 'GAController@getGaApiData');//调用GA接口
-        $api->post('getGaUserType', 'GAController@getGaUserType');//调用GA接口
+        $api->post('getGaUserType', 'GAController@getGaUserType');//人群分析
+        $api->post('getSourceMedium', 'GAController@getSourceMedium');//流量分析
         $api->post('addGaConfig', 'GAController@addGaConfig');//添加GA配置
         $api->post('editGaconfig', 'GAController@editGaconfig');//修改GA配置
         $api->post('delGaConfig', 'GAController@delGaConfig');//删除GA配置

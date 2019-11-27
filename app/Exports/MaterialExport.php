@@ -7,7 +7,7 @@
     use Maatwebsite\Excel\Concerns\FromCollection;
     use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-    class MaterialExport implements FromCollection,ShouldAutoSize
+    class MaterialExport implements FromCollection, ShouldAutoSize
     {
         private $data;
 
@@ -26,6 +26,7 @@
 
         public function createData()
         {
+
             $status = [
                 0 => '待审核',
                 1 => '已审核',
@@ -58,5 +59,6 @@
                 ];
             }
             return $excelData;
+
         }
     }

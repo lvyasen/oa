@@ -164,8 +164,8 @@
             $data['list']  = $list;
             $data['page']  = $page;
             $data['count'] = $count;
-            if ($request->download){
-                return Excel::download(new MaterialExport(toArr($list)), '物料列表.xlsx');
+            if (!empty($request->download)){
+                return Excel::download(new MaterialExport(toArr($list)), 'test.xlsx');
             };
             ajaxReturn(200, Code::$com[200], $data);
         }

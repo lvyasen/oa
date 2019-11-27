@@ -45,6 +45,19 @@
                 ajaxReturn(4005, $e->getMessage());
             }
         }
+
+        /**
+         * GA用户分析
+         *
+         * @param Request $request
+         *
+         * @throws \Exception
+         * getGaUserType
+         * author: walker
+         * Date: 2019/11/26
+         * Time: 17:37
+         * Note:
+         */
         public function getGaUserType(Request $request)
         {
             $request->validate([
@@ -60,8 +73,58 @@
             };
             try {
                 AnalyticsFacade::setViewId($request->view_id);
-//                $sexData = $this->getGaMethod('other')
-                $data = [];
+                $data                       = [];
+                $data['gender']             = [
+                    'female' => 0,
+                    'male'   => 0,
+                ];
+                $data['age']                = [];
+                $data['country']            = [];
+                $data['country_user_total'] = 0;
+
+                $sexInfo = $this->getGaCommonMethod($date, ['dimensions' => 'ga:userGender']);
+                if ( !empty($sexInfo)){
+                    $data['gender']['female'] = $sexInfo['rows'][0][1] ?: 0;
+                    $data['gender']['male']   = key_exists(1, $sexInfo['rows']) ? $sexInfo['rows'][1][1] : 0;
+                }
+                $userAgeInfo = $this->getGaCommonMethod($date, ['dimensions' => 'ga:userAgeBracket']);
+                if ( !empty($userAgeInfo)){
+                    $data['age'] = $userAgeInfo['rows'];
+                }
+                $userCountryInfo = $this->getGaCommonMethod($date, ['dimensions' => 'ga:country']);
+                if ( !empty($userCountryInfo)){
+                    $data['country'] = $userCountryInfo['rows'];
+                    foreach ($data['country'] as $key => $val) {
+                        $data['country_user_total'] += (int)$val[1];
+                    }
+                }
+                ajaxReturn(200, Code::$com[200], $data);
+            } catch (\Exception $e) {
+                ajaxReturn(4005, $e->getMessage());
+            }
+        }
+
+        public function getSourceMedium(Request $request)
+        {
+            $request->validate([
+                                   'date_type'  => 'required|Integer',
+                                   'start_time' => 'nullable|date',
+                                   'end_time'   => 'nullable|date',
+                                   'view_id'    => 'required|string|exists:ga_config',
+                               ]);
+            if ($request->start_time || $request->end_time){
+                $date = $this->getDate(4, '', $request->start_time, $request->end_time);
+            } else {
+                $date = $this->getDate($request->date_type, $request->date_val);
+            };
+            try {
+                AnalyticsFacade::setViewId($request->view_id);
+                $data              = [];
+                $data['user_view'] = [];
+                $userViewInfo      = $this->getGaMethod('fetchTotalVisitorsAndPageViews', $date);
+                if ( !empty($userViewInfo)) $data['user_view'] = $userViewInfo;
+                 $trafficChannel = $this->getGaCommonMethod($date,['dimensions'=>'trafficChannel']);
+                fp($trafficChannel);
                 ajaxReturn(200, Code::$com[200], $data);
             } catch (\Exception $e) {
                 ajaxReturn(4005, $e->getMessage());
@@ -154,6 +217,25 @@
             }
             return toArr($analyticsData);
 
+        }
+
+        /**
+         * GA通用查询接口
+         *
+         * @param        $date
+         * @param string $metrics
+         * @param array  $other
+         *
+         * @return mixed
+         * getGaCommonMethod
+         * author: walker
+         * Date: 2019/11/26
+         * Time: 14:40
+         * Note:
+         */
+        private function getGaCommonMethod($date, $other = [], string $metrics = 'ga:sessions')
+        {
+            return toArr(AnalyticsFacade::performQuery($date, $metrics, $other));
         }
 
         /**
@@ -254,7 +336,7 @@
                                ]);
             $where               = [];
             $where['website_id'] = $request->website_id;
-            $result              = DB::table('ga_config')->delete($request->website_id);
+            $result              = DB::table('ga_config')->where(['website_id'=>$request->website_id])->delete();
             if (empty($result)) ajaxReturn(4004, Code::$com[4004]);
             SystemController::sysLog($request, '删除GA配置');
             ajaxReturn(200, Code::$com[200]);
