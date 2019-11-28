@@ -107,6 +107,7 @@
         $api->post('delGaConfig', 'GAController@delGaConfig');//删除GA配置
         $api->post('getGaWebSitList', 'GAController@getGaWebSitList');//删除GA配置
 
+
         /**
          * 系统管理
          */
@@ -119,6 +120,8 @@
         $api->post('signUp', 'AuthController@signUp');
         $api->post('login', 'AuthController@logIn');
         $api->post('getDepartmentList', 'DepartmentController@getDepartmentList');
+
+//        $api->post();
         //        $api->post('test', 'CommonController@test');//测试站点
         //        $api->any('test',function(){
         ////            $analyticsData = Analytics::fetchVisitorsAndPageViews(\Spatie\Analytics\Period::days(7));
@@ -127,4 +130,12 @@
         //                    });//测试站点
 
     });
-
+    /**
+     * Erp相关接口
+     */
+    $api->version('v1', ['middleware' => 'api:auth', 'namespace' => '\App\Http\Controllers\Erp'], function($api) {
+        /**
+         * shopify相关接口
+         */
+        $api->post('getShopifyWebsite', 'WebSiteController@getShopifyWebsite');
+    });

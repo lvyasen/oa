@@ -14,10 +14,4 @@
     Route::get('/', function() {
         return view('welcome');
     });
-    Route::any('test', function() {
-
-        $analyticsData = Spatie\Analytics\AnalyticsFacade::fetchUserTypes(\Spatie\Analytics\Period::months(1));
-        $analyticsData = toArr($analyticsData);
-        //        $analyticsData = storage_path('app/analytics/service-account-credentials.json');
-        fp($analyticsData);
-    });//测试站点
+    Route::any('test','\App\Http\Controllers\V1\GAController@gaTest');//测试站点

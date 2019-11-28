@@ -341,4 +341,9 @@
             SystemController::sysLog($request, '删除GA配置');
             ajaxReturn(200, Code::$com[200]);
         }
+
+        public function gaTest(Request $request)
+        {
+            return view('test');
+        }
     }
