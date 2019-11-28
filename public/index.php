@@ -34,7 +34,9 @@ require __DIR__.'/../vendor/autoload.php';
 | the responses back to the browser and delight our users.
 |
 */
-
+echo "<pre>";
+print_r(1);
+die();
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
 /*
