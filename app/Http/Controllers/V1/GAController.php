@@ -352,7 +352,7 @@
             $client     = new \Google_Client();
             $configPath = storage_path('client_secret.json');
             $res = $client->setAuthConfig($configPath);
-            fp($res);
+           
             $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/oauthCallback.php');
             $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
             if ( !isset($request->code)){
