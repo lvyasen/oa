@@ -351,10 +351,11 @@
         {
             $client     = new \Google_Client();
             $configPath = storage_path('client_secret.json');
-            $client->setAuthConfig($configPath);
+            $res = $client->setAuthConfig($configPath);
+            fp($res);
             $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/oauthCallback.php');
             $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
-            if ( !isset($_GET['code'])){
+            if ( !isset($request->code)){
                 $auth_url = $client->createAuthUrl();
                 header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
             } else {
