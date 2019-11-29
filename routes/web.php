@@ -15,3 +15,4 @@
         return view('welcome');
     });
     Route::any('test','\App\Http\Controllers\V1\GAController@gaTest');//测试站点
+    Route::any('oauthCallback','\App\Http\Controllers\V1\GAController@oauthCallback');//google回调站点
