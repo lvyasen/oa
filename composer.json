@@ -12,6 +12,7 @@
         "php": "^7.2",
         "dingo/api": "^2.4",
         "fideloper/proxy": "^4.0",
+        "google/apiclient": "^2.4",
         "guzzlehttp/guzzle": "^6.4",
         "laravel/framework": "^6.2",
         "laravel/passport": "^8.0",

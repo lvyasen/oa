@@ -123,7 +123,7 @@
                 $data['user_view'] = [];
                 $userViewInfo      = $this->getGaMethod('fetchTotalVisitorsAndPageViews', $date);
                 if ( !empty($userViewInfo)) $data['user_view'] = $userViewInfo;
-                 $trafficChannel = $this->getGaCommonMethod($date,['dimensions'=>'trafficChannel']);
+                $trafficChannel = $this->getGaCommonMethod($date, ['dimensions' => 'trafficChannel']);
                 fp($trafficChannel);
                 ajaxReturn(200, Code::$com[200], $data);
             } catch (\Exception $e) {
@@ -336,7 +336,7 @@
                                ]);
             $where               = [];
             $where['website_id'] = $request->website_id;
-            $result              = DB::table('ga_config')->where(['website_id'=>$request->website_id])->delete();
+            $result              = DB::table('ga_config')->where(['website_id' => $request->website_id])->delete();
             if (empty($result)) ajaxReturn(4004, Code::$com[4004]);
             SystemController::sysLog($request, '删除GA配置');
             ajaxReturn(200, Code::$com[200]);
@@ -346,4 +346,24 @@
         {
             return view('test');
         }
+
+        public function oauthCallback(Request $request)
+        {
+            $client     = new \Google_Client();
+            $configPath = storage_path('client_secret.json');
+            $res = $client->setAuthConfig($configPath);
+           
+            $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/oauthCallback.php');
+            $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+            if ( !isset($request->code)){
+                $auth_url = $client->createAuthUrl();
+                header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
+            } else {
+                $client->authenticate($_GET['code']);
+                $_SESSION['access_token'] = $client->getAccessToken();
+                $redirect_uri             = 'http://' . $_SERVER['HTTP_HOST'] . '/';
+                header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
+            }
+        }
+
     }
