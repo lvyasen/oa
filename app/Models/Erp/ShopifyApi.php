@@ -3,6 +3,8 @@
     namespace App\Models\Erp;
 
 
+    use Illuminate\Support\Facades\DB;
+
     class ShopifyApi
     {
         //
@@ -15,13 +17,15 @@
 
         public $web_id = '';
 
-        public function __construct($params = [])
+        public function __construct($webId)
         {
-            $this->initialize($params);
+            $this->initialize($webId);
         }
 
-        public function initialize($params = [])
+        public function initialize($webId)
         {
+            $params           = DB::where(['web_id' => $webId])->get()->toArray();
+            fp($params);
             $this->web_name   = $params['web_name'];
             $this->web_access = $params['web_access'];
             $this->ab_name    = $params['ab_name'];
