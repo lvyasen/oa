@@ -347,12 +347,23 @@
             return view('test');
         }
 
+        /**
+         * GA授权
+         * @param Request $request
+         *
+         * @throws \Google_Exception
+         * oauthCallback
+         * author: walker
+         * Date: 2019/11/29
+         * Time: 11:22
+         * Note:
+         */
         public function oauthCallback(Request $request)
         {
             $client     = new \Google_Client();
             $configPath = storage_path('client_secret.json');
             $res = $client->setAuthConfig($configPath);
-           
+
             $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/oauthCallback.php');
             $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
             if ( !isset($request->code)){
@@ -365,5 +376,6 @@
                 header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
             }
         }
+
 
     }
