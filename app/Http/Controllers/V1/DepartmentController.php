@@ -201,7 +201,7 @@
             $where           = [];
             $where['status'] = 1;
             if ( !empty($departmentId)) $where['department_id'] = $departmentId;
-            $table = DB::table('users');
+            $table         = DB::table('users');
             $list          = $table->where($where)->offset($pageStart)->limit($pageNum)->get();
             $count         = $table->where($where)->count();
             $data          = [];
@@ -210,6 +210,7 @@
             $data['count'] = $count;
             ajaxReturn(200, Code::$com[200], $data);
         }
+
 
 
     }

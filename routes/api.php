@@ -85,6 +85,8 @@
         $api->post('editUserQuota', 'UserQuotaController@editUserQuota');//修改用户指标
         $api->post('getUserQuotaList', 'UserQuotaController@getUserQuotaList');//获取用户指标列表
         $api->post('delUserQuota', 'UserQuotaController@delUserQuota');//删除用户指标
+        $api->post('getDepartmentQuotaList', 'UserQuotaController@getDepartmentQuotaList');//部门负责人指标
+        $api->post('getDepartmentQuotaDetail', 'UserQuotaController@getDepartmentQuotaDetail');//部门负责人指标
         /**
          * 站点管理
          */
@@ -95,10 +97,16 @@
         /**
          * Erp接口相关
          */
+        $api->post('getPlatformUser', 'ErpController@getPlatformUser');//获取Erp站点列表
+        $api->post('getWarehouse', 'ErpController@getWarehouse');//获取仓库列表
+        $api->post('getEOrders', 'ErpController@getEOrders');//获取订单列表
+        /**
+         * 物流费用相关接口
+         */
+        $api->post('getShippingList', 'ErpController@getShippingList');//获取物流费用列表
         /**
          * GA接口相关
          */
-
         $api->post('getGaApiData', 'GAController@getGaApiData');//调用GA接口
         $api->post('getGaUserType', 'GAController@getGaUserType');//人群分析
         $api->post('getSourceMedium', 'GAController@getSourceMedium');//流量分析
@@ -106,12 +114,20 @@
         $api->post('editGaconfig', 'GAController@editGaconfig');//修改GA配置
         $api->post('delGaConfig', 'GAController@delGaConfig');//删除GA配置
         $api->post('getGaWebSitList', 'GAController@getGaWebSitList');//删除GA配置
-
-
+        /**
+         * Facebook相关接口
+         */
+        $api->post('getAds', 'FaceBookController@getAds');//删除GA配置
         /**
          * 系统管理
          */
         $api->post('getSystemLog', 'SystemController@getSystemLog');//获取角色列表
+        /**
+         * shopify
+         */
+        $api->any('addShopifyAuth', 'ShopifyController@addShopifyAuth');//添加shopif站点
+        $api->any('getShopifyAuthList', 'ShopifyController@getShopifyAuthList');//添加shopif站点
+
     });
     /**
      * 无需用户信息
@@ -120,9 +136,10 @@
         $api->post('signUp', 'AuthController@signUp');
         $api->post('login', 'AuthController@logIn');
         $api->post('getDepartmentList', 'DepartmentController@getDepartmentList');
-
-//        $api->post();
+        $api->any('pullEorders', 'ErpController@pullEorders');//获取订单列表
+        //        $api->post();
         //        $api->post('test', 'CommonController@test');//测试站点
+        //  Route::any('shopify','\App\Http\Controllers\Erp\ShopifyController@countProducts');//测试站点
         //        $api->any('test',function(){
         ////            $analyticsData = Analytics::fetchVisitorsAndPageViews(\Spatie\Analytics\Period::days(7));
         //            $analyticsData = storage_path('app/analytics/service-account-credentials.json');
@@ -131,11 +148,16 @@
 
     });
     /**
-     * Erp相关接口
+     * 第三方接口
      */
-    $api->version('v1', ['middleware' => 'api:auth', 'namespace' => '\App\Http\Controllers\Erp'], function($api) {
+    $api->version('v1', ['namespace' => '\App\Http\Controllers\Erp'], function($api) {
         /**
          * shopify相关接口
          */
         $api->post('getShopifyWebsite', 'WebSiteController@getShopifyWebsite');
+        $api->any('pullProductsData', 'ShopifyController@pullProductsData');
+        $api->post('getPrePullData', 'ShopifyController@getPrePullData');
+        $api->post('getReport', 'ShopifyController@getReport');
+        $api->any('shopifyInstall', 'ShopifyController@shopifyInstall');
+        $api->any('shopifyGenerateToken', 'ShopifyController@shopifyGenerateToken');//获取token
     });

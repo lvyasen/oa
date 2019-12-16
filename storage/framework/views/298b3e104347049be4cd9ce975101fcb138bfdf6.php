@@ -7,11 +7,14 @@
 
 <!-- Step 1: Create the containing elements. -->
 
-<section id="auth-button"></section>
-<section id="view-selector"></section>
-<section id="timeline"></section>
+<div id="embed-api-auth-container"></div>
+<div id="chart-1-container"></div>
+<div id="chart-2-container"></div>
+<div id="view-selector-1-container"></div>
+<div id="view-selector-2-container"></div>
 
 <!-- Step 2: Load the library. -->
+
 
 <script>
     (function(w,d,s,g,js,fjs){
@@ -22,54 +25,108 @@
     }(window,document,'script'));
 </script>
 
+
+
+
+
+
 <script>
+
     gapi.analytics.ready(function() {
 
-        // Step 3: Authorize the user.
-
-        var CLIENT_ID = '5caaae993f39f11bda489d79b3abccc4d4f10075';
-
+        /**
+         * Authorize the user immediately if the user has already granted access.
+         * If no access has been created, render an authorize button inside the
+         * element with the ID "embed-api-auth-container".
+         */
         gapi.analytics.auth.authorize({
-            container: 'auth-button',
-            clientid: CLIENT_ID,
+            container: 'embed-api-auth-container',
+            clientid: '628874914398-uqthhdqsb0sv06s1sork5j1uf4k69555.apps.googleusercontent.com'
         });
 
-        // Step 4: Create the view selector.
 
-        var viewSelector = new gapi.analytics.ViewSelector({
-            container: 'view-selector'
+        /**
+         * Create a ViewSelector for the first view to be rendered inside of an
+         * element with the id "view-selector-1-container".
+         */
+        var viewSelector1 = new gapi.analytics.ViewSelector({
+            container: 'view-selector-1-container'
         });
 
-        // Step 5: Create the timeline chart.
+        /**
+         * Create a ViewSelector for the second view to be rendered inside of an
+         * element with the id "view-selector-2-container".
+         */
+        var viewSelector2 = new gapi.analytics.ViewSelector({
+            container: 'view-selector-2-container'
+        });
 
-        var timeline = new gapi.analytics.googleCharts.DataChart({
-            reportType: 'ga',
+        // Render both view selectors to the page.
+        viewSelector1.execute();
+        viewSelector2.execute();
+
+
+        /**
+         * Create the first DataChart for top countries over the past 30 days.
+         * It will be rendered inside an element with the id "chart-1-container".
+         */
+        var dataChart1 = new gapi.analytics.googleCharts.DataChart({
             query: {
-                'dimensions': 'ga:date',
-                'metrics': 'ga:sessions',
+                metrics: 'ga:sessions',
+                dimensions: 'ga:country',
                 'start-date': '30daysAgo',
                 'end-date': 'yesterday',
+                'max-results': 6,
+                sort: '-ga:sessions'
             },
             chart: {
-                type: 'LINE',
-                container: 'timeline'
-            }
-        });
-
-        // Step 6: Hook up the components to work together.
-
-        gapi.analytics.auth.on('success', function(response) {
-            viewSelector.execute();
-        });
-
-        viewSelector.on('change', function(ids) {
-            var newIds = {
-                query: {
-                    ids: ids
+                container: 'chart-1-container',
+                type: 'PIE',
+                options: {
+                    width: '100%',
+                    pieHole: 4/9
                 }
             }
-            timeline.set(newIds).execute();
         });
+
+
+        /**
+         * Create the second DataChart for top countries over the past 30 days.
+         * It will be rendered inside an element with the id "chart-2-container".
+         */
+        var dataChart2 = new gapi.analytics.googleCharts.DataChart({
+            query: {
+                metrics: 'ga:sessions',
+                dimensions: 'ga:country',
+                'start-date': '30daysAgo',
+                'end-date': 'yesterday',
+                'max-results': 6,
+                sort: '-ga:sessions'
+            },
+            chart: {
+                container: 'chart-2-container',
+                type: 'PIE',
+                options: {
+                    width: '100%',
+                    pieHole: 4/9
+                }
+            }
+        });
+
+        /**
+         * Update the first dataChart when the first view selecter is changed.
+         */
+        viewSelector1.on('change', function(ids) {
+            dataChart1.set({query: {ids: ids}}).execute();
+        });
+
+        /**
+         * Update the second dataChart when the second view selecter is changed.
+         */
+        viewSelector2.on('change', function(ids) {
+            dataChart2.set({query: {ids: ids}}).execute();
+        });
+
     });
 </script>
 </body>

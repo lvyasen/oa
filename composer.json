@@ -11,6 +11,8 @@
     "require" : {
         "php": "^7.2",
         "dingo/api": "^2.4",
+        "facebook/graph-sdk": "^5.7",
+        "facebook/php-business-sdk": "^5.0",
         "fideloper/proxy": "^4.0",
         "google/apiclient": "^2.4",
         "guzzlehttp/guzzle": "^6.4",

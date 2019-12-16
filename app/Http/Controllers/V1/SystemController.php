@@ -26,18 +26,19 @@
          * Time: 17:31
          * Note:
          */
-        public static function sysLog($request, $note = '')
+        public static function sysLog($request = '', $note = '')
         {
-            $model              = new System();
+            $model = new System();
             $model->action_name = $request->route()->getActionName();
             $model->route       = $request->route()->getActionMethod();
             $model->note        = $note;
-            $model->user_id     = $request->user()->id;
+            $model->user_id     = !empty($request->user())?$request->user()->id:0;
             $model->params      = json_encode($request->input(), true);
             $model->ip          = $request->getClientIp();
-            $model->user_name   = $request->user()->name;
+            $model->user_name   = !empty($request->user())?$request->user()->name:'system';
             $model->add_time    = time();
             $model->save();
+
         }
 
         /**
@@ -56,24 +57,24 @@
             $pageNum   = $request->pageNum ?: 10;
             $pageStart = ($page - 1) * $pageNum;
             $where     = [];
-            $startTime = strtotime($request->start_time)?:strtotime('-7 days');
-            $endTime = $request->end_time?strtotime($request->end_time):time();
+            $startTime = strtotime($request->start_time) ?: strtotime('-7 days');
+            $endTime   = $request->end_time ? strtotime($request->end_time) : time();
             if ($request->user_name) $where['user_name'] = $request->user();
-            $logList = System::where($where)
-                             ->whereBetween('add_time', [$startTime,$endTime])
-                             ->offset($pageStart)
-                             ->limit($pageNum)
-                             ->orderBy('add_time', 'DESC')
-                             ->get()
-                             ->toArray();
-            $count = System::where($where)
-                           ->whereBetween('add_time', [$startTime,$endTime])
-                            ->count();
-            $data = [];
-            $data['list']=$logList;
-            $data['count']=$count;
-            $data['page']=$page;
-//            return   Excel::download(new UsersExport($logList),'test.xlsx');
+            $logList       = System::where($where)
+                                   ->whereBetween('add_time', [$startTime, $endTime])
+                                   ->offset($pageStart)
+                                   ->limit($pageNum)
+                                   ->orderBy('add_time', 'DESC')
+                                   ->get()
+                                   ->toArray();
+            $count         = System::where($where)
+                                   ->whereBetween('add_time', [$startTime, $endTime])
+                                   ->count();
+            $data          = [];
+            $data['list']  = $logList;
+            $data['count'] = $count;
+            $data['page']  = $page;
+            //            return   Excel::download(new UsersExport($logList),'test.xlsx');
 
             ajaxReturn(200, Code::$com[200], $data);
         }

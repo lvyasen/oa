@@ -24,10 +24,7 @@
          */
         public function getShopifyWebsite(Request $request)
         {
-            $config = array(
-                'ShopUrl' => 'yourshop.myshopify.com',
-                'AccessToken' => '***ACCESS-TOKEN-FOR-THIRD-PARTY-APP***',
-            );
+
 
             $page          = (int)$request->page ?: 1;
             $pageNum       = $request->pageNum ?: 10;

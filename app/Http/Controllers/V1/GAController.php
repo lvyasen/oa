@@ -345,6 +345,7 @@
         public function gaTest(Request $request)
         {
             return view('test');
+
         }
 
         /**
