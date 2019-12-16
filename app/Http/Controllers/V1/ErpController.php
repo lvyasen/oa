@@ -370,6 +370,45 @@
             }
             return false;
         }
+        /**
+         * 获取物流列表
+         * @param Request $request
+         * getLogisticsList
+         * author: walker
+         * Date: 2019/12/16
+         * Time: 14:47
+         * Note:
+         */
+        public function getLogisticsList(Request $request)
+        {
+            $request->validate([
+                                   'start_time' => 'nullable|date',
+                                   'end_time'   => 'nullable|date',
+                               ]);
+            $page            = (int)$request->page ?: 1;
+            $pageNum         = $request->pageNum ?: 10;
+            $pageStart       = ($page - 1) * $pageNum;
+            $webId          = $request->web_id;
+            $where           = [];
+            $startTime       = $request->start_time ? strtotime($request->start_time) : 0;
+            $endTime         = $request->end_time ? strtotime($request->end) : time();
+            if ( !empty($webId)) $where['web_id'] = $webId;
+            $table = DB::table('e_orders');
+            $table->whereBetween('dateWarehouseShipping', [$startTime, $endTime]);
+            $field = "webId,warehouseCode,shippingMethodNo,orderWeight,shippingMethod,platformFeeTotal,shipFee,dateWarehouseShipping";
+            $where['platformShipStatus']=1;
+            $list          = $table->where($where)->offset($pageStart)->selectRaw($field)->orderBy('dateWarehouseShipping','desc')->limit($pageNum)->get();
+            $count         = $table->where($where)->count();
+            $list = toArr($list);
+            foreach ($list as $key => $val) {
+                $list[$key]['total_fee'] = $val['platformFeeTotal']+$val['shipFee'];
+            }
+            $data          = [];
+            $data['list']  = $list;
+            $data['page']  = $page;
+            $data['count'] = $count;
+            ajaxReturn(200, Code::$com[200], $data);
+        }
 
         /**
          * Erp SOAP请求封装

@@ -128,6 +128,10 @@
          */
         $api->any('addShopifyAuth', 'ShopifyController@addShopifyAuth');//添加shopif站点
         $api->any('getShopifyAuthList', 'ShopifyController@getShopifyAuthList');//添加shopif站点
+        /**
+         * ERP
+         */
+        $api->any('getLogisticsList', 'ErpController@getLogisticsList');//添加shopif站点
 
     });
     /**
