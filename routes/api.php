@@ -131,7 +131,8 @@
         /**
          * ERP
          */
-        $api->any('getLogisticsList', 'ErpController@getLogisticsList');//添加shopif站点
+        $api->any('getLogisticsList', 'ErpController@getLogisticsList');//获取物流列表
+        $api->any('getLogisticsLineChart', 'ErpController@getLogisticsLineChart');//获取物流列表分析
 
     });
     /**

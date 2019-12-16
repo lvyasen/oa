@@ -49,19 +49,19 @@
             $request->validate([
                                    'start_time' => 'nullable|date',
                                    'end_time'   => 'nullable|date',
-//                                   'web_id'   => 'nullable|string|exists:connection.erp.siteweb',
+                                   //                                   'web_id'   => 'nullable|string|exists:connection.erp.siteweb',
                                ]);
-            $page            = (int)$request->page ?: 1;
-            $pageNum         = $request->pageNum ?: 10;
-            $pageStart       = ($page - 1) * $pageNum;
-            $webId           = $request->web_id;
-            $orderStatus     = $request->status;
-            $where           = [];
-            $startTime       = $request->start_time ? strtotime($request->start_time) : 0;
-            $endTime         = $request->end_time ? strtotime($request->end) : time();
+            $page        = (int)$request->page ?: 1;
+            $pageNum     = $request->pageNum ?: 10;
+            $pageStart   = ($page - 1) * $pageNum;
+            $webId       = $request->web_id;
+            $orderStatus = $request->status;
+            $where       = [];
+            $startTime   = $request->start_time ? strtotime($request->start_time) : 0;
+            $endTime     = $request->end_time ? strtotime($request->end) : time();
             if ( !empty($orderStatus)) $where['status'] = $orderStatus;
             $table = new OrderE();
-            $table->whereBetween('createdDate', [\date('Y-m-d H:i:s',$startTime), \date('Y-m-d H:i:s',$endTime)]);
+            $table->whereBetween('createdDate', [\date('Y-m-d H:i:s', $startTime), \date('Y-m-d H:i:s', $endTime)]);
             $list          = $table->where($where)->offset($pageStart)->limit($pageNum)->get();
             $count         = $table->where($where)->count();
             $data          = [];
@@ -130,7 +130,6 @@
         {
 
 
-
             $url         = $request->route()->getActionName();
             $sellerIdArr = [$request->seller_id_arr];
             $this->pullOrderList($url);
@@ -196,10 +195,10 @@
                     $orderData['warehouseCode']          = $val['warehouseCode'];
                     $orderData['createdDate']            = $val['createdDate'];
                     $orderData['updateDate']             = $val['updateDate'];
-                    $orderData['datePaidPlatform']       = strtotime($val['datePaidPlatform'])>0?strtotime($val['datePaidPlatform']):0;
+                    $orderData['datePaidPlatform']       = strtotime($val['datePaidPlatform']) > 0 ? strtotime($val['datePaidPlatform']) : 0;
                     $orderData['platformShipStatus']     = $val['platformShipStatus'] ?: null;
-                    $orderData['platformShipTime']       = strtotime($val['platformShipTime'])>0?strtotime($val['platformShipTime']):0;
-                    $orderData['dateWarehouseShipping']  = strtotime($val['dateWarehouseShipping'])>0?strtotime($val['dateWarehouseShipping']):0;
+                    $orderData['platformShipTime']       = strtotime($val['platformShipTime']) > 0 ? strtotime($val['platformShipTime']) : 0;
+                    $orderData['dateWarehouseShipping']  = strtotime($val['dateWarehouseShipping']) > 0 ? strtotime($val['dateWarehouseShipping']) : 0;
 
                     $orderData['dateLatestShip']     = strtotime($val['dateLatestShip']);
                     $orderData['currency']           = $val['currency'];
@@ -233,7 +232,7 @@
                             $orderGoodsData               = [];
                             $orderGoodsData['productSku'] = $val1['productSku'];
                             //                            $orderGoodsData['sku']               = $val1['sku'];
-                            $orderGoodsData['unitPrice']         = round($val1['unitPrice'],3);
+                            $orderGoodsData['unitPrice']         = round($val1['unitPrice'], 3);
                             $orderGoodsData['qty']               = $val1['qty'];
                             $orderGoodsData['productTitle']      = $val1['productTitle'];
                             $orderGoodsData['pic']               = $val1['pic'];
@@ -241,8 +240,8 @@
                             $orderGoodsData['productUrl']        = $val1['productUrl'];
                             $orderGoodsData['refItemId']         = $val1['refItemId'];
                             $orderGoodsData['opRefItemLocation'] = $val1['opRefItemLocation'];
-                            $orderGoodsData['unitFinalValueFee'] = round($val1['unitFinalValueFee'],3);
-                            $orderGoodsData['transactionPrice']  = round($val1['transactionPrice'],3);
+                            $orderGoodsData['unitFinalValueFee'] = round($val1['unitFinalValueFee'], 3);
+                            $orderGoodsData['transactionPrice']  = round($val1['transactionPrice'], 3);
                             $orderGoodsData['operTime']          = $val1['operTime'];
 
                             $orderGoodsData['orderStatus']   = $orderStatus;
@@ -370,8 +369,10 @@
             }
             return false;
         }
+
         /**
          * 获取物流列表
+         *
          * @param Request $request
          * getLogisticsList
          * author: walker
@@ -385,29 +386,83 @@
                                    'start_time' => 'nullable|date',
                                    'end_time'   => 'nullable|date',
                                ]);
-            $page            = (int)$request->page ?: 1;
-            $pageNum         = $request->pageNum ?: 10;
-            $pageStart       = ($page - 1) * $pageNum;
-            $webId          = $request->web_id;
-            $where           = [];
-            $startTime       = $request->start_time ? strtotime($request->start_time) : 0;
-            $endTime         = $request->end_time ? strtotime($request->end) : time();
+            $page      = (int)$request->page ?: 1;
+            $pageNum   = $request->pageNum ?: 10;
+            $pageStart = ($page - 1) * $pageNum;
+            $webId     = $request->web_id;
+            $where     = [];
+            $startTime = $request->start_time ? strtotime($request->start_time) : 0;
+            $endTime   = $request->end_time ? strtotime($request->end) : time();
             if ( !empty($webId)) $where['web_id'] = $webId;
             $table = DB::table('e_orders');
             $table->whereBetween('dateWarehouseShipping', [$startTime, $endTime]);
-            $field = "webId,warehouseCode,shippingMethodNo,orderWeight,shippingMethod,platformFeeTotal,shipFee,dateWarehouseShipping";
-            $where['platformShipStatus']=1;
-            $list          = $table->where($where)->offset($pageStart)->selectRaw($field)->orderBy('dateWarehouseShipping','desc')->limit($pageNum)->get();
-            $count         = $table->where($where)->count();
-            $list = toArr($list);
+            $field                       = "webId,warehouseCode,shippingMethodNo,orderWeight,shippingMethod,platformFeeTotal,shipFee,dateWarehouseShipping";
+            $where['platformShipStatus'] = 1;
+            $list                        = $table->where($where)->offset($pageStart)->selectRaw($field)->orderBy('dateWarehouseShipping', 'desc')->limit($pageNum)->get();
+            $count                       = $table->where($where)->count();
+            $list                        = toArr($list);
             foreach ($list as $key => $val) {
-                $list[$key]['total_fee'] = $val['platformFeeTotal']+$val['shipFee'];
+                $list[$key]['total_fee'] = $val['platformFeeTotal'] + $val['shipFee'];
             }
             $data          = [];
             $data['list']  = $list;
             $data['page']  = $page;
             $data['count'] = $count;
             ajaxReturn(200, Code::$com[200], $data);
+        }
+
+        /**
+         * 获取物流费用图表
+         * @param Request $request
+         * getLogisticsLineChart
+         * author: walker
+         * Date: 2019/12/16
+         * Time: 16:21
+         * Note:
+         */
+        public function getLogisticsLineChart(Request $request)
+        {
+
+            $where                       = [];
+            $where['platformShipStatus'] = 1;
+            if(!empty($request->web_id))$where['webId'] = $request->web_id;
+
+            $orderList                   = DB::table('e_orders')
+                                             ->where($where)
+                                             ->orderBy('dateWarehouseShipping', 'desc')
+                                             ->selectRaw('shipFee,dateWarehouseShipping,webId')
+                                             ->get();
+            $orderList                   = toArr($orderList);
+            #在进行图表统计的时候直接从数据库取得的数据有的月份可能是没有的,不过月份比较少可直接写死,同样也需要补全
+            $year
+                = date('Y', time());
+            #一年的月份
+            $month = [
+                0  => $year . '-01',
+                1  => $year . '-02',
+                2  => $year . '-03',
+                3  => $year . '-04',
+                4  => $year . '-05',
+                5  => $year . '-06',
+                6  => $year . '-07',
+                7  => $year . '-08',
+                8  => $year . '-09',
+                9  => $year . '-10',
+                10 => $year . '-11',
+                11 => $year . '-12',
+            ];
+            foreach ($month as $key => $val) {
+                $data[$key] = [
+                    'date'  => $val,
+                    'value' => 0,
+                ];
+                foreach ($orderList as $key1 => $val1) {
+                    if($val==\date('Y-m',$val1['dateWarehouseShipping'])){
+                        $data[$key]['value']=round($data[$key]['value'],2)+round($val1['shipFee'],2);
+                    };
+                }
+            }
+            ajaxReturn(200,Code::$com[200],$data);
         }
 
         /**
