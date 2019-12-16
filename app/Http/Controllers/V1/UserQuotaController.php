@@ -4,6 +4,7 @@
 
     use App\Dictionary\Code;
     use App\Http\Controllers\Controller;
+    use App\Models\V1\Department;
     use App\Models\V1\User;
     use App\Models\V1\UserQuota;
     use Illuminate\Http\Request;
@@ -263,14 +264,52 @@
             fp($userQuota);
         }
 
+        /**
+         * 部门指标数据
+         * @param Request $request
+         * getDepartmentQuotaAnalytics
+         * author: walker
+         * Date: 2019/12/16
+         * Time: 11:59
+         * Note:
+         */
         public function getDepartmentQuotaAnalytics(Request $request)
         {
             $request->validate([
-                                   'start_time' => 'nullable|date',
-                                   'end_time'   => 'nullable|date',
-                                   'user_id'=>'nullable|string|exists:users,id'
+                                   'department_id' => 'required|string|exists:department',
+                                   'start_time'    => 'nullable|date',
+                                   'end_time'      => 'nullable|date',
+                                   'user_id'       => 'nullable|string|exists:users,id',
                                ]);
-            $userId = $request->user_id;
+
+            $userId          = $request->user_id ?: $request->user()->id;
+            $userName        = DB::table('users')->where(['id' => $userId])->first('name');
+            $departmentModel = new Department();
+            $departmentInfo  = $departmentModel->where(['manager_user_id' => $userId,'department_id'=>$request->department_id])->first('department_id');
+            $startTime       = $request->start_time ?: strtotime('-1 month');
+            $endTime         = $request->end_time ?: time();
+            if (empty($departmentInfo)){
+                ajaxReturn(4005, Code::$user['not_have_promise']);
+            }
+            $quotaList = DB::table('quota')->where(['department_id' => $departmentInfo->department_id])->get();
+            $quotaList = toArr($quotaList);
+            foreach ($quotaList as $key => $val) {
+                $userQuota = DB::table('user_quota');
+                $userQuota->whereBetween('complete_date', [$startTime, $endTime]);
+                $userQuotaLists            = $userQuota
+                    ->where([
+                                'is_del'   => 0,
+                                'quota_id' => $val['quota_id'],
+                                'user_id'  => $userId,
+                            ])
+                    ->get();
+                $userQuotaLists            = toArr($userQuotaLists);
+                $quotaList[$key]['detail'] = $userQuotaLists;
+            }
+            $info              = [];
+            $info['user_name'] = $userName;
+            $info['list']      = $quotaList;
+            ajaxReturn(200, Code::$com[200], $info);
         }
 
     }

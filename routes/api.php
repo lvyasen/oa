@@ -87,6 +87,7 @@
         $api->post('delUserQuota', 'UserQuotaController@delUserQuota');//删除用户指标
         $api->post('getDepartmentQuotaList', 'UserQuotaController@getDepartmentQuotaList');//部门负责人指标
         $api->post('getDepartmentQuotaDetail', 'UserQuotaController@getDepartmentQuotaDetail');//部门负责人指标
+        $api->post('getDepartmentQuotaAnalytics', 'UserQuotaController@getDepartmentQuotaAnalytics');//部门负责人指标
         /**
          * 站点管理
          */
