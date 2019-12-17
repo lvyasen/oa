@@ -167,7 +167,7 @@
         }
 
         /**
-         * 部门指标列表
+         * 部门负责人指标
          *
          * @param Request $request
          * getDepartmentQuotaList
@@ -244,28 +244,65 @@
         {
             $request->validate([
                                    'department_id' => 'required|Integer|exists:department',
+                                   'start_time'    => 'nullable|date',
+                                   'end_time'      => 'nullable|date',
                                ]);
             //根据部门查看每个人的指标详情
-            $quotaList = DB::table('quota')
-                           ->where(['is_del' => 0, 'department_id' => $request->department_id])
-                           ->selectRaw('quota_id,quota_name,is_del')
-                           ->get();
-            $quotaList = toArr($quotaList);
-            $userQuota = [];
-            foreach ($quotaList as $key => $val) {
-                $userQuotaData = [];
-                $data          = DB::table('user_quota')
-                                   ->where(['is_del' => 0, 'quota_id' => $val['quota_id']])
-                                   ->selectRaw('user_id,user_name,target_value,complete_value,score')
-                                   ->get();
-                $userQuota[]   = $data;
+
+            $field                             = 'user_quota.department_id,user_quota.quota_id,quota.quota_id,complete_value,
+            score,complete_date,user_name,quota_name
+            ';
+            $where                             = [];
+            $where['user_quota.department_id'] = $request->department_id;
+            $table                             = DB::table('user_quota');
+            $startTime                         = $request->start_time ?: strtotime('-1 year');
+            $endTime                           = $request->end_time ?: time();
+            $table->whereBetween('complete_date', [$startTime, $endTime]);
+            $userQuotaList = $table
+                ->leftJoin('quota', 'quota.quota_id', '=', 'user_quota.quota_id')
+                ->orderBy('user_quota.quota_id', 'asc')
+                ->selectRaw($field)
+                ->where($where)
+                ->get();
+            $userQuotaList = toArr($userQuotaList);
+
+            $year
+                = date('Y', time());
+            #一年的月份
+            $month = [
+                0  => $year . '-01',
+                1  => $year . '-02',
+                2  => $year . '-03',
+                3  => $year . '-04',
+                4  => $year . '-05',
+                5  => $year . '-06',
+                6  => $year . '-07',
+                7  => $year . '-08',
+                8  => $year . '-09',
+                9  => $year . '-10',
+                10 => $year . '-11',
+                11 => $year . '-12',
+            ];
+            foreach ($month as $key => $val) {
+                $quotaChart[$key] = [
+                    'date'  => $val,
+                    'value' => 0,
+                ];
+                foreach ($userQuotaList as $key1 => $val1) {
+                    if ($val == \date('Y-m', $val1['complete_date'])){
+                        $quotaChart[$key]['value'] = $quotaChart[$key]['value']+$val1['complete_value'];
+                    };
+                }
             }
-            $userQuota = toArr($userQuota);
-            fp($userQuota);
+            $data['list']  = $userQuotaList;
+            $data['quota_chart']  = $quotaChart;
+            ajaxReturn(200, Code::$com[200], $data);
         }
+
 
         /**
          * 部门指标数据
+         *
          * @param Request $request
          * getDepartmentQuotaAnalytics
          * author: walker
@@ -285,7 +322,7 @@
             $userId          = $request->user_id ?: $request->user()->id;
             $userName        = DB::table('users')->where(['id' => $userId])->first('name');
             $departmentModel = new Department();
-            $departmentInfo  = $departmentModel->where(['manager_user_id' => $userId,'department_id'=>$request->department_id])->first('department_id');
+            $departmentInfo  = $departmentModel->where(['manager_user_id' => $userId, 'department_id' => $request->department_id])->first('department_id');
             $startTime       = $request->start_time ?: strtotime('-1 month');
             $endTime         = $request->end_time ?: time();
             if (empty($departmentInfo)){

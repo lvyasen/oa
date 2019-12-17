@@ -132,11 +132,38 @@
          */
         public function pullEorders(Request $request)
         {
-
-
-            $url         = $request->route()->getActionName();
-            $sellerIdArr = [$request->seller_id_arr];
+            $url = $request->route()->getActionName();
             $this->pullOrderList($url);
+        }
+
+        /**
+         * 拉取采购单
+         * @param Request $request
+         *
+         * @throws \SoapFault
+         * pullEPurchaseOrders
+         * author: walker
+         * Date: 2019/12/17
+         * Time: 16:55
+         * Note:
+         */
+        public function pullEPurchaseOrders(Request $request)
+        {
+            $url = $request->route()->getActionName();
+            $beginTime = time();
+
+            $info               = DB::table('pull_log')
+                                    ->where(['pull_url' => $url, 'status' => 1, 'type' => 2])
+                                    ->orderBy('add_time', 'desc')
+                                    ->first('current_page');
+            $page               = empty($info) ? 1 : $info->current_page + 1;
+            $pageSize=50;
+            $service            = 'getPurchaseOrders';
+            $params             = [];
+            $params['page']     = $page;
+            $params['pageSize'] = $pageSize;
+            $result             = self::soapRequest($service, 'WMS', $params);
+            fp($result);
         }
 
 
@@ -371,6 +398,7 @@
 
         /**
          * 删除物流费用
+         *
          * @param Request $request
          * delLogistics
          * author: walker
@@ -391,6 +419,7 @@
             SystemController::sysLog($request, '删除物流费用');
             ajaxReturn(200, Code::$com[200]);
         }
+
 
         /**
          * 获取物流费用
@@ -413,6 +442,9 @@
             ajaxReturn(200, Code::$com[200], $result);
         }
 
+
+
+
         /**
          * 拉取订单存入数据库
          *
@@ -430,7 +462,7 @@
             $beginTime = time();
 
             $info = DB::table('pull_log')
-                      ->where(['pull_url' => $url, 'status' => 1])
+                      ->where(['pull_url' => $url, 'status' => 1, 'type' => 1])
                       ->orderBy('add_time', 'desc')
                       ->first('current_page');
 

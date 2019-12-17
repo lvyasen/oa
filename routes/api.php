@@ -104,7 +104,8 @@
         $api->post('getShippingMethod', 'ErpController@getShippingMethod');//获取运输方式
         $api->post('addLogistics', 'ErpController@addLogistics');//添加物流费用
         $api->post('editLogistics', 'ErpController@editLogistics');//修改物流费用
-        $api->post('delLogistics', 'ErpController@delLogistics');//删除物流费用
+        $api->post('delLogistics', 'ErpController@delLogistics');//删除 物流费用
+        $api->post('pullEPurchaseOrders', 'ErpController@pullEPurchaseOrders');//拉取采购单
         /**
          * 物流费用相关接口
          */
