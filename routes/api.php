@@ -101,6 +101,10 @@
         $api->post('getPlatformUser', 'ErpController@getPlatformUser');//获取Erp站点列表
         $api->post('getWarehouse', 'ErpController@getWarehouse');//获取仓库列表
         $api->post('getEOrders', 'ErpController@getEOrders');//获取订单列表
+        $api->post('getShippingMethod', 'ErpController@getShippingMethod');//获取运输方式
+        $api->post('addLogistics', 'ErpController@addLogistics');//添加物流费用
+        $api->post('editLogistics', 'ErpController@editLogistics');//修改物流费用
+        $api->post('delLogistics', 'ErpController@delLogistics');//删除物流费用
         /**
          * 物流费用相关接口
          */

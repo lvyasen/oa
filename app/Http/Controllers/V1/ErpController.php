@@ -8,6 +8,8 @@
     use App\Models\Erp\OrderInfo;
     use App\Models\Erp\SiteWeb;
     use App\Models\V1\OrderE;
+    use App\Models\V1\Ship;
+    use App\Models\V1\ShipMethod;
     use Cassandra\Date;
     use http\Url;
     use Illuminate\Http\Request;
@@ -137,6 +139,280 @@
             $this->pullOrderList($url);
         }
 
+
+        /**
+         * 获取网站列表
+         *
+         * @return mixed
+         * getSiteList
+         * author: walker
+         * Date: 2019/12/10
+         * Time: 9:51
+         * Note:
+         */
+        private function getSiteList()
+        {
+            $siteList = Cache::get('site_web');
+
+            if (empty($siteList)){
+                $model   = new SiteWeb();
+                $listRow = $model->where(['type' => 1])
+                                 ->selectRaw('web_id,web_name')
+                                 ->get();
+                $listRow = toArr($listRow);
+                foreach ($listRow as $key => $val) {
+                    $siteList[$val['web_name']] = $val['web_id'];
+                }
+                Cache::add('site_web', $siteList);
+            }
+            return $siteList;
+
+        }
+
+        /**
+         * 获取webid
+         *
+         * @param $referenceNo
+         *
+         * @return mixed
+         * getWebId
+         * author: walker
+         * Date: 2019/12/10
+         * Time: 10:42
+         * Note:
+         */
+        private function getWebId($referenceNo)
+        {
+            $model = new OrderInfo();
+            $info  = $model->where(['source_id' => $referenceNo])
+                           ->first('web_id');
+            if ( !empty($info)){
+                return $info->web_id;
+            }
+            return false;
+        }
+
+        /**
+         * 获取物流列表
+         *
+         * @param Request $request
+         * getLogisticsList
+         * author: walker
+         * Date: 2019/12/16
+         * Time: 14:47
+         * Note:
+         */
+        public function getLogisticsList(Request $request)
+        {
+            $request->validate([
+                                   'start_time' => 'nullable|date',
+                                   'end_time'   => 'nullable|date',
+                               ]);
+            $page            = (int)$request->page ?: 1;
+            $pageNum         = $request->pageNum ?: 10;
+            $pageStart       = ($page - 1) * $pageNum;
+            $webId           = $request->web_id;
+            $where           = [];
+            $where['status'] = 1;
+            $startTime       = $request->start_time ? strtotime($request->start_time) : 0;
+            $endTime         = $request->end_time ? strtotime($request->end) : time();
+            if ( !empty($webId)) $where['web_id'] = $webId;
+            $table = DB::table('ship');
+            $table->whereBetween('dateWarehouseShipping', [$startTime, $endTime]);
+            $list          = $table
+                ->where($where)
+                ->offset($pageStart)
+                ->orderBy('dateWarehouseShipping', 'desc')
+                ->limit($pageNum)
+                ->get();
+            $count         = $table->where($where)->count();
+            $list          = toArr($list);
+            $shipMethodMap = $this->getShippingMethodMap();
+            foreach ($list as $key => $val) {
+                $list[$key]['shippingMethod'] = $shipMethodMap[$val['shippingMethod']];
+            }
+            if ( !empty($request->download)){
+                return Excel::download(new LogisticsExport(toArr($list)), 'test.xlsx');
+            };
+            $data          = [];
+            $data['list']  = $list;
+            $data['page']  = $page;
+            $data['count'] = $count;
+            ajaxReturn(200, Code::$com[200], $data);
+        }
+
+        /**
+         * 获取物流费用图表
+         *
+         * @param Request $request
+         * getLogisticsLineChart
+         * author: walker
+         * Date: 2019/12/16
+         * Time: 16:21
+         * Note:
+         */
+        public function getLogisticsLineChart(Request $request)
+        {
+
+            $where           = [];
+            $where['status'] = 1;
+            if ( !empty($request->web_id)) $where['webId'] = $request->web_id;
+
+            $orderList = DB::table('ship')
+                           ->where($where)
+                           ->orderBy('dateWarehouseShipping', 'desc')
+                           ->selectRaw('shipFee,dateWarehouseShipping,webId')
+                           ->get();
+            $orderList = toArr($orderList);
+            #在进行图表统计的时候直接从数据库取得的数据有的月份可能是没有的,不过月份比较少可直接写死,同样也需要补全
+            $year
+                = date('Y', time());
+            #一年的月份
+            $month = [
+                0  => $year . '-01',
+                1  => $year . '-02',
+                2  => $year . '-03',
+                3  => $year . '-04',
+                4  => $year . '-05',
+                5  => $year . '-06',
+                6  => $year . '-07',
+                7  => $year . '-08',
+                8  => $year . '-09',
+                9  => $year . '-10',
+                10 => $year . '-11',
+                11 => $year . '-12',
+            ];
+            foreach ($month as $key => $val) {
+                $data[$key] = [
+                    'date'  => $val,
+                    'value' => 0,
+                ];
+                foreach ($orderList as $key1 => $val1) {
+                    if ($val == \date('Y-m', $val1['dateWarehouseShipping'])){
+                        $data[$key]['value'] = round($data[$key]['value'], 2) + round($val1['shipFee'], 2);
+                    };
+                }
+            }
+            ajaxReturn(200, Code::$com[200], $data);
+        }
+
+        /**
+         * 添加物流费用
+         *
+         * @param Request $request
+         * addLogistics
+         * author: walker
+         * Date: 2019/12/17
+         * Time: 14:53
+         * Note:
+         */
+        public function addLogistics(Request $request)
+        {
+            $request->validate([
+                                   'warehouseOrderCode'    => 'required|string',
+                                   'shippingMethodNo'      => 'required|string',
+                                   'orderWeight'           => 'required|string',
+                                   'shippingMethod'        => 'required|string',
+                                   'platformFeeTotal'      => 'required|string',
+                                   'shipFee'               => 'required|string',
+                                   'dateWarehouseShipping' => 'required|date',
+                                   'webId'                 => 'required|string',
+                               ]);
+
+            $model                        = new Ship();
+            $model->warehouseOrderCode    = $request->warehouseOrderCode;
+            $model->shippingMethodNo      = $request->shippingMethodNo;
+            $model->orderWeight           = round($request->orderWeight, 2);
+            $model->shippingMethod        = $request->shippingMethod;
+            $model->platformFeeTotal      = round($request->platformFeeTotal, 2);
+            $model->shipFee               = round($request->shipFee, 2);
+            $model->dateWarehouseShipping = strtotime($request->dateWarehouseShipping);
+            $model->webId                 = $request->webId;
+            $model->type                  = 1;
+            $model->totalFee              = round($request->platformFeeTotal, 2) + round($request->shipFee, 2);
+            $result                       = $model->save();
+            if (empty($result)) ajaxReturn(4002, Code::$com[4002]);
+            SystemController::sysLog($request, '添加物流费用');
+            ajaxReturn(200, Code::$com[200]);
+        }
+
+        /**
+         * 修改物流费用
+         *
+         * @param Request $request
+         * editLogistics
+         * author: walker
+         * Date: 2019/12/17
+         * Time: 15:22
+         * Note:
+         */
+        public function editLogistics(Request $request)
+        {
+            $request->validate([
+                                   'id' => 'required|string|exists:ship',
+                               ]);
+
+            $model                        = Ship::find($request->id);
+            $model->warehouseOrderCode    = $request->warehouseOrderCode;
+            $model->shippingMethodNo      = $request->shippingMethodNo;
+            $model->orderWeight           = round($request->orderWeight, 2);
+            $model->shippingMethod        = $request->shippingMethod;
+            $model->platformFeeTotal      = round($request->platformFeeTotal, 2);
+            $model->shipFee               = round($request->shipFee, 2);
+            $model->dateWarehouseShipping = strtotime($request->dateWarehouseShipping);
+            $model->webId                 = $request->webId;
+            //            $model->type                  = 1;
+            $model->totalFee = round($request->platformFeeTotal, 2) + round($request->shipFee, 2);
+            $result          = $model->save();
+            if (empty($result)) ajaxReturn(4002, Code::$com[4002]);
+            SystemController::sysLog($request, '修改物流信息');
+            ajaxReturn(200, Code::$com[200]);
+        }
+
+        /**
+         * 删除物流费用
+         * @param Request $request
+         * delLogistics
+         * author: walker
+         * Date: 2019/12/17
+         * Time: 15:26
+         * Note:
+         */
+        public function delLogistics(Request $request)
+        {
+            $request->validate([
+                                   'id' => 'required|string|exists:ship',
+                               ]);
+
+            $model         = Ship::find($request->id);
+            $model->status = 0;
+            $result        = $model->save();
+            if (empty($result)) ajaxReturn(4002, Code::$com[4002]);
+            SystemController::sysLog($request, '删除物流费用');
+            ajaxReturn(200, Code::$com[200]);
+        }
+
+        /**
+         * 获取物流费用
+         *
+         * @throws \SoapFault
+         * getShippingMethod
+         * author: walker
+         * Date: 2019/12/17
+         * Time: 14:52
+         * Note:
+         */
+        public function getShippingMethod()
+        {
+            $result      = $this->getShippingType();
+            $table       = new ShipMethod();
+            $shipMethods = $table->get()->toArray();
+            if (empty($shipMethods) && $result){
+                $table->insert($result);
+            };
+            ajaxReturn(200, Code::$com[200], $result);
+        }
+
         /**
          * 拉取订单存入数据库
          *
@@ -174,7 +450,7 @@
                 $orderTotalData        = [];
                 $orderTotalGoodsData   = [];
                 $orderTotalAddressData = [];
-                $orderShip = [];
+                $orderShip             = [];
                 foreach ($result['data'] as $key => $val) {
                     //订单
                     $referenceNo = (int)$val['saleOrderCode'];
@@ -230,20 +506,20 @@
 
                     $orderData['addTime'] = time();
                     $orderTotalData[]     = $orderData;
-                    if(!empty($val['platformShipStatus'])){
-                        $ship = [];
-                        $ship['warehouseOrderCode'] = $val['warehouseOrderCode'];
-                        $ship['saleOrderCode'] = $val['saleOrderCode'];
-                        $ship['shippingMethodNo'] = $val['shippingMethodNo'];
-                        $ship['orderWeight'] = $val['orderWeight'];
-                        $ship['shippingMethod'] = $val['shippingMethod'];
-                        $ship['platformFeeTotal'] = $val['platformFeeTotal'];
-                        $ship['shipFee'] = $val['shipFee'];
+                    if ( !empty($val['platformShipStatus'])){
+                        $ship                          = [];
+                        $ship['warehouseOrderCode']    = $val['warehouseOrderCode'];
+                        $ship['saleOrderCode']         = $val['saleOrderCode'];
+                        $ship['shippingMethodNo']      = $val['shippingMethodNo'];
+                        $ship['orderWeight']           = $val['orderWeight'];
+                        $ship['shippingMethod']        = $val['shippingMethod'];
+                        $ship['platformFeeTotal']      = $val['platformFeeTotal'];
+                        $ship['shipFee']               = $val['shipFee'];
                         $ship['dateWarehouseShipping'] = strtotime($val['dateWarehouseShipping']);
-                        $ship['addTime'] = \date('Y-m-d H:i:s');
-                        $ship['webId'] = $webId;
-                        $ship['totalFee'] = round($val['platformFeeTotal'],3)+round($val['shipFee'],3);
-                        $orderShip[] = $ship;
+                        $ship['addTime']               = \date('Y-m-d H:i:s');
+                        $ship['webId']                 = $webId;
+                        $ship['totalFee']              = round($val['platformFeeTotal'], 3) + round($val['shipFee'], 3);
+                        $orderShip[]                   = $ship;
                     }
 
                     //订单商品
@@ -340,157 +616,53 @@
         }
 
         /**
-         * 获取网站列表
+         * 获取物流方式字典
          *
-         * @return mixed
-         * getSiteList
+         * @return array|mixed
+         * @throws \SoapFault
+         * getShippingMethodMap
          * author: walker
-         * Date: 2019/12/10
-         * Time: 9:51
+         * Date: 2019/12/17
+         * Time: 14:48
          * Note:
          */
-        private function getSiteList()
+        private function getShippingMethodMap()
         {
-            $siteList = Cache::get('site_web');
-
-            if (empty($siteList)){
-                $model   = new SiteWeb();
-                $listRow = $model->where(['type' => 1])
-                                 ->selectRaw('web_id,web_name')
-                                 ->get();
-                $listRow = toArr($listRow);
-                foreach ($listRow as $key => $val) {
-                    $siteList[$val['web_name']] = $val['web_id'];
+            $mapList = Cache::get('ship_method_map');
+            if (empty($mapList)){
+                $mapList    = [];
+                $methodList = $this->getShippingType();
+                foreach ($methodList as $key => $val) {
+                    $mapList[$val['sm_code']] = $val['sm_name_cn'];
                 }
-                Cache::add('site_web', $siteList);
+                Cache::add('ship_method_map', $mapList);
             }
-            return $siteList;
+            return $mapList;
 
         }
 
         /**
-         * 获取webid
+         * 获取物流方式列表
          *
-         * @param $referenceNo
-         *
-         * @return mixed
-         * getWebId
+         * @return array|mixed
+         * @throws \SoapFault
+         * getShippingType
          * author: walker
-         * Date: 2019/12/10
-         * Time: 10:42
+         * Date: 2019/12/17
+         * Time: 14:39
          * Note:
          */
-        private function getWebId($referenceNo)
+        private function getShippingType()
         {
-            $model = new OrderInfo();
-            $info  = $model->where(['source_id' => $referenceNo])
-                           ->first('web_id');
-            if ( !empty($info)){
-                return $info->web_id;
+            $result = Cache::get('shippingMethod');
+            if (empty($result)){
+                $service = 'getShippingMethod';
+                $result  = self::soapRequest($service, 'WMS');
+                $result  = $result['data'];
+                Cache::add('shippingMethod', $result);
             }
-            return false;
-        }
+            return $result;
 
-        /**
-         * 获取物流列表
-         *
-         * @param Request $request
-         * getLogisticsList
-         * author: walker
-         * Date: 2019/12/16
-         * Time: 14:47
-         * Note:
-         */
-        public function getLogisticsList(Request $request)
-        {
-            $request->validate([
-                                   'start_time' => 'nullable|date',
-                                   'end_time'   => 'nullable|date',
-                               ]);
-            $page      = (int)$request->page ?: 1;
-            $pageNum   = $request->pageNum ?: 10;
-            $pageStart = ($page - 1) * $pageNum;
-            $webId     = $request->web_id;
-            $where     = [];
-            $startTime = $request->start_time ? strtotime($request->start_time) : 0;
-            $endTime   = $request->end_time ? strtotime($request->end) : time();
-            if ( !empty($webId)) $where['web_id'] = $webId;
-            $table = DB::table('ship');
-            $table->whereBetween('dateWarehouseShipping', [$startTime, $endTime]);
-//            $field                       = "id,webId,warehouseCode,shippingMethodNo,orderWeight,shippingMethod,platformFeeTotal,shipFee,dateWarehouseShipping";
-            $list                        = $table
-                ->where($where)
-                ->offset($pageStart)
-//                ->selectRaw($field)
-                ->orderBy('dateWarehouseShipping', 'desc')
-                ->limit($pageNum)
-                ->get();
-            $count                       = $table->where($where)->count();
-            $list                        = toArr($list);
-//            foreach ($list as $key => $val) {
-//                $list[$key]['total_fee'] = $val['platformFeeTotal'] + $val['shipFee'];
-//            }
-            if (!empty($request->download)){
-                return Excel::download(new LogisticsExport(toArr($list)), 'test.xlsx');
-            };
-            $data          = [];
-            $data['list']  = $list;
-            $data['page']  = $page;
-            $data['count'] = $count;
-            ajaxReturn(200, Code::$com[200], $data);
-        }
-
-        /**
-         * 获取物流费用图表
-         * @param Request $request
-         * getLogisticsLineChart
-         * author: walker
-         * Date: 2019/12/16
-         * Time: 16:21
-         * Note:
-         */
-        public function getLogisticsLineChart(Request $request)
-        {
-
-            $where                       = [];
-            if(!empty($request->web_id))$where['webId'] = $request->web_id;
-
-            $orderList                   = DB::table('ship')
-                                             ->where($where)
-                                             ->orderBy('dateWarehouseShipping', 'desc')
-                                             ->selectRaw('shipFee,dateWarehouseShipping,webId')
-                                             ->get();
-            $orderList                   = toArr($orderList);
-            #在进行图表统计的时候直接从数据库取得的数据有的月份可能是没有的,不过月份比较少可直接写死,同样也需要补全
-            $year
-                = date('Y', time());
-            #一年的月份
-            $month = [
-                0  => $year . '-01',
-                1  => $year . '-02',
-                2  => $year . '-03',
-                3  => $year . '-04',
-                4  => $year . '-05',
-                5  => $year . '-06',
-                6  => $year . '-07',
-                7  => $year . '-08',
-                8  => $year . '-09',
-                9  => $year . '-10',
-                10 => $year . '-11',
-                11 => $year . '-12',
-            ];
-            foreach ($month as $key => $val) {
-                $data[$key] = [
-                    'date'  => $val,
-                    'value' => 0,
-                ];
-                foreach ($orderList as $key1 => $val1) {
-                    if($val==\date('Y-m',$val1['dateWarehouseShipping'])){
-                        $data[$key]['value']=round($data[$key]['value'],2)+round($val1['shipFee'],2);
-                    };
-                }
-            }
-            ajaxReturn(200,Code::$com[200],$data);
         }
 
         /**
@@ -554,4 +726,5 @@
             }
             return $data;
         }
+
     }
