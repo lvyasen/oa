@@ -163,6 +163,7 @@
         $api->post('getShopifyWebsite', 'WebSiteController@getShopifyWebsite');
         $api->any('pullProductsData', 'ShopifyController@pullProductsData');
         $api->post('getPrePullData', 'ShopifyController@getPrePullData');
+        $api->post('getCustomersData', 'ShopifyController@getCustomersData');
         $api->post('getReport', 'ShopifyController@getReport');
         $api->any('shopifyInstall', 'ShopifyController@shopifyInstall');
         $api->any('shopifyGenerateToken', 'ShopifyController@shopifyGenerateToken');//获取token

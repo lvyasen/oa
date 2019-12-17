@@ -40,7 +40,7 @@
             $downTime = $request->down_time ? strtotime($request->down_time) : time();
             $webId     = $request->web_id;
             $shopify   = new  ShopifyApi();
-            $count = $shopify->countProducts($webId,$downTime);
+            $count = $shopify->countData($webId,$downTime);
 
         }
 
@@ -65,6 +65,30 @@
             $shopify = new  ShopifyApi();
 
             $count = $shopify->pullOrderData($request->web_id);
+        }
+        /**
+         * 拉取shopify订单数据
+         *
+         * @param Request $request
+         * pullProductsData
+         * author: walker
+         * Date: 2019/12/6
+         * Time: 15:52
+         * Note:
+         */
+        public function getCustomersData(Request $request)
+        {
+
+            $request->validate([
+                                   'down_time' => 'nullable|date',
+                                   'web_id'    => 'required|string',
+                               ]);
+            $downTime = $request->down_time ? strtotime($request->down_time) : time();
+            $webId     = $request->web_id;
+            $shopify   = new  ShopifyApi();
+            $count = $shopify->countData($webId,$downTime,1);
+
+
         }
 
         public function getReport(Request $request)

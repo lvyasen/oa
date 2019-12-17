@@ -453,7 +453,6 @@
         {
 
             $where                       = [];
-            $where['platformShipStatus'] = 1;
             if(!empty($request->web_id))$where['webId'] = $request->web_id;
 
             $orderList                   = DB::table('ship')

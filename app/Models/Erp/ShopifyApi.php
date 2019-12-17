@@ -26,7 +26,7 @@
          * Time: 11:55
          * Note:
          */
-        public function countProducts($webId, $downTime = '', $type = 0)
+        public function countData($webId, $downTime = '', $type = 0)
         {
             $t        = time();
             $webModel = new SiteWeb();
