@@ -93,8 +93,7 @@
             $data['manager_user_id']    = $request->manager_user_id;
             $departmentId               = $request->department_id;
             $model                      = new Department();
-
-            $result = $model->editDepartment($departmentId, $data);
+            $result                     = $model->editDepartment($departmentId, $data);
             if (empty($result)) ajaxReturn(4003, Code::$com[4003]);
             SystemController::sysLog($request, '修改部门');
             ajaxReturn(200, Code::$com[200]);
@@ -210,7 +209,6 @@
             $data['count'] = $count;
             ajaxReturn(200, Code::$com[200], $data);
         }
-
 
 
     }

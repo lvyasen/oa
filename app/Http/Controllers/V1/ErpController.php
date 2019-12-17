@@ -3,6 +3,7 @@
     namespace App\Http\Controllers\V1;
 
     use App\Dictionary\Code;
+    use App\Exports\LogisticsExport;
     use App\Http\Controllers\Controller;
     use App\Models\Erp\OrderInfo;
     use App\Models\Erp\SiteWeb;
@@ -12,6 +13,7 @@
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Cache;
     use Illuminate\Support\Facades\DB;
+    use Maatwebsite\Excel\Facades\Excel;
     use Phpro\SoapClient\Exception\SoapException;
     use Phpro\SoapClient\Soap\HttpBinding\SoapRequest;
 
@@ -155,6 +157,7 @@
                       ->where(['pull_url' => $url, 'status' => 1])
                       ->orderBy('add_time', 'desc')
                       ->first('current_page');
+
             $page = empty($info) ? 1 : $info->current_page + 1;
 
             $params               = [];
@@ -171,6 +174,7 @@
                 $orderTotalData        = [];
                 $orderTotalGoodsData   = [];
                 $orderTotalAddressData = [];
+                $orderShip = [];
                 foreach ($result['data'] as $key => $val) {
                     //订单
                     $referenceNo = (int)$val['saleOrderCode'];
@@ -226,6 +230,22 @@
 
                     $orderData['addTime'] = time();
                     $orderTotalData[]     = $orderData;
+                    if(!empty($val['platformShipStatus'])){
+                        $ship = [];
+                        $ship['warehouseOrderCode'] = $val['warehouseOrderCode'];
+                        $ship['saleOrderCode'] = $val['saleOrderCode'];
+                        $ship['shippingMethodNo'] = $val['shippingMethodNo'];
+                        $ship['orderWeight'] = $val['orderWeight'];
+                        $ship['shippingMethod'] = $val['shippingMethod'];
+                        $ship['platformFeeTotal'] = $val['platformFeeTotal'];
+                        $ship['shipFee'] = $val['shipFee'];
+                        $ship['dateWarehouseShipping'] = strtotime($val['dateWarehouseShipping']);
+                        $ship['addTime'] = \date('Y-m-d H:i:s');
+                        $ship['webId'] = $webId;
+                        $ship['totalFee'] = round($val['platformFeeTotal'],3)+round($val['shipFee'],3);
+                        $orderShip[] = $ship;
+                    }
+
                     //订单商品
                     if ( !empty($val['orderDetails'])){
                         foreach ($val['orderDetails'] as $key1 => $val1) {
@@ -293,6 +313,7 @@
                     try {
                         DB::beginTransaction();
                         DB::table('e_orders')->insert($orderTotalData);
+                        DB::table('ship')->insert($orderShip);
                         DB::rollBack();
                         DB::table('e_order_goods')->insert($orderTotalGoodsData);
                         DB::rollBack();
@@ -394,16 +415,24 @@
             $startTime = $request->start_time ? strtotime($request->start_time) : 0;
             $endTime   = $request->end_time ? strtotime($request->end) : time();
             if ( !empty($webId)) $where['web_id'] = $webId;
-            $table = DB::table('e_orders');
+            $table = DB::table('ship');
             $table->whereBetween('dateWarehouseShipping', [$startTime, $endTime]);
-            $field                       = "webId,warehouseCode,shippingMethodNo,orderWeight,shippingMethod,platformFeeTotal,shipFee,dateWarehouseShipping";
-            $where['platformShipStatus'] = 1;
-            $list                        = $table->where($where)->offset($pageStart)->selectRaw($field)->orderBy('dateWarehouseShipping', 'desc')->limit($pageNum)->get();
+//            $field                       = "id,webId,warehouseCode,shippingMethodNo,orderWeight,shippingMethod,platformFeeTotal,shipFee,dateWarehouseShipping";
+            $list                        = $table
+                ->where($where)
+                ->offset($pageStart)
+//                ->selectRaw($field)
+                ->orderBy('dateWarehouseShipping', 'desc')
+                ->limit($pageNum)
+                ->get();
             $count                       = $table->where($where)->count();
             $list                        = toArr($list);
-            foreach ($list as $key => $val) {
-                $list[$key]['total_fee'] = $val['platformFeeTotal'] + $val['shipFee'];
-            }
+//            foreach ($list as $key => $val) {
+//                $list[$key]['total_fee'] = $val['platformFeeTotal'] + $val['shipFee'];
+//            }
+            if (!empty($request->download)){
+                return Excel::download(new LogisticsExport(toArr($list)), 'test.xlsx');
+            };
             $data          = [];
             $data['list']  = $list;
             $data['page']  = $page;
@@ -427,7 +456,7 @@
             $where['platformShipStatus'] = 1;
             if(!empty($request->web_id))$where['webId'] = $request->web_id;
 
-            $orderList                   = DB::table('e_orders')
+            $orderList                   = DB::table('ship')
                                              ->where($where)
                                              ->orderBy('dateWarehouseShipping', 'desc')
                                              ->selectRaw('shipFee,dateWarehouseShipping,webId')

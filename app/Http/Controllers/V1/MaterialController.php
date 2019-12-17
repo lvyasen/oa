@@ -25,7 +25,15 @@
      */
     class MaterialController extends Controller
     {
-        //
+        /**
+         * 添加物料
+         * @param Request $request
+         * addMaterial
+         * author: walker
+         * Date: 2019/12/16
+         * Time: 16:33
+         * Note:
+         */
         public function addMaterial(Request $request)
         {
             $request->validate([

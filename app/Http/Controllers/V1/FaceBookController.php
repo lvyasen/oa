@@ -11,7 +11,7 @@
 
     class FaceBookController extends Controller
     {
-        private static $access_token  = 'EAALQ4mpJm4UBAFNhnXeOzJQkxjSeiXN02HYKyQlMD5VSQuKriHIor7sfIhBiIgJOZCkZB7UsSZBveuYkAmIZAZBjh8U8z0qZCiAaXSRvYTMxbYuJuvowOwt5mYRaFdLOvYE49dDbr3ZCauDjSOxhMxSgYUUvUOVXEGdfTMAl87mbtenihmkPCpgnxMBHIvhdgsZD';
+        private static $access_token  = 'EAAHSAZC8QX2ABAEHVMIDNMjEQ9uBNVV3voe8NdeOuP2Kxd56u8J3YrMC1JtzzLqZBjBGAvYCIQfJP3FrX0cz1bZABVKcQIjPxr7EhZAFA9j7VnepqZADrGs999NlkHocffIlFGfBg0XaSNoYNR5C31bNRbU9S2Cr6mO0pcrZCRopNo52j20WtG9fikGgKSw5YZD';
         private static $ad_account_id = 'act_954424211597267';
         private static $app_secret    = 'c600725b9c87e95d7e92e27117a1ddfb';
         private static $app_id        = '102541504485683';

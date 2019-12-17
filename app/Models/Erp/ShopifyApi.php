@@ -26,7 +26,7 @@
          * Time: 11:55
          * Note:
          */
-        public function countProducts($webId, $downTime = '')
+        public function countProducts($webId, $downTime = '', $type = 0)
         {
             $t        = time();
             $webModel = new SiteWeb();
@@ -37,7 +37,7 @@
             if (empty($info)) return false;
             $info    = toArr($info);
             $pullLog = DB::table('shopify_pull_info')
-                         ->where(['web_id' => $webId])
+                         ->where(['web_id' => $webId, 'type' => 0])
                          ->orderBy('start_time', 'asc')
                          ->first();
             $pullLog = toArr($pullLog);
@@ -54,14 +54,23 @@
             $timeStr = $this->getTimeString($start, $end);
 
             if ( !empty($timeStr)){
-                $url       = $info['web_access'] . '.myshopify.com/admin/orders/count.json?' . $timeStr . '&status=any';
+                switch ($type) {
+                    case 0:
+                        $url = $info['web_access'] . '.myshopify.com/admin/orders/count.json?' . $timeStr . '&status=any';
+                        $pullUrl                 = $info['web_access'] . '.myshopify.com/admin/orders.json?' . $timeStr . '&page=%u' . '&limit=' . $limit . '&status=any';
+                        break;
+                    case 1:
+                        $url = $info['web_access'] . '.myshopify.com/admin/customers/count.json?' . $timeStr . '&status=any';
+                        $pullUrl                 = $info['web_access'] . '.myshopify.com/admin/customers.json?' . $timeStr . '&page=%u' . '&limit=' . $limit . '&status=any';
+                        break;
+                }
                 $countInfo = json_decode(file_get_contents($url), true);
                 if ( !empty($countInfo)){
                     $count                      = $countInfo['count'];
                     $totalPage                  = ceil($count / $limit);
                     $pullInfoData               = [];
                     $pullInfoData['web_id']     = $webId;
-                    $pullInfoData['type']       = 0;
+                    $pullInfoData['type']       = $type;
                     $pullInfoData['pull_times'] = 0;
                     $pullInfoData['web_access'] = $info['web_access'];
                     $pullInfoData['total_page'] = $totalPage;
@@ -77,12 +86,13 @@
                     if ($count > 0){
                         for ($i = 1; $i <= $totalPage; $i++) {
                             $pullLog                 = [];
-                            $pullUrl                 = $info['web_access'] . '.myshopify.com/admin/orders.json?' . $timeStr . '&page=' . $i . '&limit=' . $limit . '&status=any';
+                            $pullUrl = sprintf($pullUrl,$i);
                             $pullLog['current_page'] = $i;
                             $pullLog['web_name']     = $info['web_name'];
                             $pullLog['pull_url']     = $pullUrl;
                             $pullLog['pull_status']  = 0;
                             $pullLog['web_id']       = $webId;
+                            $pullLog['type']         = $type;
                             $pullLog['add_time']     = time();
                             $pullLogData []          = $pullLog;
                         }
@@ -140,6 +150,7 @@
                          ->where([
                                      'web_id'      => $webId,
                                      'pull_status' => 0,
+                                     'type'        => 0,
                                  ])
                          ->orderBy('add_time', 'asc')
                          ->orderBy('current_page', 'asc')
@@ -167,7 +178,7 @@
                         $shopifInfo = DB::table('shopify_order')
                                         ->where(['shopify_id' => $val['id']])->first('id');
                         if (empty($shopifInfo)){
-                            $orderId                               = $val['id']?:0;
+                            $orderId                               = $val['id'] ?: 0;
                             $createTime                            = strtotime($val['created_at']);
                             $insertData                            = [];
                             $insertData['email']                   = $val['email'];
@@ -349,7 +360,7 @@
                         $shopify_order_line_item = DB::table('shopify_order_line_item')->insert($shopifyOrderLineItem);
                         //                        DB::rollBack();
                         //shopify顾客信息
-                        $shopify_customer = DB::table('shopify_customer')->insert($shopifyCustomer);
+                        $shopify_customer = DB::table('shopify_order_customer')->insert($shopifyCustomer);
                         //                        DB::rollBack();
                         //shopify地址信息
                         $shopify_address = DB::table('shopify_address')->insert($shopifyCustomerAddress);
@@ -398,6 +409,7 @@
             fp($res);
         }
 
+
         /**
          * 获取组装时间字符串
          *
@@ -443,6 +455,7 @@
             }
 
         }
+
 
         /**
          * shopify curl
