@@ -35,15 +35,9 @@
 
             $request->validate([
                                    'down_time' => 'nullable|date',
-                                   'web_id'    => 'required|string',
                                ]);
             $downTime = $request->down_time ? strtotime($request->down_time) : time();
-
-
-
-            //            $webId     = $request->web_id;
             $shopify = new  ShopifyApi();
-
             $count = $shopify->countData($downTime);
 
         }
