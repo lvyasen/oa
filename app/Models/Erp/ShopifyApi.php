@@ -194,6 +194,7 @@
             $pullLog = toArr($pullLog);
             if ( !empty($pullLog)){
                 $url = $pullLog['pull_url'];
+                $webId = $pullLog['web_id'];
                 $res = $this->shopifyCurl($url);
 
                 if ( !empty($res['orders'])){
