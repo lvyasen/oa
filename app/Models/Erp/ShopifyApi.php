@@ -42,21 +42,20 @@
                 //            $info    = toArr($info);
                 $pullLog = DB::table('shopify_pull_info')
                              ->where(['web_id' => $webId, 'type' => 0])
-                             ->orderBy('start_time', 'asc')
+                             ->orderBy('end_time', 'desc')
                              ->first();
                 $pullLog = toArr($pullLog);
                 if ( !empty($pullLog)){
                     $start = strtotime($pullLog['end_time']);
-                    $end   = strtotime(date('Y-m-d'));
+                    $end   = strtotime(date('Y-m-d H:i'))-self::$timeDiff;
                 } else {
-                    $today       = strtotime('today');
-                    $defaultTime = date('Y-m-d', strtotime('2018-3-10'));
-                    $start       = strtotime($defaultTime);
+                    $today       = strtotime('today')-self::$timeDiff;
+                    $defaultTime = date('Y-m-d ', strtotime('2018-3-10'));
+                    $start       = strtotime($defaultTime)-self::$timeDiff;
                     $end         = $today;
                 }
                 $limit   = 100;
                 $timeStr = $this->getTimeString($start, $end);
-
                 if ( !empty($timeStr)){
                     switch ($type) {
                         case 0:
@@ -68,12 +67,16 @@
                             $pullUrl = $info['web_access'] . '.myshopify.com/admin/customers.json?' . $timeStr . '&page=%u' . '&limit=' . $limit . '&status=any';
                             break;
                     }
+                    $shopify_pull_info_id = DB::table('shopify_pull_info')
+                                              ->where(['pull_url' => $url])
+                                              ->first('id');
+                    if(!empty($shopify_pull_info_id)){
+                        continue;
+                    }
                     try {
-                        $shopify_pull_info_id = DB::table('shopify_pull_info')
-                                                  ->where(['pull_url' => $url])
-                                                  ->first('id');
                         if (empty($shopify_pull_info_id)){
                             $countInfo = json_decode(file_get_contents($url), true);
+
                             //                            fp($countInfo);
                             if (isset($countInfo)){
                                 $count                      = $countInfo['count'];
@@ -116,7 +119,7 @@
                                     foreach ($pullLogData as $key => $val) {
                                         $pullLogData[$key]['pull_info_id'] = $pullInfoId;
                                     }
-                                    if($count > 0){
+                                    if ($count > 0){
                                         DB::table('shopify_pull_log')->insert($pullLogData);
                                     };
                                     DB::commit();
@@ -136,11 +139,25 @@
                             continue;
                         }
                     } catch (\Exception $exception) {
-                        $data        = [];
-                        $data['msg'] = $exception->getMessage();
-                        $data['url'] = $url;
+                        $pullInfoData               = [];
+                        $pullInfoData['web_id']     = $webId;
+                        $pullInfoData['type']       = $type;
+                        $pullInfoData['pull_times'] = 0;
+                        $pullInfoData['web_access'] = $info['web_access'];
+                        $pullInfoData['total_page'] = 0;
+                        $pullInfoData['page_size']  = $limit;
+                        $pullInfoData['count_num']  = 0;
+                        $pullInfoData['time_str']   = $timeStr;
+                        $pullInfoData['pull_url']   = $url;
+                        $pullInfoData['start_time'] = date('Y-m-d H:i:s', $start);
+                        $pullInfoData['end_time']   = date('Y-m-d H:i:s', $end);
+                        $pullInfoData['web_id']     = $webId;
+                        $pullInfoData['add_time']   = time();
+                        $pullInfoData['pull_status']   = 3;
+                        $pullInfoData['spend_time'] = time() - $t;
+                        $pullInfoData['err_msg']   = $exception->getMessage();
+                        $pullInfoId                 = DB::table('shopify_pull_info')->insertGetId($pullInfoData);
                         continue;
-                        //                    ajaxReturn(4001,'失败',$data);
                     }
 
 
@@ -450,9 +467,14 @@
         private function getTimeString($startTime, $endTime)
         {
             if ($startTime > $endTime) return false;
-            $start = date('Y-m-d\TH:i:s-04:00', $startTime);
-            $end   = date('Y-m-d\TH:i:s-04:00', $endTime);
-            return 'updated_at_min=' . $start . '&updated_at_max=' . $end;
+            if($endTime-$startTime>60*60){
+                $start = date('Y-m-d\TH:i:s-04:00', $startTime);
+                $end   = date('Y-m-d\TH:i:s-04:00', $endTime);
+                return 'updated_at_min=' . $start . '&updated_at_max=' . $end;
+            }else{
+                return false;
+            }
+
         }
 
         /**
