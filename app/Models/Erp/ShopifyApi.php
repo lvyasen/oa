@@ -177,19 +177,14 @@
          * Time: 9:25
          * Note:
          */
-        public function pullOrderData($webId)
+        public function pullOrderData()
         {
-            $beginTime = time();
-            $webModel  = new SiteWeb();
-            $webInfo   = $webModel->where(['web_id' => $webId])
-                                  ->first();
-            if (empty($webInfo)) return false;
-            //获取拉取统计
 
+            $beginTime = time();
+            
             //获取最近拉取的page
             $pullLog = DB::table('shopify_pull_log')
                          ->where([
-                                     'web_id'      => $webId,
                                      'pull_status' => 0,
                                      'type'        => 0,
                                  ])
@@ -328,7 +323,7 @@
                             }
                             //订单顾客
                             if ( !empty($val['customer'])){
-                                $customerInfo = DB::table('shopify_customer')->where(['customer_id' => $val['customer']['id']])->first('id');
+                                $customerInfo = DB::table('shopify_order_customer')->where(['customer_id' => $val['customer']['id']])->first('id');
                                 if (empty($customerInfo)){
                                     $customer                                 = [];
                                     $customer['customer_id']                  = $val['customer']['id'] ?: 0;

@@ -62,7 +62,7 @@
 
             $shopify = new  ShopifyApi();
 
-            $count = $shopify->pullOrderData($request->web_id);
+            $count = $shopify->pullOrderData();
         }
 
         /**
