@@ -181,7 +181,7 @@
         {
 
             $beginTime = time();
-            
+
             //获取最近拉取的page
             $pullLog = DB::table('shopify_pull_log')
                          ->where([
