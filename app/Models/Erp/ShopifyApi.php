@@ -26,101 +26,125 @@
          * Time: 11:55
          * Note:
          */
-        public function countData($webId, $downTime = '', $type = 0)
+        public function countData($downTime = '', $type = 0)
         {
-            $t        = time();
             $webModel = new SiteWeb();
-
-            $info = $webModel
-                ->where(['web_id' => $webId])
-                ->first();
-            if (empty($info)) return false;
-            $info    = toArr($info);
-            $pullLog = DB::table('shopify_pull_info')
-                         ->where(['web_id' => $webId, 'type' => 0])
-                         ->orderBy('start_time', 'asc')
-                         ->first();
-            $pullLog = toArr($pullLog);
-            if ( !empty($pullLog)){
-                $start = strtotime($pullLog['end_time']);
-                $end   = strtotime(date('Y-m-d'));
-            } else {
-                $today       = strtotime('today');
-                $defaultTime = date('Y-m-d', strtotime('2018-3-10'));
-                $start       = strtotime($defaultTime);
-                $end         = $today;
-            }
-            $limit   = 100;
-            $timeStr = $this->getTimeString($start, $end);
-
-            if ( !empty($timeStr)){
-                switch ($type) {
-                    case 0:
-                        $url = $info['web_access'] . '.myshopify.com/admin/orders/count.json?' . $timeStr . '&status=any';
-                        $pullUrl                 = $info['web_access'] . '.myshopify.com/admin/orders.json?' . $timeStr . '&page=%u' . '&limit=' . $limit . '&status=any';
-                        break;
-                    case 1:
-                        $url = $info['web_access'] . '.myshopify.com/admin/customers/count.json?' . $timeStr . '&status=any';
-                        $pullUrl                 = $info['web_access'] . '.myshopify.com/admin/customers.json?' . $timeStr . '&page=%u' . '&limit=' . $limit . '&status=any';
-                        break;
+            $webLists = $webModel->where(['type' => 1, 'is_delete' => 0])->get()->toArray();
+            $webModel = new SiteWeb();
+            foreach ($webLists as $k => $v) {
+                $t     = time();
+                $info  = $v;
+                $webId = $v['web_id'];
+                //            $info = $webModel
+                //                ->where(['web_id' => $webId])
+                //                ->first();
+                //            if (empty($info)) return false;
+                //            $info    = toArr($info);
+                $pullLog = DB::table('shopify_pull_info')
+                             ->where(['web_id' => $webId, 'type' => 0])
+                             ->orderBy('start_time', 'asc')
+                             ->first();
+                $pullLog = toArr($pullLog);
+                if ( !empty($pullLog)){
+                    $start = strtotime($pullLog['end_time']);
+                    $end   = strtotime(date('Y-m-d'));
+                } else {
+                    $today       = strtotime('today');
+                    $defaultTime = date('Y-m-d', strtotime('2018-3-10'));
+                    $start       = strtotime($defaultTime);
+                    $end         = $today;
                 }
-                $countInfo = json_decode(file_get_contents($url), true);
-                if ( !empty($countInfo)){
-                    $count                      = $countInfo['count'];
-                    $totalPage                  = ceil($count / $limit);
-                    $pullInfoData               = [];
-                    $pullInfoData['web_id']     = $webId;
-                    $pullInfoData['type']       = $type;
-                    $pullInfoData['pull_times'] = 0;
-                    $pullInfoData['web_access'] = $info['web_access'];
-                    $pullInfoData['total_page'] = $totalPage;
-                    $pullInfoData['page_size']  = $limit;
-                    $pullInfoData['count_num']  = $count;
-                    $pullInfoData['time_str']   = $timeStr;
-                    $pullInfoData['pull_url']   = $url;
-                    $pullInfoData['start_time'] = date('Y-m-d H:i:s', $start);
-                    $pullInfoData['end_time']   = date('Y-m-d H:i:s', $end);
-                    $pullInfoData['web_id']     = $webId;
-                    $pullInfoData['add_time']   = time();
-                    $pullLogData                = [];
-                    if ($count > 0){
-                        for ($i = 1; $i <= $totalPage; $i++) {
-                            $pullLog                 = [];
-                            $pullUrl = sprintf($pullUrl,$i);
-                            $pullLog['current_page'] = $i;
-                            $pullLog['web_name']     = $info['web_name'];
-                            $pullLog['pull_url']     = $pullUrl;
-                            $pullLog['pull_status']  = 0;
-                            $pullLog['web_id']       = $webId;
-                            $pullLog['type']         = $type;
-                            $pullLog['add_time']     = time();
-                            $pullLogData []          = $pullLog;
-                        }
-                        DB::beginTransaction();
-                        try {
-                            DB::beginTransaction();
-                            $pullInfoData['spend_time'] = time() - $t;
-                            $pullInfoId                 = DB::table('shopify_pull_info')->insertGetId($pullInfoData);
-                            DB::rollBack();
-                            foreach ($pullLogData as $key => $val) {
-                                $pullLogData[$key]['pull_info_id'] = $pullInfoId;
-                            }
-                            DB::table('shopify_pull_log')->insert($pullLogData);
-                            DB::commit();
-                        } catch (\Exception $exception) {
-                            DB::rollBack();
-                            $pullInfo = DB::table('shopify_pull_info')->where(['web_id' => $webId, 'pull_url' => $url])->first('id');
-                            if ( !empty($pullInfo)){
-                                $pullLogData['err_msg'] = $exception->getMessage();
-                                DB::table('shopify_pull_info')->insert($pullLogData);
-                            } else {
-                                DB::table('shopify_pull_info')->where(['web_id' => $webId, 'pull_url' => $url])->update(['err_msg' => $exception->getMessage()]);
-                            }
-                            ajaxReturn(4001, 'error', $exception->getMessage());
-                        }
-                    };
-                }
+                $limit   = 100;
+                $timeStr = $this->getTimeString($start, $end);
 
+                if ( !empty($timeStr)){
+                    switch ($type) {
+                        case 0:
+                            $url     = $info['web_access'] . '.myshopify.com/admin/orders/count.json?' . $timeStr . '&status=any';
+                            $pullUrl = $info['web_access'] . '.myshopify.com/admin/orders.json?' . $timeStr . '&page=%u' . '&limit=' . $limit . '&status=any';
+                            break;
+                        case 1:
+                            $url     = $info['web_access'] . '.myshopify.com/admin/customers/count.json?' . $timeStr . '&status=any';
+                            $pullUrl = $info['web_access'] . '.myshopify.com/admin/customers.json?' . $timeStr . '&page=%u' . '&limit=' . $limit . '&status=any';
+                            break;
+                    }
+                    try {
+                        $shopify_pull_info_id = DB::table('shopify_pull_info')
+                                                  ->where(['pull_url' => $url])
+                                                  ->first('id');
+                        if (empty($shopify_pull_info_id)){
+                            $countInfo = json_decode(file_get_contents($url), true);
+                            //                            fp($countInfo);
+                            if (isset($countInfo)){
+                                $count                      = $countInfo['count'];
+                                $totalPage                  = ceil($count / $limit);
+                                $pullInfoData               = [];
+                                $pullInfoData['web_id']     = $webId;
+                                $pullInfoData['type']       = $type;
+                                $pullInfoData['pull_times'] = 0;
+                                $pullInfoData['web_access'] = $info['web_access'];
+                                $pullInfoData['total_page'] = $totalPage;
+                                $pullInfoData['page_size']  = $limit;
+                                $pullInfoData['count_num']  = $count;
+                                $pullInfoData['time_str']   = $timeStr;
+                                $pullInfoData['pull_url']   = $url;
+                                $pullInfoData['start_time'] = date('Y-m-d H:i:s', $start);
+                                $pullInfoData['end_time']   = date('Y-m-d H:i:s', $end);
+                                $pullInfoData['web_id']     = $webId;
+                                $pullInfoData['add_time']   = time();
+                                $pullLogData                = [];
+                                if ($count > 0){
+                                    for ($i = 1; $i <= $totalPage; $i++) {
+                                        $pullLog                 = [];
+                                        $pullUrl                 = sprintf($pullUrl, $i);
+                                        $pullLog['current_page'] = $i;
+                                        $pullLog['web_name']     = $info['web_name'];
+                                        $pullLog['pull_url']     = $pullUrl;
+                                        $pullLog['pull_status']  = 0;
+                                        $pullLog['web_id']       = $webId;
+                                        $pullLog['type']         = $type;
+                                        $pullLog['add_time']     = time();
+                                        $pullLogData []          = $pullLog;
+                                    }
+                                };
+                                DB::beginTransaction();
+                                try {
+                                    DB::beginTransaction();
+                                    $pullInfoData['spend_time'] = time() - $t;
+                                    $pullInfoId                 = DB::table('shopify_pull_info')->insertGetId($pullInfoData);
+                                    DB::rollBack();
+                                    foreach ($pullLogData as $key => $val) {
+                                        $pullLogData[$key]['pull_info_id'] = $pullInfoId;
+                                    }
+                                    if($count > 0){
+                                        DB::table('shopify_pull_log')->insert($pullLogData);
+                                    };
+                                    DB::commit();
+                                } catch (\Exception $exception) {
+                                    DB::rollBack();
+                                    $pullInfo = DB::table('shopify_pull_info')->where(['web_id' => $webId, 'pull_url' => $url])->first('id');
+                                    if ( !empty($pullInfo)){
+                                        $pullLogData['err_msg'] = $exception->getMessage();
+                                        DB::table('shopify_pull_info')->insert($pullLogData);
+                                    } else {
+                                        DB::table('shopify_pull_info')->where(['web_id' => $webId, 'pull_url' => $url])->update(['err_msg' => $exception->getMessage()]);
+                                    }
+                                    ajaxReturn(4001, 'error', $exception->getMessage());
+                                }
+                            }
+                        } else {
+                            continue;
+                        }
+                    } catch (\Exception $exception) {
+                        $data        = [];
+                        $data['msg'] = $exception->getMessage();
+                        $data['url'] = $url;
+                        continue;
+                        //                    ajaxReturn(4001,'失败',$data);
+                    }
+
+
+                }
             }
 
 

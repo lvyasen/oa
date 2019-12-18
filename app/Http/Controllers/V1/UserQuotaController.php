@@ -250,7 +250,7 @@
             //根据部门查看每个人的指标详情
 
             $field                             = 'user_quota.department_id,user_quota.quota_id,quota.quota_id,complete_value,
-            score,complete_date,user_name,quota_name
+            score,complete_date,user_name,quota_name,target_value,unit
             ';
             $where                             = [];
             $where['user_quota.department_id'] = $request->department_id;

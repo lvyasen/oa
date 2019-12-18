@@ -38,9 +38,13 @@
                                    'web_id'    => 'required|string',
                                ]);
             $downTime = $request->down_time ? strtotime($request->down_time) : time();
-            $webId     = $request->web_id;
-            $shopify   = new  ShopifyApi();
-            $count = $shopify->countData($webId,$downTime);
+
+
+
+            //            $webId     = $request->web_id;
+            $shopify = new  ShopifyApi();
+
+            $count = $shopify->countData($downTime);
 
         }
 
@@ -66,6 +70,7 @@
 
             $count = $shopify->pullOrderData($request->web_id);
         }
+
         /**
          * 拉取shopify订单数据
          *
@@ -84,9 +89,9 @@
                                    'web_id'    => 'required|string',
                                ]);
             $downTime = $request->down_time ? strtotime($request->down_time) : time();
-            $webId     = $request->web_id;
-            $shopify   = new  ShopifyApi();
-            $count = $shopify->countData($webId,$downTime,1);
+            $webId    = $request->web_id;
+            $shopify  = new  ShopifyApi();
+            $count    = $shopify->countData($webId, $downTime, 1);
 
 
         }

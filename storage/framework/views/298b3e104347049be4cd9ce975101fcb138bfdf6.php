@@ -77,7 +77,7 @@
         var dataChart1 = new gapi.analytics.googleCharts.DataChart({
             query: {
                 metrics: 'ga:sessions',
-                dimensions: 'ga:referralPath',
+                dimensions: 'ga:sessionCount',
                 'start-date': '30daysAgo',
                 'end-date': 'yesterday',
                 'max-results': 6,
@@ -85,10 +85,14 @@
             },
             chart: {
                 container: 'chart-1-container',
-                type: 'PIE',
+                type: 'LINE',
+                // options: {
+                //     width: '100%',
+                //     pieHole: 4/9
+                // }
                 options: {
-                    width: '100%',
-                    pieHole: 4/9
+                    title: 'sessionCount',
+                    fontSize: 12
                 }
             }
         });
