@@ -290,12 +290,12 @@
                 ];
                 foreach ($userQuotaList as $key1 => $val1) {
                     if ($val == \date('Y-m', $val1['complete_date'])){
-                        $quotaChart[$key]['value'] = $quotaChart[$key]['value']+$val1['complete_value'];
+                        $quotaChart[$key]['value'] = $quotaChart[$key]['value'] + $val1['complete_value'];
                     };
                 }
             }
-            $data['list']  = $userQuotaList;
-            $data['quota_chart']  = $quotaChart;
+            $data['list']        = $userQuotaList;
+            $data['quota_chart'] = $quotaChart;
             ajaxReturn(200, Code::$com[200], $data);
         }
 
@@ -316,7 +316,7 @@
                                    'department_id' => 'required|string|exists:department',
                                    'start_time'    => 'nullable|date',
                                    'end_time'      => 'nullable|date',
-                                   'user_id'       => 'nullable|string|exists:users,id',
+                                   //                                   'user_id'       => 'nullable|string|exists:users,id',
                                ]);
 
             $userId          = $request->user_id ?: $request->user()->id;
@@ -328,25 +328,44 @@
             if (empty($departmentInfo)){
                 ajaxReturn(4005, Code::$user['not_have_promise']);
             }
-            $quotaList = DB::table('quota')->where(['department_id' => $departmentInfo->department_id])->get();
-            $quotaList = toArr($quotaList);
-            foreach ($quotaList as $key => $val) {
-                $userQuota = DB::table('user_quota');
-                $userQuota->whereBetween('complete_date', [$startTime, $endTime]);
-                $userQuotaLists            = $userQuota
-                    ->where([
-                                'is_del'   => 0,
-                                'quota_id' => $val['quota_id'],
-                                'user_id'  => $userId,
-                            ])
-                    ->get();
-                $userQuotaLists            = toArr($userQuotaLists);
-                $quotaList[$key]['detail'] = $userQuotaLists;
+            $departmentQuota = DB::table('quota')
+                                 ->where([
+                                             'department_id' => $request->department_id,
+                                             'is_del'        => 0,
+                                         ])
+                                 ->selectRaw('quota_id,quota_name,is_del')
+                                 ->orderBy('quota_id', 'desc')
+                                 ->get();
+            $departmentUser  = DB::table('users')
+                                 ->where([
+                                             'status'        => 1,
+                                             'department_id' => $request->department_id,
+                                         ])
+                                 ->selectRaw('id,name')
+                                 ->get();
+            $departmentUser  = toArr($departmentUser);
+            $departmentQuota = toArr($departmentQuota);
+
+            foreach ($departmentQuota as $key => $val) {
+                foreach ($departmentUser as $key1 => $val1) {
+                    $table = DB::table('user_quota');
+                    $table->whereBetween('complete_date', [$startTime, $endTime]);
+                    $info                                      = $table
+                        ->select(DB::raw("sum(complete_value) as complete_value"))
+                        ->where([
+                                    'quota_id' => $val['quota_id'],
+                                    'user_id'  => $val1['id'],
+                                ])
+                        ->first();
+                    $info                                      = toArr($info);
+                    $departmentUser[$key1][$val['quota_name']] = $info['complete_value'] ?: 0;
+                }
             }
-            $info              = [];
-            $info['user_name'] = $userName;
-            $info['list']      = $quotaList;
-            ajaxReturn(200, Code::$com[200], $info);
+
+            $data                    = [];
+            $data['quota_list']      = $departmentQuota;
+            $data['user_quota_list'] = $departmentUser;
+            ajaxReturn(200, Code::$com[200], $data);
         }
 
     }
