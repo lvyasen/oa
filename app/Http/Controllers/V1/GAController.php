@@ -400,7 +400,7 @@
             $configPath = storage_path('client_secret.json');
             $res        = $client->setAuthConfig($configPath);
 
-            $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/oauthCallback.php');
+            $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/oauthCallback');
             $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
             if ( !isset($request->code)){
                 $auth_url = $client->createAuthUrl();
