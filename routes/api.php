@@ -120,6 +120,7 @@
         $api->post('editGaconfig', 'GAController@editGaconfig');//修改GA配置
         $api->post('delGaConfig', 'GAController@delGaConfig');//删除GA配置
         $api->post('getGaWebSitList', 'GAController@getGaWebSitList');//删除GA配置
+        $api->post('getGaCommonApi', 'GAController@getGaCommonApi');//删除GA配置
         /**
          * Facebook相关接口
          */

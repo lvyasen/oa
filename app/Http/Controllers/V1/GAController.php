@@ -47,6 +47,38 @@
         }
 
         /**
+         * 通用获取GA接口数据
+         *
+         * @param Request $request
+         *
+         * @throws \Exception
+         * getGaCommonApi
+         * author: walker
+         * Date: 2019/12/19
+         * Time: 10:31
+         * Note:
+         */
+        public function getGaCommonApi(Request $request)
+        {
+            $request->validate([
+                                   'start_time' => 'nullable|date',
+                                   'end_time'   => 'nullable|date',
+                                   'view_id'    => 'required|string',
+                                   'metrics'    => 'required |string ',
+                                   'dimensions' => 'required |string ',
+                               ]);
+            $date = $this->getDate(4, '', $request->start_time, $request->end_time);
+            $params = [
+                'dimensions' => 'ga:userGender',//维度
+            ];
+//            fp($params);
+            $metrics =$request->metrics?:'ga:sessions';//维度
+
+            $info = $this->getGaCommonMethod($date,$metrics,$params);
+            ajaxReturn(200, Code::$com[200], $info);
+        }
+
+        /**
          * GA用户分析
          *
          * @param Request $request
@@ -161,9 +193,11 @@
                     $dateObj = Period::years($dateVal);
                     break;
                 case '4'://自定义日期
-                    $startTime = new \DateTime($startTime);
-                    $endTime   = new \DateTime($endTime);
-                    $dateObj   = Period::create($startTime, $endTime);
+                    $startTime = $startTime ? date('Y-m-d', strtotime($startTime)) : date('Y-m-d', strtotime("-30 day"));
+                    $endTime   = $endTime ? date('Y-m-d', strtotime($endTime)) : date('Y-m-d');
+                    $start     = new \DateTime($startTime);
+                    $end       = new \DateTime($endTime);
+                    $dateObj   = Period::create($start, $end);
                     break;
                 default:
                     ajaxReturn(4001, Code::$com[4001]);
@@ -233,9 +267,9 @@
          * Time: 14:40
          * Note:
          */
-        private function getGaCommonMethod($date, $other = [], string $metrics = 'ga:sessions')
+        private function getGaCommonMethod($date,$metrics,$params)
         {
-            return toArr(AnalyticsFacade::performQuery($date, $metrics, $other));
+            return toArr(AnalyticsFacade::performQuery($date,$metrics, $params));
         }
 
         /**
@@ -350,6 +384,7 @@
 
         /**
          * GA授权
+         *
          * @param Request $request
          *
          * @throws \Google_Exception
@@ -363,7 +398,7 @@
         {
             $client     = new \Google_Client();
             $configPath = storage_path('client_secret.json');
-            $res = $client->setAuthConfig($configPath);
+            $res        = $client->setAuthConfig($configPath);
 
             $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/oauthCallback.php');
             $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
