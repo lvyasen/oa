@@ -5,6 +5,7 @@
     use App\Http\Controllers\V1\SystemController;
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Support\Facades\DB;
+    use SebastianBergmann\CodeCoverage\Report\PHP;
     use function GuzzleHttp\Psr7\str;
 
     class ShopifyApi extends Model
@@ -60,11 +61,11 @@
                     switch ($type) {
                         case 0:
                             $url     = $info['web_access'] . '.myshopify.com/admin/orders/count.json?' . $timeStr . '&status=any';
-                            $pullUrl = $info['web_access'] . '.myshopify.com/admin/orders.json?' . $timeStr . '&page=%u' . '&limit=' . $limit . '&status=any';
+                            $pullUrl = $info['web_access'] . '.myshopify.com/admin/orders.json?' . $timeStr . "&page=%s" . '&limit=' . $limit . '&status=any';
                             break;
                         case 1:
                             $url     = $info['web_access'] . '.myshopify.com/admin/customers/count.json?' . $timeStr . '&status=any';
-                            $pullUrl = $info['web_access'] . '.myshopify.com/admin/customers.json?' . $timeStr . '&page=%u' . '&limit=' . $limit . '&status=any';
+                            $pullUrl = $info['web_access'] . '.myshopify.com/admin/customers.json?' . $timeStr . '&page=%s' . '&limit=' . $limit . '&status=any';
                             break;
                     }
                     $shopify_pull_info_id = DB::table('shopify_pull_info')
@@ -76,7 +77,6 @@
                     try {
                         if (empty($shopify_pull_info_id)){
                             $countInfo = json_decode(file_get_contents($url), true);
-
                             //                            fp($countInfo);
                             if (isset($countInfo)){
                                 $count                      = $countInfo['count'];
@@ -99,10 +99,12 @@
                                 if ($count > 0){
                                     for ($i = 1; $i <= $totalPage; $i++) {
                                         $pullLog                 = [];
-                                        $pullUrl                 = sprintf($pullUrl, $i);
+//                                        print_r($pullUrl.PHP_EOL);
+
+                                        $pullLogUrl                 = sprintf($pullUrl, $i);
                                         $pullLog['current_page'] = $i;
                                         $pullLog['web_name']     = $info['web_name'];
-                                        $pullLog['pull_url']     = $pullUrl;
+                                        $pullLog['pull_url']     = $pullLogUrl;
                                         $pullLog['pull_status']  = 0;
                                         $pullLog['web_id']       = $webId;
                                         $pullLog['type']         = $type;
