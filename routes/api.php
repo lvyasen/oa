@@ -151,6 +151,8 @@
         $api->post('login', 'AuthController@logIn');
         $api->post('getDepartmentList', 'DepartmentController@getDepartmentList');
         $api->any('pullEorders', 'ErpController@pullEorders');//获取订单列表
+        $api->any('pullOrderCostDetail', 'ErpController@pullOrderCostDetail');//获取订单成本
+
         //        $api->post();
         //        $api->post('test', 'CommonController@test');//测试站点
         //  Route::any('shopify','\App\Http\Controllers\Erp\ShopifyController@countProducts');//测试站点
