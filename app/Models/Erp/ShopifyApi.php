@@ -233,7 +233,8 @@
                             $insertData['updated_at']              = strtotime($val['updated_at']);
 
                             $insertData['create_time']             = date('Y-m-d H:i:s',strtotime($val['created_at']));
-                            $insertData['update_time']             = date('Y-m-d H:i:s',strtotime($val['update_time']));
+                            $insertData['update_time']             = date('Y-m-d H:i:s',strtotime($val['updated_at']));
+
                             $insertData['number']                  = $val['number'];
                             $insertData['note']                    = $val['note'];
                             $insertData['token']                   = $val['token'];
