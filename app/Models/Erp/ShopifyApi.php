@@ -98,10 +98,10 @@
                                 $pullLogData                = [];
                                 if ($count > 0){
                                     for ($i = 1; $i <= $totalPage; $i++) {
-                                        $pullLog                 = [];
-//                                        print_r($pullUrl.PHP_EOL);
+                                        $pullLog = [];
+                                        //                                        print_r($pullUrl.PHP_EOL);
 
-                                        $pullLogUrl                 = sprintf($pullUrl, $i);
+                                        $pullLogUrl              = sprintf($pullUrl, $i);
                                         $pullLog['current_page'] = $i;
                                         $pullLog['web_name']     = $info['web_name'];
                                         $pullLog['pull_url']     = $pullLogUrl;
@@ -169,6 +169,13 @@
 
         }
 
+        public function countOrder($start, $end)
+        {
+            $timeStr = $this->getTimeString($start, $end);
+            $url     = 'https://cb8bbdfb793b108dd24ff15aa3681275:1c198bbc47771743156c35b83ae73a5c@712styles' . '.myshopify.com/admin/orders/count.json?' . $timeStr . '&status=any';
+            return json_decode(file_get_contents($url), true);
+        }
+
         /**
          * 抓取订单信息并保存到数据库
          *
@@ -209,7 +216,7 @@
                     foreach ($res['orders'] as $key1 => $val1) {
                         $orderInfo = DB::table('shopify_order')->where(['shopify_id' => $val1['id']])->first('id');
                         if ( !empty($orderInfo)){
-                            unset($res['orders'][$key1]);
+                            //                            unset($res['orders'][$key1]);
                             $repeatOrder[] = $val1['id'];
                         }
                     }
@@ -224,6 +231,9 @@
                             $insertData['shopify_id']              = $orderId;
                             $insertData['created_at']              = strtotime($val['created_at']);
                             $insertData['updated_at']              = strtotime($val['updated_at']);
+
+                            $insertData['create_time']             = date('Y-m-d H:i:s',strtotime($val['created_at']));
+                            $insertData['update_time']             = date('Y-m-d H:i:s',strtotime($val['update_time']));
                             $insertData['number']                  = $val['number'];
                             $insertData['note']                    = $val['note'];
                             $insertData['token']                   = $val['token'];

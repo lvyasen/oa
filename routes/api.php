@@ -134,6 +134,8 @@
          */
         $api->any('addShopifyAuth', 'ShopifyController@addShopifyAuth');//添加shopif站点
         $api->any('getShopifyAuthList', 'ShopifyController@getShopifyAuthList');//添加shopif站点
+        $api->any('countShopifyOrders', 'ShopifyController@countShopifyOrders');//添加shopif站点
+        $api->any('countShopifyTodayOrders', 'ShopifyController@countShopifyTodayOrders');//统计shopify当天订单量
         /**
          * ERP
          */
