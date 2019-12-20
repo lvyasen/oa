@@ -338,8 +338,9 @@
          */
         private function getWebId($referenceNo)
         {
-            $model = new OrderInfo();
-            $info  = $model->where(['source_id' => $referenceNo])
+//            $model = new OrderInfo();
+            $model = DB::table('shopify_order');
+            $info  = $model->where(['shopify_id' => $referenceNo])
                            ->first('web_id');
             if ( !empty($info)){
                 return $info->web_id;
