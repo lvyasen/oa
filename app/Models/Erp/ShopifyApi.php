@@ -221,9 +221,6 @@
 //                        }
 //                    }
                     foreach ($res['orders'] as $key => $val) {
-                        $shopifInfo = DB::table('shopify_order')
-                                        ->where(['shopify_id' => $val['id']])->first('id');
-                        if (empty($shopifInfo)){
                             $orderId                               = $val['id'] ?: 0;
                             $createTime                            = strtotime($val['created_at']);
                             $insertData                            = [];
@@ -391,7 +388,6 @@
                                 $address['web_id']        = $webId;
                                 $shopifyCustomerAddress[] = $address;
                             }
-                        };
                     }
                     $pullLogData                 = [];
                     $pullLogData['pull_time']    = date('Y-m-d H:i:s');
