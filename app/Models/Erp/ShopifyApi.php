@@ -213,13 +213,13 @@
                     $shopifyCustomer        = [];
                     $shopifyCustomerAddress = [];
                     $repeatOrder            = [];
-                    foreach ($res['orders'] as $key1 => $val1) {
-                        $orderInfo = DB::table('shopify_order')->where(['shopify_id' => $val1['id']])->first('id');
-                        if ( !empty($orderInfo)){
-                            //                            unset($res['orders'][$key1]);
-                            $repeatOrder[] = $val1['id'];
-                        }
-                    }
+//                    foreach ($res['orders'] as $key1 => $val1) {
+//                        $orderInfo = DB::table('shopify_order')->where(['shopify_id' => $val1['id']])->first('id');
+//                        if ( !empty($orderInfo)){
+//                            //                            unset($res['orders'][$key1]);
+//                            $repeatOrder[] = $val1['id'];
+//                        }
+//                    }
                     foreach ($res['orders'] as $key => $val) {
                         $shopifInfo = DB::table('shopify_order')
                                         ->where(['shopify_id' => $val['id']])->first('id');

@@ -696,6 +696,7 @@
                 $orderTotalGoodsData   = [];
                 $orderTotalAddressData = [];
                 $orderShip             = [];
+                fp($result['data']);
                 foreach ($result['data'] as $key => $val) {
                     //订单
                     $referenceNo = (int)$val['saleOrderCode'];
@@ -704,7 +705,7 @@
 
                     $orderData                       = [];
                     $orderData['platform']           = $val['platform'];
-                    $orderData['order_id']           = $val['order_id'];
+//                    $orderData['order_id']           = $val['order_id'];
                     $orderData['orderType']          = $val['orderType'];
                     $orderData['status']             = $orderStatus;
                     $orderData['processAgain']       = $val['processAgain'];
