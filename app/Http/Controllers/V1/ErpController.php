@@ -886,8 +886,9 @@
                         ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
 
                     } catch (\Exception $e) {
-                        DB::rollBack();
                         ajaxReturn(4002, 'error', $e->getMessage());
+
+                        DB::rollBack();
                         $pullLog['status']  = 0;
                         $pullLog['err_msg'] = $e->getMessage();
                         DB::table('pull_log')->insert($pullLog);
