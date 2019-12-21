@@ -202,6 +202,7 @@
                          ->first();
 
             $pullLog = toArr($pullLog);
+            fp($pullLog);
             if ( !empty($pullLog)){
                 $url   = $pullLog['pull_url'];
                 $webId = $pullLog['web_id'];
