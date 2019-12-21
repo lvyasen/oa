@@ -141,7 +141,7 @@
                                   'status'   => 1,
                                   'type'     => 1,
                               ])
-                      ->orderBy('add_time', 'desc')
+                      ->orderBy('current_page', 'desc')
                       ->first('current_page');
             fp($info);
             $page = empty($info) ? 1 : $info->current_page + 1;
