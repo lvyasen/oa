@@ -731,6 +731,8 @@
 
             $service = 'getOrderList';
             $result  = self::soapRequest($service, 'EB', $params);
+            fp($result);
+
             if ( !empty($result['data'])){
                 //                $siteList              = $this->getSiteList();
                 $orderTotalData        = [];
@@ -872,7 +874,6 @@
                 $pullData                = DB::table('pull_log')
                                              ->where(['pull_url' => $url, 'current_page' => $page])
                                              ->first('id');
-                fp(1);
                 if (empty($pullData)){
                     $pullLog['spend_time'] = time() - $beginTime;
                     DB::beginTransaction();
