@@ -731,7 +731,6 @@
 
             $service = 'getOrderList';
             $result  = self::soapRequest($service, 'EB', $params);
-            fp($result);
 
             if ( !empty($result['data'])){
                 //                $siteList              = $this->getSiteList();
