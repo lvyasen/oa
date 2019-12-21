@@ -392,7 +392,6 @@
                     $pullLogData['repeat_order'] = json_encode($repeatOrder, true);
                     DB::beginTransaction();
                     try {
-                        DB::beginTransaction();
                         //shopify订单数据
                         DB::table('shopify_order')->insert($shopifyOrderData);
                         //shopify订单商品数据
