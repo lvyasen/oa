@@ -197,7 +197,7 @@
                                      'pull_status' => 0,
                                      'type'        => 0,
                                  ])
-                         ->orderBy('add_time', 'asc')
+                         ->orderBy('id', 'asc')
                          ->orderBy('current_page', 'asc')
                          ->first();
 
@@ -432,6 +432,8 @@
                 }else{
                     ajaxReturn(4003,'订单没有数据',$res);
                 }
+            }else{
+                ajaxReturn(4004,'未查到该日志',$pullLog);
             }
 
         }
