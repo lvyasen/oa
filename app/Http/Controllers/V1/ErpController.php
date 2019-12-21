@@ -144,7 +144,7 @@
                       ->orderBy('current_page', 'asc')
                       ->first('current_page');
             $page = empty($info) ? 1 : $info->current_page + 1;
-
+            fp($page);
             $params               = [];
             $params['getDetail']  = 1;
             $params['getAddress'] = 1;
