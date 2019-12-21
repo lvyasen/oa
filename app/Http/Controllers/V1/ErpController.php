@@ -882,17 +882,16 @@
                         DB::table('e_address')->insert($orderTotalAddressData);
                         DB::table('pull_log')->insert($pullLog);
                         DB::table('e_orders')->insert($orderTotalData);
+
                         DB::commit();
                         $endTime = time();
                         ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
 
                     } catch (\Exception $e) {
                         DB::rollBack();
-                        ajaxReturn(4002, 'error', $e->getMessage());
                         $pullLog['status']  = 0;
                         $pullLog['err_msg'] = $e->getMessage();
                         DB::table('pull_log')->insert($pullLog);
-                        DB::commit();
 
                     }
                 };
