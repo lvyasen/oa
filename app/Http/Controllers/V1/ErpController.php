@@ -18,6 +18,7 @@
     use Maatwebsite\Excel\Facades\Excel;
     use Phpro\SoapClient\Exception\SoapException;
     use Phpro\SoapClient\Soap\HttpBinding\SoapRequest;
+    use function GuzzleHttp\Psr7\str;
 
     class ErpController extends Controller
     {
@@ -135,15 +136,15 @@
             $url       = $request->route()->getActionName();
             $beginTime = time();
 
-            $info = DB::table('pull_log')
-                      ->where([
-                                  'pull_url' => $url,
-                                  'status'   => 1,
-                                  'type'     => 1,
-                              ])
-                      ->orderBy('current_page', 'desc')
-                      ->first('current_page');
-            $page = empty($info) ? 1 : $info->current_page + 1;
+            $info                 = DB::table('pull_log')
+                                      ->where([
+                                                  'pull_url' => $url,
+                                                  'status'   => 1,
+                                                  'type'     => 1,
+                                              ])
+                                      ->orderBy('current_page', 'desc')
+                                      ->first('current_page');
+            $page                 = empty($info) ? 1 : $info->current_page + 1;
             $params               = [];
             $params['getDetail']  = 1;
             $params['getAddress'] = 1;
@@ -217,19 +218,20 @@
                     $orderData['addTime'] = time();
                     $orderTotalData[]     = $orderData;
                     if ( !empty($val['platformShipStatus'])){
-                        $ship                          = [];
-                        $ship['warehouseOrderCode']    = $val['warehouseOrderCode'];
-                        $ship['saleOrderCode']         = $val['saleOrderCode'];
-                        $ship['shippingMethodNo']      = $val['shippingMethodNo'];
-                        $ship['orderWeight']           = $val['orderWeight'];
-                        $ship['shippingMethod']        = $val['shippingMethod'];
-                        $ship['platformFeeTotal']      = $val['platformFeeTotal'];
-                        $ship['shipFee']               = $val['shipFee'];
-                        $ship['dateWarehouseShipping'] = strtotime($val['dateWarehouseShipping']);
-                        $ship['addTime']               = \date('Y-m-d H:i:s');
-                        $ship['webId']                 = $webId;
-                        $ship['totalFee']              = round($val['platformFeeTotal'], 3) + round($val['shipFee'], 3);
-                        $orderShip[]                   = $ship;
+                        $ship                            = [];
+                        $ship['warehouseOrderCode']      = $val['warehouseOrderCode'];
+                        $ship['saleOrderCode']           = $val['saleOrderCode'];
+                        $ship['shippingMethodNo']        = $val['shippingMethodNo'];
+                        $ship['orderWeight']             = $val['orderWeight'];
+                        $ship['shippingMethod']          = $val['shippingMethod'];
+                        $ship['platformFeeTotal']        = $val['platformFeeTotal'];
+                        $ship['shipFee']                 = $val['shipFee'];
+                        $ship['dateWarehouseShipping']   = strtotime($val['dateWarehouseShipping']);
+                        $ship['dateWarehouseShippingAt'] = \date('Y-m-d H:i:s', strtotime($val['dateWarehouseShipping']));
+                        $ship['addTime']                 = \date('Y-m-d H:i:s');
+                        $ship['webId']                   = $webId;
+                        $ship['totalFee']                = round($val['platformFeeTotal'], 3) + round($val['shipFee'], 3);
+                        $orderShip[]                     = $ship;
                     }
 
                     //订单商品
@@ -322,9 +324,9 @@
 
                     }
                 } else {
-                    $info = [];
+                    $info         = [];
                     $info['page'] = $page;
-                    ajaxReturn(4002, '已有该记录',$info);
+                    ajaxReturn(4002, '已有该记录', $info);
                 };
             } else {
 
@@ -542,8 +544,16 @@
 
             if ( !empty($info)){
                 return $info->web_id;
+            } else {
+                $model = new OrderInfo();
+                $info  = $model->where(['source_id' => $referenceNo])
+                               ->first('web_id');
+                if ( !empty($info)){
+                    return $info->web_id;
+                } else {
+                    return false;
+                }
             }
-            return false;
         }
 
         /**
@@ -880,15 +890,119 @@
          */
         public function getTotalFeeData(Request $request)
         {
+            $request->validate([
+                                   //                                   'web_id' => 'required|string|max:30|unique:menu',
+                               ]);
+            //分组条件 1天内按小时分组,否则按天/月分组
+            //86400/1天 2678400/1月
+            $start = $request->start_time ? strtotime($request->start_time) : strtotime('-4 year');
+            $end   = $request->end_time ? strtotime($request->end_time) : time();
+            $diff  = $end - $start;
+            if ($diff < 86400 && $diff > 0){
+                $sort = '%H';
+            } elseif ($diff < 2678400) {
+                $sort = '%Y-%m-%d';
+            } else {
+                $sort = '%Y-%m';
+            }
+
+            //date_format  FROM_UNIXTIME
+            //物流费用统计
+            $shipFee = DB::table('ship')
+                         ->select(DB::raw("FROM_UNIXTIME(dateWarehouseShipping,'{$sort}') as create_time,sum(totalFee) as total_price"))
+                         ->groupBy(DB::raw("FROM_UNIXTIME(dateWarehouseShipping,'{$sort}')"))
+                         ->orderBy('create_time', 'asc')
+                         ->whereBetween('dateWarehouseShipping', [$start, $end])
+                         ->get();
+            $shipFee = toArr($shipFee);
+            //物料费用
+            $material = DB::table('material')
+                          ->select(DB::raw("FROM_UNIXTIME(add_time,'{$sort}') as create_time,sum(total_price) as total_price  "))
+                          ->groupBy(DB::raw("FROM_UNIXTIME(add_time,'{$sort}')"))
+                          ->orderBy('create_time', 'asc')
+                          ->whereBetween('add_time', [$start, $end])
+                          ->get();
+            $material = toArr($material);
+            //采购费用
+            $orderCost = DB::table('e_order_cost')
+                           ->select(DB::raw("date_format(pay_time,'{$sort}') as create_time,sum(totalCost) as total_price"))
+                           ->groupBy(DB::raw("date_format(pay_time,'{$sort}')"))
+                           ->orderBy('create_time', 'asc')
+                           ->whereBetween('pay_time', [\date('Y-m-d H:i:s', $start), \date('Y-m-d H:i:s', $end)])
+                           ->get();
+            $orderCost = toArr($orderCost);
+            $year
+                       = date('Y', time());
+            #一年的月份
+            $month        = [
+                0  => $year . '-01',
+                1  => $year . '-02',
+                2  => $year . '-03',
+                3  => $year . '-04',
+                4  => $year . '-05',
+                5  => $year . '-06',
+                6  => $year . '-07',
+                7  => $year . '-08',
+                8  => $year . '-09',
+                9  => $year . '-10',
+                10 => $year . '-11',
+                11 => $year . '-12',
+            ];
+            $data         = [];
+            $materialNew  = [];
+            $orderCostNew = [];
+            $shipFeeNew   = [];
+            foreach ($material as $key1 => $val1) {
+                $materialNew[$val1['create_time']] = $val1['total_price'];
+            }
+            foreach ($orderCost as $key2 => $val2) {
+                $orderCostNew[$val2['create_time']] = $val2['total_price'];
+            }
+            foreach ($shipFee as $key3 => $val3) {
+                $shipFeeNew[$val3['create_time']] = $val3['total_price'];
+            }
+            foreach ($month as $key => $val) {
+                $data['material'][$key]['date'] = $val;
+                if (array_key_exists($val, $materialNew)){
+                    $data['material'][$key]['total_price'] = $materialNew[$val];
+                } else {
+                    $data['material'][$key]['total_price'] = 0;
+                };
+                $data['order_cost'][$key]['date'] = $val;
+                if (array_key_exists($val, $orderCostNew)){
+                    $data['order_cost'][$key]['total_price'] = $orderCostNew[$val];
+                } else {
+                    $data['order_cost'][$key]['total_price'] = 0;
+                };
+                $data['ship_fee'][$key]['date'] = $val;
+                if (array_key_exists($val, $shipFeeNew)){
+                    $data['ship_fee'][$key]['total_price'] = $shipFeeNew[$val];
+                } else {
+                    $data['ship_fee'][$key]['total_price'] = 0;
+                };
+                //                fp($val);
+            }
+
+            ajaxReturn(200, Code::$com[200], $data);
+            //物料费用统计
+            //条件筛选 某时间段内
+            //            if ( !empty($start)){
+            //                $query->whereRaw('o.create_time >= ?', strtotime($start));
+            //            }
+            //            if ( !empty($end)){
+            //                $query->whereRaw('o.create_time <= ?', strtotime($end));
+            //            }
+
+
             //物流费用
             //物料费用
             //采购费用
         }
 
-//        public function ()
-//        {
-//
-//        }
+        //        public function ()
+        //        {
+        //
+        //        }
 
         /**
          * 获取物流费用

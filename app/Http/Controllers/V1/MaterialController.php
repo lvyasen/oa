@@ -57,6 +57,7 @@
             $model->ticker_total_price         = (int)$request->ticket_num * number_format($request->ticket_price, 2);
             $model->total_price                = $model->package_total_price + $model->zipper_package_total_price + $model->ticker_total_price;
             $model->buy_time                   = strtotime($request->buy_time);
+            $model->buy_at                   = date('Y-m-d H:i:s',strtotime($request->buy_time));
             if ($request->file('image')){
                 $path            = $request->file('image')->store("public");
                 $model->img_path = Storage::url($path);
@@ -103,6 +104,7 @@
             $model->ticker_total_price         = (int)$request->ticket_num * number_format($request->ticket_price, 2);
             $model->total_price                = $model->package_total_price + $model->zipper_package_total_price + $model->ticker_total_price;
             $model->buy_time                   = strtotime($request->buy_time);
+            $model->buy_at                   = date('Y-m-d H:i:s',strtotime($request->buy_time));
             if ($request->file('image')){
                 $path            = $request->file('image')->store("public");
                 $model->img_path = Storage::url($path);

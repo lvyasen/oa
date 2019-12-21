@@ -106,6 +106,7 @@
         $api->post('editLogistics', 'ErpController@editLogistics');//修改物流费用
         $api->post('delLogistics', 'ErpController@delLogistics');//删除 物流费用
         $api->post('pullEPurchaseOrders', 'ErpController@pullEPurchaseOrders');//拉取采购单
+        $api->post('getTotalFeeData', 'ErpController@getTotalFeeData');//费用总数据
         /**
          * 物流费用相关接口
          */
