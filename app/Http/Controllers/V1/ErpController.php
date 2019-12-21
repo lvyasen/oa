@@ -565,98 +565,111 @@
             $url       = $request->route()->getActionName();
             $beginTime = time();
 
-            $info                = DB::table('pull_log')
-                                     ->where(['pull_url' => $url, 'status' => 1, 'type' => 3])
-                                     ->orderBy('add_time', 'desc')
-                                     ->first('current_page');
-            $page                = empty($info) ? 1 : $info->current_page + 1;
-            $pageSize            = 50;
-            $service             = 'getOrderCostDetail';
-            $params              = [];
-            $params['orderCode'] = ['SF19032738472', 'SF19032738386'];
-            $params['page']      = $page;
-            $params['pageSize']  = $pageSize;
-            $result              = self::soapRequest($service, 'WMS', $params);
-            fp($result);
-            if ( !empty($result)){
-                $orderCostLists = [];
-                foreach ($result['data'] as $key => $val) {
-                    $webId                              = DB::table('e_orders')->where(['warehouseOrderCode' => $val['reference_no']])->first('webId');
-                    $webId                              = $webId ? $webId->web_id : 0;
-                    $orderCost                          = [];
-                    $orderCost['order_platform_type']   = $val['order_platform_type'];
-                    $orderCost['reference_no']          = $val['reference_no'];
-                    $orderCost['orderTotalAmount']      = round($val['orderTotalAmount'], 3);
-                    $orderCost['productAmount']         = round($val['productAmount'], 3);
-                    $orderCost['buyerPayShipping']      = round($val['buyerPayShipping'], 3);
-                    $orderCost['shippingFee']           = round($val['shippingFee'], 3);
-                    $orderCost['paymentPlatformFee']    = round($val['paymentPlatformFee'], 3);
-                    $orderCost['platformCost']          = round($val['platformCost'], 3);
-                    $orderCost['fbaFee']                = round($val['fbaFee'], 3);
-                    $orderCost['otherFee']              = round($val['otherFee'], 3);
-                    $orderCost['packageFee']            = round($val['packageFee'], 3);
-                    $orderCost['purchaseCost']          = round($val['purchaseCost'], 3);
-                    $orderCost['purchaseShippingFee']   = round($val['purchaseShippingFee'], 3);
-                    $orderCost['purchaseTaxationFee']   = round($val['purchaseTaxationFee'], 3);
-                    $orderCost['serviceTransportFee']   = round($val['serviceTransportFee'], 3);
-                    $orderCost['currency_rate']         = round($val['currency_rate'], 3);
-                    $orderCost['firstCarrierFreight']   = round($val['firstCarrierFreight'], 3);
-                    $orderCost['tariffFee']             = round($val['tariffFee'], 3);
-                    $orderCost['orderTotalAmountOrg']   = round($val['orderTotalAmountOrg'], 3);
-                    $orderCost['productAmountOrg']      = round($val['productAmountOrg'], 3);
-                    $orderCost['buyerPayShippingOrg']   = round($val['buyerPayShippingOrg'], 3);
-                    $orderCost['paymentPlatformFeeOrg'] = round($val['paymentPlatformFeeOrg'], 3);
-                    $orderCost['platformCostOrg']       = round($val['platformCostOrg'], 3);
-                    $orderCost['paymentPlatformFeeOrg'] = round($val['paymentPlatformFeeOrg'], 3);
-                    $orderCost['fbaFeeOrg']             = round($val['fbaFeeOrg'], 3);
-                    $orderCost['otherFeeOrg']           = round($val['otherFeeOrg'], 3);
-                    $orderCost['shippingFeeOrg']        = round($val['shippingFeeOrg'], 3);
-                    $orderCost['paymentPlatformFeeOrg'] = round($val['paymentPlatformFeeOrg'], 3);
-                    $orderCost['totalCost']             = round($val['totalCost'], 3);
-                    $orderCost['grossProfit']           = round($val['grossProfit'], 3);
-                    $orderCost['grossProfitRate']       = round($val['grossProfitRate'], 3);
-
-
-                    $orderCost['currencyCodeOrg'] = $val['currencyCodeOrg'];
-                    $orderCost['sku_quantity']    = $val['sku_quantity'];
-                    $orderCost['currencyCode']    = $val['currencyCode'];
-                    $orderCost['pay_time']        = $val['pay_time'];
-
-                    $orderCost['web_id']        = $webId;
-                    $orderCost['add_time']        = \date('Y-m-d H:i:s');
-                    $orderCostLists[] = $orderCost;
-
-                }
-                $pullLog                 = [];
-                $pullLog['pull_url']     = $url;
-                $pullLog['pull_time']    = \date('Y/m/d H:i:s');
-                $pullLog['count']        = $result['totalCount'];
-                $pullLog['page_size']    = $result['pageSize'];
-                $pullLog['current_page'] = $page;
-                $pullLog['status']       = 1;
-                $pullLog['type']         = 3;
-                $pullLog['add_time']     = time();
-                $pullData                = DB::table('pull_log')
-                                             ->where(['pull_url' => $url, 'current_page' => $page])
-                                             ->first('id');
-                if (empty($pullData)){
-                    DB::beginTransaction();
-                    try {
-                        DB::table('e_order_cost')->insert($orderCostLists);
-                        $pullLog['spend_time'] = time() - $beginTime;
-                        DB::table('pull_log')->insert($pullLog);
-                        DB::commit();
-                        $endTime = time();
-                        ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
-
-                    } catch (\Exception $e) {
-                        $pullLog['status']  = 0;
-                        $pullLog['err_msg'] = $e->getMessage();
-                        DB::table('pull_log')->insert($pullLog);
-                        ajaxReturn(4002, 'error', $e->getMessage());
-                    }
-                };
+            $info          = DB::table('pull_log')
+                               ->where(['pull_url' => $url, 'status' => 1, 'type' => 3])
+                               ->orderBy('add_time', 'desc')
+                               ->first('current_page');
+            $page          = empty($info) ? 1 : $info->current_page + 1;
+            $pageSize      = 100;
+            $service       = 'getOrderCostDetail';
+            $orderCodeList = DB::table('e_orders')
+                               ->where('warehouseOrderCode', '!=', '')
+                               ->where(['pull_cost' => 0])
+                               ->selectRaw('warehouseOrderCode,pull_cost')
+                                ->limit($pageSize)
+                               ->get();
+            $orderCodeList = toArr($orderCodeList);
+            $orderCode     = [];
+            foreach ($orderCodeList as $key1 => $val1) {
+                $orderCode[] = $val1['warehouseOrderCode'];
             }
+            if(!empty($orderCode)){
+                $params              = [];
+                $params['orderCode'] = $orderCode;
+
+                $result              = self::soapRequest($service, 'WMS', $params);
+                if ( !empty($result)){
+                    $orderCostLists = [];
+                    foreach ($result['data'] as $key => $val) {
+                        $webId                              = DB::table('e_orders')->where(['warehouseOrderCode' => $val['reference_no']])->first('webId');
+                        $webId                              = $webId->webId?:0;
+                        $orderCost                          = [];
+                        $orderCost['order_platform_type']   = $val['order_platform_type'];
+                        $orderCost['reference_no']          = $val['reference_no'];
+                        $orderCost['orderTotalAmount']      = round($val['orderTotalAmount'], 3);
+                        $orderCost['productAmount']         = round($val['productAmount'], 3);
+                        $orderCost['buyerPayShipping']      = round($val['buyerPayShipping'], 3);
+                        $orderCost['shippingFee']           = round($val['shippingFee'], 3);
+                        $orderCost['paymentPlatformFee']    = round($val['paymentPlatformFee'], 3);
+                        $orderCost['platformCost']          = round($val['platformCost'], 3);
+                        $orderCost['fbaFee']                = round($val['fbaFee'], 3);
+                        $orderCost['otherFee']              = round($val['otherFee'], 3);
+                        $orderCost['packageFee']            = round($val['packageFee'], 3);
+                        $orderCost['purchaseCost']          = round($val['purchaseCost'], 3);
+                        $orderCost['purchaseShippingFee']   = round($val['purchaseShippingFee'], 3);
+                        $orderCost['purchaseTaxationFee']   = round($val['purchaseTaxationFee'], 3);
+                        $orderCost['serviceTransportFee']   = round($val['serviceTransportFee'], 3);
+                        $orderCost['currency_rate']         = round($val['currency_rate'], 3);
+                        $orderCost['firstCarrierFreight']   = round($val['firstCarrierFreight'], 3);
+                        $orderCost['tariffFee']             = round($val['tariffFee'], 3);
+                        $orderCost['orderTotalAmountOrg']   = round($val['orderTotalAmountOrg'], 3);
+                        $orderCost['productAmountOrg']      = round($val['productAmountOrg'], 3);
+                        $orderCost['buyerPayShippingOrg']   = round($val['buyerPayShippingOrg'], 3);
+                        $orderCost['paymentPlatformFeeOrg'] = round($val['paymentPlatformFeeOrg'], 3);
+                        $orderCost['platformCostOrg']       = round($val['platformCostOrg'], 3);
+                        $orderCost['paymentPlatformFeeOrg'] = round($val['paymentPlatformFeeOrg'], 3);
+                        $orderCost['fbaFeeOrg']             = round($val['fbaFeeOrg'], 3);
+                        $orderCost['otherFeeOrg']           = round($val['otherFeeOrg'], 3);
+                        $orderCost['shippingFeeOrg']        = round($val['shippingFeeOrg'], 3);
+                        $orderCost['paymentPlatformFeeOrg'] = round($val['paymentPlatformFeeOrg'], 3);
+                        $orderCost['totalCost']             = round($val['totalCost'], 3);
+                        $orderCost['grossProfit']           = round($val['grossProfit'], 3);
+                        $orderCost['grossProfitRate']       = round($val['grossProfitRate'], 3);
+
+
+                        $orderCost['currencyCodeOrg'] = $val['currencyCodeOrg'];
+                        $orderCost['sku_quantity']    = $val['sku_quantity'];
+                        $orderCost['currencyCode']    = $val['currencyCode'];
+                        $orderCost['pay_time']        = $val['pay_time'];
+
+                        $orderCost['web_id']   = $webId;
+                        $orderCost['add_time'] = \date('Y-m-d H:i:s');
+                        $orderCostLists[]      = $orderCost;
+
+                    }
+                    $pullLog                 = [];
+                    $pullLog['pull_url']     = $url;
+                    $pullLog['pull_time']    = \date('Y/m/d H:i:s');
+                    $pullLog['count']        = $pageSize;
+                    $pullLog['page_size']    = $pageSize;
+                    $pullLog['current_page'] = $page;
+                    $pullLog['status']       = 1;
+                    $pullLog['type']         = 3;
+                    $pullLog['add_time']     = time();
+                    $pullData                = DB::table('pull_log')
+                                                 ->where(['pull_url' => $url, 'current_page' => $page])
+                                                 ->first('id');
+                    if (empty($pullData)){
+                        DB::beginTransaction();
+                        try {
+                            DB::table('e_orders')->whereIn('warehouseOrderCode',$orderCode)->update(['pull_cost'=>1]);
+                            DB::table('e_order_cost')->insert($orderCostLists);
+                            $pullLog['spend_time'] = time() - $beginTime;
+                            DB::table('pull_log')->insert($pullLog);
+                            DB::commit();
+                            $endTime = time();
+                            ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
+
+                        } catch (\Exception $e) {
+                            $pullLog['status']  = 0;
+                            $pullLog['err_msg'] = $e->getMessage();
+                            DB::table('pull_log')->insert($pullLog);
+                            ajaxReturn(4002, 'error', $e->getMessage());
+                        }
+                    };
+                }
+            }
+
         }
 
         /**
