@@ -887,11 +887,12 @@
 
                     } catch (\Exception $e) {
                         DB::rollBack();
+                        ajaxReturn(4002, 'error', $e->getMessage());
                         $pullLog['status']  = 0;
                         $pullLog['err_msg'] = $e->getMessage();
                         DB::table('pull_log')->insert($pullLog);
                         DB::commit();
-                        ajaxReturn(4002, 'error', $e->getMessage());
+
                     }
                 };
             } else {
