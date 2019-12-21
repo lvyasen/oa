@@ -136,7 +136,11 @@
             $beginTime = time();
 
             $info = DB::table('pull_log')
-                      ->where(['pull_url' => $url, 'status' => 1, 'type' => 1])
+                      ->where([
+                                  'pull_url' => $url,
+                                  'status'   => 1,
+                                  'type'     => 1,
+                              ])
                       ->orderBy('add_time', 'desc')
                       ->first('current_page');
 
@@ -319,8 +323,10 @@
                         DB::table('pull_log')->insert($pullLog);
 
                     }
-                }else{
-                    ajaxReturn(4002,'已有该记录');
+                } else {
+                    $info = [];
+                    $info['page'] = $page;
+                    ajaxReturn(4002, '已有该记录',$info);
                 };
             } else {
 
