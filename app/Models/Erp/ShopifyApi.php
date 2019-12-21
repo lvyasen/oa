@@ -406,6 +406,7 @@
                         $pullLog['spend_time'] = time() - $beginTime;
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
                         DB::commit();
+                        ajaxReturn(200,'成功');
 
                     } catch (\Exception $exception) {
 
