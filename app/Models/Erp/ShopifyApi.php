@@ -405,7 +405,6 @@
                         DB::table('shopify_order_client')->insert($shopifyOrderClient);
                         $pullLog['spend_time'] = time() - $beginTime;
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
-
                         DB::commit();
 
                     } catch (\Exception $exception) {
