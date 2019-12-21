@@ -143,7 +143,6 @@
                               ])
                       ->orderBy('current_page', 'asc')
                       ->first('current_page');
-            fp($info);
             $page = empty($info) ? 1 : $info->current_page + 1;
 
             $params               = [];
