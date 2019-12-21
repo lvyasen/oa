@@ -200,6 +200,7 @@
                          ->orderBy('add_time', 'asc')
                          ->orderBy('current_page', 'asc')
                          ->first();
+
             $pullLog = toArr($pullLog);
             if ( !empty($pullLog)){
                 $url   = $pullLog['pull_url'];
@@ -328,35 +329,34 @@
                         }
                         //订单顾客
                         if ( !empty($val['customer'])){
-                            $customerInfo = DB::table('shopify_order_customer')->where(['customer_id' => $val['customer']['id']])->first('id');
-                            if (empty($customerInfo)){
-                                $customer                                 = [];
-                                $customer['customer_id']                  = $val['customer']['id'] ?: 0;
-                                $customer['email']                        = $val['customer']['email'];
-                                $customer['accepts_marketing']            = $val['customer']['accepts_marketing'];
-                                $customer['created_at']                   = strtotime($val['customer']['created_at']);
-                                $customer['updated_at']                   = strtotime($val['customer']['updated_at']);
-                                $customer['first_name']                   = $val['customer']['first_name'];
-                                $customer['last_name']                    = $val['customer']['last_name'];
-                                $customer['orders_count']                 = $val['customer']['orders_count'];
-                                $customer['state']                        = $val['customer']['state'];
-                                $customer['total_spent']                  = $val['customer']['total_spent'];
-                                $customer['last_order_id']                = $val['customer']['last_order_id'];
-                                $customer['note']                         = $val['customer']['note'];
-                                $customer['verified_email']               = $val['customer']['verified_email'];
-                                $customer['multipass_identifier']         = $val['customer']['multipass_identifier'];
-                                $customer['tax_exempt']                   = $val['customer']['tax_exempt'];
-                                $customer['phone']                        = $val['customer']['phone'];
-                                $customer['tags']                         = $val['customer']['tags'];
-                                $customer['last_order_name']              = $val['customer']['last_order_name'];
-                                $customer['currency']                     = $val['customer']['currency'];
-                                $customer['accepts_marketing_updated_at'] = strtotime($val['customer']['accepts_marketing_updated_at']);
-                                $customer['marketing_opt_in_level']       = $val['customer']['marketing_opt_in_level'];
-                                $customer['admin_graphql_api_id']         = $val['customer']['admin_graphql_api_id'];
-                                $customer['web_id']                       = $webId;
-                                $customer['add_time']                     = date('Y-m-d H:i:s');
-                                $shopifyCustomer[]                        = $customer;
-                            }
+
+                            $customer                                 = [];
+                            $customer['customer_id']                  = $val['customer']['id'] ?: 0;
+                            $customer['email']                        = $val['customer']['email'];
+                            $customer['accepts_marketing']            = $val['customer']['accepts_marketing'];
+                            $customer['created_at']                   = strtotime($val['customer']['created_at']);
+                            $customer['updated_at']                   = strtotime($val['customer']['updated_at']);
+                            $customer['first_name']                   = $val['customer']['first_name'];
+                            $customer['last_name']                    = $val['customer']['last_name'];
+                            $customer['orders_count']                 = $val['customer']['orders_count'];
+                            $customer['state']                        = $val['customer']['state'];
+                            $customer['total_spent']                  = $val['customer']['total_spent'];
+                            $customer['last_order_id']                = $val['customer']['last_order_id'];
+                            $customer['note']                         = $val['customer']['note'];
+                            $customer['verified_email']               = $val['customer']['verified_email'];
+                            $customer['multipass_identifier']         = $val['customer']['multipass_identifier'];
+                            $customer['tax_exempt']                   = $val['customer']['tax_exempt'];
+                            $customer['phone']                        = $val['customer']['phone'];
+                            $customer['tags']                         = $val['customer']['tags'];
+                            $customer['last_order_name']              = $val['customer']['last_order_name'];
+                            $customer['currency']                     = $val['customer']['currency'];
+                            $customer['accepts_marketing_updated_at'] = strtotime($val['customer']['accepts_marketing_updated_at']);
+                            $customer['marketing_opt_in_level']       = $val['customer']['marketing_opt_in_level'];
+                            $customer['admin_graphql_api_id']         = $val['customer']['admin_graphql_api_id'];
+                            $customer['web_id']                       = $webId;
+                            $customer['add_time']                     = date('Y-m-d H:i:s');
+                            $shopifyCustomer[]                        = $customer;
+
 
                         }
                         //用户地址
@@ -383,6 +383,7 @@
                             $shopifyCustomerAddress[] = $address;
                         }
                     }
+
                     $pullLogData                 = [];
                     $pullLogData['pull_time']    = date('Y-m-d H:i:s');
                     $pullLogData['pull_status']  = 1;
@@ -394,28 +395,23 @@
                         DB::beginTransaction();
                         //shopify订单数据
                         DB::table('shopify_order')->insert($shopifyOrderData);
-                        DB::rollBack();
                         //shopify订单商品数据
                         DB::table('shopify_order_line_item')->insert($shopifyOrderLineItem);
-                        DB::rollBack();
                         //shopify顾客信息
                         DB::table('shopify_order_customer')->insert($shopifyCustomer);
-                        DB::rollBack();
                         //shopify地址信息
                         DB::table('shopify_address')->insert($shopifyCustomerAddress);
-                        DB::rollBack();
                         //shopify客户端信息
                         DB::table('shopify_order_client')->insert($shopifyOrderClient);
-                        DB::rollBack();
                         $pullLog['spend_time'] = time() - $beginTime;
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
-                        DB::rollBack();
 
                         DB::commit();
 
                     } catch (\Exception $exception) {
-                        DB::rollBack();
 
+                        DB::rollBack();
+                        ajaxReturn(4001, 'err', $exception->getMessage());
                         $pullLog['spend_time']              = time() - $beginTime;
                         $addData                            = [];
                         $addData['shopify_order']           = $shopifyOrderData;
@@ -427,6 +423,7 @@
                         $pullLogData['err_msg']             = $exception->getMessage();
                         $pullLogData['insert_data']         = json_encode($addData, true);
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
+                        DB::commit();
                         //                        DB::table('shopify_pull_log')
                         //                          ->where(['id' => $pullLog['id']])
                         //                          ->update($pullLogData);

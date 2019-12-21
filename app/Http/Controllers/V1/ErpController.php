@@ -841,21 +841,11 @@
                     $pullLog['spend_time'] = time() - $beginTime;
                     DB::beginTransaction();
                     try {
-                        DB::beginTransaction();
-                        DB::table('e_orders')->insert($orderTotalData);
-                        DB::rollBack();
                         DB::table('ship')->insert($orderShip);
-                        DB::rollBack();
-
                         DB::table('e_order_goods')->insert($orderTotalGoodsData);
-                        DB::rollBack();
-
                         DB::table('e_address')->insert($orderTotalAddressData);
-                        DB::rollBack();
-
                         DB::table('pull_log')->insert($pullLog);
-                        DB::rollBack();
-
+                        DB::table('e_orders')->insert($orderTotalData);
                         DB::commit();
                         //                        $endTime = time();
                         //                        ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
