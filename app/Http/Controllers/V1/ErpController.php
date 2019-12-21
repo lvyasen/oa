@@ -872,6 +872,7 @@
                 $pullData                = DB::table('pull_log')
                                              ->where(['pull_url' => $url, 'current_page' => $page])
                                              ->first('id');
+                fp(1);
                 if (empty($pullData)){
                     $pullLog['spend_time'] = time() - $beginTime;
                     DB::beginTransaction();
@@ -886,9 +887,8 @@
                         ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
 
                     } catch (\Exception $e) {
-                        ajaxReturn(4002, 'error', $e->getMessage());
-
                         DB::rollBack();
+                        ajaxReturn(4002, 'error', $e->getMessage());
                         $pullLog['status']  = 0;
                         $pullLog['err_msg'] = $e->getMessage();
                         DB::table('pull_log')->insert($pullLog);
