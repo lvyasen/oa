@@ -202,7 +202,6 @@
                          ->first();
 
             $pullLog = toArr($pullLog);
-            fp($pullLog);
             if ( !empty($pullLog)){
                 $url   = $pullLog['pull_url'];
                 $webId = $pullLog['web_id'];
@@ -392,6 +391,7 @@
                     $pullLogData['update_time']  = date('Y-m-d H:i:s');
                     $pullLogData['repeat_order'] = json_encode($repeatOrder, true);
                     DB::beginTransaction();
+                    $pullLog['spend_time'] = time() - $beginTime;
                     try {
                         //shopify订单数据
                         DB::table('shopify_order')->insert($shopifyOrderData);
@@ -403,8 +403,9 @@
                         DB::table('shopify_address')->insert($shopifyCustomerAddress);
                         //shopify客户端信息
                         DB::table('shopify_order_client')->insert($shopifyOrderClient);
-                        $pullLog['spend_time'] = time() - $beginTime;
+                        //日志
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
+
                         DB::commit();
                         ajaxReturn(200,'成功');
 
@@ -423,9 +424,7 @@
                         $pullLogData['insert_data']         = json_encode($addData, true);
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
                         ajaxReturn(4003,'error',$exception->getMessage());
-                        //                        DB::table('shopify_pull_log')
-                        //                          ->where(['id' => $pullLog['id']])
-                        //                          ->update($pullLogData);
+
                     }
 
                     //修改订单状态
