@@ -177,4 +177,5 @@
         $api->post('getReport', 'ShopifyController@getReport');
         $api->any('shopifyInstall', 'ShopifyController@shopifyInstall');
         $api->any('shopifyGenerateToken', 'ShopifyController@shopifyGenerateToken');//获取token
+
     });
