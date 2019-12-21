@@ -30,7 +30,7 @@
         public function countData($downTime = '', $type = 0)
         {
             $webModel = new SiteWeb();
-            $webLists = $webModel->where(['type' => 1, 'is_delete' => 0])->get()->toArray();
+            $webLists = $webModel->where(['type' => 1])->get()->toArray();
             $webModel = new SiteWeb();
             foreach ($webLists as $k => $v) {
                 $t     = time();
@@ -437,13 +437,6 @@
 
         }
 
-        public function getReport()
-        {
-            $webAccess = 'https://cb8bbdfb793b108dd24ff15aa3681275:1c198bbc47771743156c35b83ae73a5c@712styles';
-            $url       = $webAccess . '.myshopify.com/admin/orders.json?shopify_ql=SHOW sales BY country FROM order SINCE -1m UNTIL today ORDER BY sales';
-            $res       = $this->shopifyCurl($url);
-            fp($res);
-        }
 
 
         /**
