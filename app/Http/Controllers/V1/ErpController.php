@@ -182,52 +182,52 @@
                     $purchaseOrders['pay_ship_amount']            = round($val['pay_ship_amount'], 3);
                     $purchaseOrders['sum_amount']                 = round($val['sum_amount'], 3);
                     $purchaseOrders['total_tax_fee']              = round($val['total_tax_fee'], 3);
-                    $purchaseOrders['currency_code']              = $val['currency_code']?:null;
-                    $purchaseOrders['pay_status']                 = $val['pay_status']?:null;
-                    $purchaseOrders['po_staus']                   = $val['po_staus']?:null;
+                    $purchaseOrders['currency_code']              = $val['currency_code'] ?: null;
+                    $purchaseOrders['pay_status']                 = $val['pay_status'] ?: null;
+                    $purchaseOrders['po_staus']                   = $val['po_staus'] ?: null;
                     $purchaseOrders['date_create']                = strtotime($val['date_create']);
                     $purchaseOrders['date_eta']                   = strtotime($val['date_eta']);
                     $purchaseOrders['date_release']               = strtotime($val['date_release']);
                     $purchaseOrders['po_completion_time']         = strtotime($val['po_completion_time']);
-                    $purchaseOrders['to_warehouse_id']            = $val['to_warehouse_id']?:null;
-                    $purchaseOrders['receiving_exception']        = $val['receiving_exception']?:null;
-                    $purchaseOrders['operator_purchase']          = $val['operator_purchase']?:null;
-                    $purchaseOrders['receiving_exception_handle'] = $val['receiving_exception_handle']?:null;
-                    $purchaseOrders['return_verify']              = $val['return_verify']?:null;
-                    $purchaseOrders['create_type']                = $val['create_type']?:null;
-                    $purchaseOrders['pts_status_sort']            = $val['pts_status_sort']?:null;
-                    $purchaseOrders['account_type']               = $val['account_type']?:null;
-                    $purchaseOrders['pts_oprater']                = $val['pts_oprater']?:null;
-                    $purchaseOrders['transaction_no']             = $val['transaction_no']?:null;
-                    $purchaseOrders['ps_id']                      = $val['ps_id']?:null;
-                    $purchaseOrders['po_remark']                  = $val['po_remark']?:null;
-                    $purchaseOrders['receiving_exception_status'] = $val['receiving_exception_status']?:null;
-                    $purchaseOrders['qc_exception_status']        = $val['qc_exception_status']?:null;
-                    $purchaseOrders['supplier_name']              = $val['supplier_name']?:null;
-                    $purchaseOrders['supplier_code']              = $val['supplier_code']?:null;
-                    $purchaseOrders['warehouse_code']             = $val['warehouse_code']?:null;
-                    $purchaseOrders['warehouse_desc']             = $val['warehouse_desc']?:null;
-                    $purchaseOrders['receiving_code']             = $val['receiving_code']?:null;
-                    $purchaseOrders['verify']                     = $val['verify']?:null;
-                    $purchaseOrders['mark_eta']                   = $val['mark_eta']?:null;
-                    $purchaseOrders['pts_name']                   = $val['pts_name']?:null;
-//                    $purchaseOrders['ps_name']                    = $val['ps_name'];
-//                    $purchaseOrders['ps_url']                     = $val['ps_url'];
-                    $purchaseOrders['pt_note']                    = $val['pt_note']?:null;
-                    $purchaseOrders['qty_expected_all']           = $val['qty_expected_all']?:null;
-                    $purchaseOrders['qty_receving_all']           = $val['qty_receving_all']?:null;
-                    $purchaseOrders['trackings']                  = $val['trackings']?:null;
-                    $purchaseOrders['po_is_net']                  = $val['po_is_net']?:null;
-                    $purchaseOrders['pay_type']                   = $val['pay_type']?:null;
-//                    $purchaseOrders['bank_name']                  = $val['bank_name'];
-//                    $purchaseOrders['pay_account']                = $val['pay_account'];
-                    $purchaseOrders['date_expected']              = $val['date_expected']?:null;
-                    $purchaseOrders['po_type']                    = $val['po_type']?:null;
-                    $purchaseOrders['single_net_number']          = json_encode($val['single_net_number'], true);
-                    $purchaseOrders['track']                      = json_encode($val['track'], true);
-                    $purchaseOrders['payment_note']               = $val['payment_note']?:null;
-                    $purchaseOrders['company']                    = $val['company']?:null;
-                    $totalPurchaseOrders[]                        = $purchaseOrders;
+                    $purchaseOrders['to_warehouse_id']            = $val['to_warehouse_id'] ?: null;
+                    $purchaseOrders['receiving_exception']        = $val['receiving_exception'] ?: null;
+                    $purchaseOrders['operator_purchase']          = $val['operator_purchase'] ?: null;
+                    $purchaseOrders['receiving_exception_handle'] = $val['receiving_exception_handle'] ?: null;
+                    $purchaseOrders['return_verify']              = $val['return_verify'] ?: null;
+                    $purchaseOrders['create_type']                = $val['create_type'] ?: null;
+                    $purchaseOrders['pts_status_sort']            = $val['pts_status_sort'] ?: null;
+                    $purchaseOrders['account_type']               = $val['account_type'] ?: null;
+                    $purchaseOrders['pts_oprater']                = $val['pts_oprater'] ?: null;
+                    $purchaseOrders['transaction_no']             = $val['transaction_no'] ?: null;
+                    $purchaseOrders['ps_id']                      = $val['ps_id'] ?: null;
+                    $purchaseOrders['po_remark']                  = $val['po_remark'] ?: null;
+                    $purchaseOrders['receiving_exception_status'] = $val['receiving_exception_status'] ?: null;
+                    $purchaseOrders['qc_exception_status']        = $val['qc_exception_status'] ?: null;
+                    $purchaseOrders['supplier_name']              = $val['supplier_name'] ?: null;
+                    $purchaseOrders['supplier_code']              = $val['supplier_code'] ?: null;
+                    $purchaseOrders['warehouse_code']             = $val['warehouse_code'] ?: null;
+                    $purchaseOrders['warehouse_desc']             = $val['warehouse_desc'] ?: null;
+                    $purchaseOrders['receiving_code']             = $val['receiving_code'] ?: null;
+                    $purchaseOrders['verify']                     = $val['verify'] ?: null;
+                    $purchaseOrders['mark_eta']                   = $val['mark_eta'] ?: null;
+                    $purchaseOrders['pts_name']                   = $val['pts_name'] ?: null;
+                    //                    $purchaseOrders['ps_name']                    = $val['ps_name'];
+                    //                    $purchaseOrders['ps_url']                     = $val['ps_url'];
+                    $purchaseOrders['pt_note']          = $val['pt_note'] ?: null;
+                    $purchaseOrders['qty_expected_all'] = $val['qty_expected_all'] ?: null;
+                    $purchaseOrders['qty_receving_all'] = $val['qty_receving_all'] ?: null;
+                    $purchaseOrders['trackings']        = $val['trackings'] ?: null;
+                    $purchaseOrders['po_is_net']        = $val['po_is_net'] ?: null;
+                    $purchaseOrders['pay_type']         = $val['pay_type'] ?: null;
+                    //                    $purchaseOrders['bank_name']                  = $val['bank_name'];
+                    //                    $purchaseOrders['pay_account']                = $val['pay_account'];
+                    $purchaseOrders['date_expected']     = $val['date_expected'] ?: null;
+                    $purchaseOrders['po_type']           = $val['po_type'] ?: null;
+                    $purchaseOrders['single_net_number'] = json_encode($val['single_net_number'], true);
+                    $purchaseOrders['track']             = json_encode($val['track'], true);
+                    $purchaseOrders['payment_note']      = $val['payment_note'] ?: null;
+                    $purchaseOrders['company']           = $val['company'] ?: null;
+                    $totalPurchaseOrders[]               = $purchaseOrders;
                     //采购单详情
                     if ( !empty($val['detail'])){
                         foreach ($val['detail'] as $key1 => $val1) {
@@ -338,10 +338,11 @@
          */
         private function getWebId($referenceNo)
         {
-//            $model = new OrderInfo();
+            //            $model = new OrderInfo();
             $model = DB::table('shopify_order');
             $info  = $model->where(['shopify_id' => $referenceNo])
                            ->first('web_id');
+
             if ( !empty($info)){
                 return $info->web_id;
             }
@@ -551,6 +552,7 @@
 
         /**
          * 获取采购费用
+         *
          * @param Request $request
          * pullOrderCostDetail
          * author: walker
@@ -563,25 +565,26 @@
             $url       = $request->route()->getActionName();
             $beginTime = time();
 
-            $info               = DB::table('pull_log')
-                                    ->where(['pull_url' => $url, 'status' => 1, 'type' => 3])
-                                    ->orderBy('add_time', 'desc')
-                                    ->first('current_page');
-            $page               = empty($info) ? 1 : $info->current_page + 1;
-            $pageSize           = 50;
-            $service            = 'getOrderCostDetail';
-            $params             = [];
-            $params['orderCode'] = ['SF19032738472','SF19032738386'];
-            $params['page']     = $page;
-            $params['pageSize'] = $pageSize;
-            $result             = self::soapRequest($service, 'WMS', $params);
+            $info                = DB::table('pull_log')
+                                     ->where(['pull_url' => $url, 'status' => 1, 'type' => 3])
+                                     ->orderBy('add_time', 'desc')
+                                     ->first('current_page');
+            $page                = empty($info) ? 1 : $info->current_page + 1;
+            $pageSize            = 50;
+            $service             = 'getOrderCostDetail';
+            $params              = [];
+            $params['orderCode'] = ['SF19032738472', 'SF19032738386'];
+            $params['page']      = $page;
+            $params['pageSize']  = $pageSize;
+            $result              = self::soapRequest($service, 'WMS', $params);
             fp($result);
             if ( !empty($result)){
                 $totalPurchaseOrders       = [];
                 $totalPurchaseOrdersDetail = [];
                 foreach ($result['data'] as $key => $val) {
-                    $poId                                         = $val['po_id'];
-                    $orderCostLists                               = [];
+                    $webId          = DB::table('e_orders')->where(['']);
+                    $orderCostLists = [];
+
 
                 }
                 $pullLog                 = [];
@@ -620,8 +623,10 @@
                 };
             }
         }
+
         /**
          * 费用总数据
+         *
          * @param Request $request
          * getTotalFeeData
          * author: walker
@@ -697,16 +702,15 @@
                 $orderTotalGoodsData   = [];
                 $orderTotalAddressData = [];
                 $orderShip             = [];
-                fp($result['data']);
                 foreach ($result['data'] as $key => $val) {
                     //订单
                     $referenceNo = (int)$val['saleOrderCode'];
+                    //                    fp($referenceNo);
                     $orderStatus = $val['status'];
                     $webId       = $this->getWebId($referenceNo) ?: 0;
 
                     $orderData                       = [];
                     $orderData['platform']           = $val['platform'];
-//                    $orderData['order_id']           = $val['order_id'];
                     $orderData['orderType']          = $val['orderType'];
                     $orderData['status']             = $orderStatus;
                     $orderData['processAgain']       = $val['processAgain'];
@@ -834,24 +838,30 @@
                                              ->where(['pull_url' => $url, 'current_page' => $page])
                                              ->first('id');
                 if (empty($pullData)){
+                    $pullLog['spend_time'] = time() - $beginTime;
                     DB::beginTransaction();
                     try {
                         DB::beginTransaction();
                         DB::table('e_orders')->insert($orderTotalData);
+                        DB::rollBack();
                         DB::table('ship')->insert($orderShip);
                         DB::rollBack();
+
                         DB::table('e_order_goods')->insert($orderTotalGoodsData);
                         DB::rollBack();
+
                         DB::table('e_address')->insert($orderTotalAddressData);
                         DB::rollBack();
-                        $pullLog['spend_time'] = time() - $beginTime;
+
                         DB::table('pull_log')->insert($pullLog);
                         DB::rollBack();
+
                         DB::commit();
-                        $endTime = time();
-                        ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
+                        //                        $endTime = time();
+                        //                        ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
 
                     } catch (\Exception $e) {
+                        DB::rollBack();
                         $pullLog['status']  = 0;
                         $pullLog['err_msg'] = $e->getMessage();
                         DB::table('pull_log')->insert($pullLog);
@@ -859,6 +869,7 @@
                     }
                 };
             } else {
+
                 ajaxReturn(4001, 'not find data');
             }
 

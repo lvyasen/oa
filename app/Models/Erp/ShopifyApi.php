@@ -393,30 +393,26 @@
                     try {
                         DB::beginTransaction();
                         //shopify订单数据
-                        $shopify_order = DB::table('shopify_order')->insert($shopifyOrderData);
-
+                        DB::table('shopify_order')->insert($shopifyOrderData);
                         DB::rollBack();
                         //shopify订单商品数据
-                        $shopify_order_line_item = DB::table('shopify_order_line_item')->insert($shopifyOrderLineItem);
+                        DB::table('shopify_order_line_item')->insert($shopifyOrderLineItem);
                         DB::rollBack();
                         //shopify顾客信息
-                        $shopify_customer = DB::table('shopify_order_customer')->insert($shopifyCustomer);
+                        DB::table('shopify_order_customer')->insert($shopifyCustomer);
                         DB::rollBack();
                         //shopify地址信息
-                        $shopify_address = DB::table('shopify_address')->insert($shopifyCustomerAddress);
+                        DB::table('shopify_address')->insert($shopifyCustomerAddress);
                         DB::rollBack();
                         //shopify客户端信息
-                        $shopify_order_client = DB::table('shopify_order_client')->insert($shopifyOrderClient);
+                        DB::table('shopify_order_client')->insert($shopifyOrderClient);
                         DB::rollBack();
                         $pullLog['spend_time'] = time() - $beginTime;
-                        $shopify_pull_log      = DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
+                        DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
                         DB::rollBack();
+
                         DB::commit();
-                        //                        if ($shopify_order && $shopify_order_line_item && $shopify_customer && $shopify_address && $shopify_order_client && $shopify_pull_log){
-                        //                            DB::commit();
-                        //                        } else {
-                        //                            DB::rollBack();
-                        //                        };
+
                     } catch (\Exception $exception) {
                         DB::rollBack();
 
