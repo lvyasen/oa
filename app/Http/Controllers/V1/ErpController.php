@@ -132,8 +132,201 @@
          */
         public function pullEorders(Request $request)
         {
-            $url = $request->route()->getActionName();
-            $this->pullOrderList($url);
+            $url       = $request->route()->getActionName();
+            $beginTime = time();
+
+            $info = DB::table('pull_log')
+                      ->where(['pull_url' => $url, 'status' => 1, 'type' => 1])
+                      ->orderBy('add_time', 'desc')
+                      ->first('current_page');
+
+            $page = empty($info) ? 1 : $info->current_page + 1;
+
+            $params               = [];
+            $params['getDetail']  = 1;
+            $params['getAddress'] = 1;
+            $params['page']       = $page;
+            $params['pageSize']   = 50;
+            $params['getAddress'] = 1;
+
+            $service = 'getOrderList';
+            $result  = self::soapRequest($service, 'EB', $params);
+
+            if ( !empty($result['data'])){
+                //                $siteList              = $this->getSiteList();
+                $orderTotalData        = [];
+                $orderTotalGoodsData   = [];
+                $orderTotalAddressData = [];
+                $orderShip             = [];
+                foreach ($result['data'] as $key => $val) {
+                    //订单
+                    $referenceNo = (int)$val['saleOrderCode'];
+                    //                    fp($referenceNo);
+                    $orderStatus = $val['status'];
+                    $webId       = $this->getWebId($referenceNo) ?: 0;
+
+                    $orderData                       = [];
+                    $orderData['platform']           = $val['platform'];
+                    $orderData['orderType']          = $val['orderType'];
+                    $orderData['status']             = $orderStatus;
+                    $orderData['processAgain']       = $val['processAgain'];
+                    $orderData['refNo']              = $val['refNo'];
+                    $orderData['saleOrderCode']      = $val['saleOrderCode'];
+                    $orderData['warehouseOrderCode'] = $val['warehouseOrderCode'];
+                    $orderData['companyCode']        = $val['companyCode'];
+                    $orderData['userAccount']        = $val['userAccount'];
+                    //                    $orderData['platformUserName']       = $val['platformUserName'];
+                    $orderData['shippingMethod']         = $val['shippingMethod'];
+                    $orderData['shippingMethodNo']       = $val['shippingMethodNo'];
+                    $orderData['shippingMethodPlatform'] = $val['shippingMethodPlatform'];
+                    $orderData['warehouseId']            = $val['warehouseId'];
+                    $orderData['warehouseCode']          = $val['warehouseCode'];
+                    $orderData['createdDate']            = $val['createdDate'];
+                    $orderData['updateDate']             = $val['updateDate'];
+                    $orderData['datePaidPlatform']       = strtotime($val['datePaidPlatform']) > 0 ? strtotime($val['datePaidPlatform']) : 0;
+                    $orderData['platformShipStatus']     = $val['platformShipStatus'] ?: null;
+                    $orderData['platformShipTime']       = strtotime($val['platformShipTime']) > 0 ? strtotime($val['platformShipTime']) : 0;
+                    $orderData['dateWarehouseShipping']  = strtotime($val['dateWarehouseShipping']) > 0 ? strtotime($val['dateWarehouseShipping']) : 0;
+
+                    $orderData['dateLatestShip']     = strtotime($val['dateLatestShip']);
+                    $orderData['currency']           = $val['currency'];
+                    $orderData['amountpaid']         = $val['amountpaid'];
+                    $orderData['subtotal']           = $val['subtotal'];
+                    $orderData['shipFee']            = $val['shipFee'];
+                    $orderData['platformFeeTotal']   = $val['platformFeeTotal'];
+                    $orderData['finalvaluefeeTotal'] = $val['finalvaluefeeTotal'];
+                    $orderData['otherFee']           = $val['otherFee'];
+                    //                    $orderData['costShipFee']            = $val['costShipFee'];
+                    $orderData['buyerId']             = $val['buyerId'];
+                    $orderData['buyerName']           = $val['buyerName'];
+                    $orderData['buyerMail']           = $val['buyerMail'];
+                    $orderData['site']                = $val['site'];
+                    $orderData['countryCode']         = $val['countryCode'];
+                    $orderData['productCount']        = $val['productCount'];
+                    $orderData['orderWeight']         = $val['orderWeight'];
+                    $orderData['orderDesc']           = $val['orderDesc'];
+                    $orderData['paypalTransactionId'] = $val['paypalTransactionId'];
+                    $orderData['abnormalType']        = $val['abnormalType'];
+                    $orderData['abnormalReason']      = $val['abnormalReason'];
+                    //                    $orderData['orderConfigDatas']       = $val['orderConfigDatas'];
+                    $orderData['addTime'] = time();
+                    $orderData['webId']   = $webId;
+
+                    $orderData['addTime'] = time();
+                    $orderTotalData[]     = $orderData;
+                    if ( !empty($val['platformShipStatus'])){
+                        $ship                          = [];
+                        $ship['warehouseOrderCode']    = $val['warehouseOrderCode'];
+                        $ship['saleOrderCode']         = $val['saleOrderCode'];
+                        $ship['shippingMethodNo']      = $val['shippingMethodNo'];
+                        $ship['orderWeight']           = $val['orderWeight'];
+                        $ship['shippingMethod']        = $val['shippingMethod'];
+                        $ship['platformFeeTotal']      = $val['platformFeeTotal'];
+                        $ship['shipFee']               = $val['shipFee'];
+                        $ship['dateWarehouseShipping'] = strtotime($val['dateWarehouseShipping']);
+                        $ship['addTime']               = \date('Y-m-d H:i:s');
+                        $ship['webId']                 = $webId;
+                        $ship['totalFee']              = round($val['platformFeeTotal'], 3) + round($val['shipFee'], 3);
+                        $orderShip[]                   = $ship;
+                    }
+
+                    //订单商品
+                    if ( !empty($val['orderDetails'])){
+                        foreach ($val['orderDetails'] as $key1 => $val1) {
+                            $orderGoodsData               = [];
+                            $orderGoodsData['productSku'] = $val1['productSku'];
+                            //                            $orderGoodsData['sku']               = $val1['sku'];
+                            $orderGoodsData['unitPrice']         = round($val1['unitPrice'], 3);
+                            $orderGoodsData['qty']               = $val1['qty'];
+                            $orderGoodsData['productTitle']      = $val1['productTitle'];
+                            $orderGoodsData['pic']               = $val1['pic'];
+                            $orderGoodsData['opSite']            = $val1['opSite'];
+                            $orderGoodsData['productUrl']        = $val1['productUrl'];
+                            $orderGoodsData['refItemId']         = $val1['refItemId'];
+                            $orderGoodsData['opRefItemLocation'] = $val1['opRefItemLocation'];
+                            $orderGoodsData['unitFinalValueFee'] = round($val1['unitFinalValueFee'], 3);
+                            $orderGoodsData['transactionPrice']  = round($val1['transactionPrice'], 3);
+                            $orderGoodsData['operTime']          = $val1['operTime'];
+
+                            $orderGoodsData['orderStatus']   = $orderStatus;
+                            $orderGoodsData['saleOrderCode'] = $referenceNo;
+                            $orderGoodsData['addTime']       = time();
+                            $orderGoodsData['webId']         = $webId;
+                            $orderTotalGoodsData[]           = $orderGoodsData;
+                        }
+                    }
+                    //订单地址
+                    if ( !empty($val['orderAddress'])){
+                        $orderAddress                = [];
+                        $orderAddress['name']        = $val['orderAddress']['name'];
+                        $orderAddress['companyName'] = $val['orderAddress']['companyName'];
+                        $orderAddress['line1']       = $val['orderAddress']['line1'];
+                        $orderAddress['line2']       = $val['orderAddress']['line2'];
+                        $orderAddress['line3']       = $val['orderAddress']['line3'];
+                        $orderAddress['district']    = $val['orderAddress']['district'];
+                        $orderAddress['cityName']    = $val['orderAddress']['cityName'];
+                        $orderAddress['postalCode']  = $val['orderAddress']['postalCode'];
+                        $orderAddress['phone']       = $val['orderAddress']['phone'];
+                        $orderAddress['state']       = $val['orderAddress']['state'];
+                        $orderAddress['countryCode'] = $val['orderAddress']['countryCode'];
+                        $orderAddress['countryName'] = $val['orderAddress']['countryName'];
+                        $orderAddress['doorplate']   = $val['orderAddress']['doorplate'];
+                        $orderAddress['createdDate'] = $val['orderAddress']['createdDate'];
+                        $orderAddress['updateDate']  = $val['orderAddress']['updateDate'];
+
+                        $orderAddress['orderStatus']   = $orderStatus;
+                        $orderAddress['saleOrderCode'] = $referenceNo;
+                        $orderAddress['addTime']       = time();
+                        $orderAddress['webId']         = $webId;
+                        $orderTotalAddressData[]       = $orderAddress;
+                    }
+                }
+                $pullLog                 = [];
+                $pullLog['pull_url']     = $url;
+                $pullLog['pull_time']    = \date('Y/m/d H:i:s');
+                $pullLog['count']        = $result['totalCount'];
+                $pullLog['page_size']    = $result['pageSize'];
+                $pullLog['current_page'] = $page;
+                $pullLog['status']       = 1;
+                $pullLog['type']         = 1;
+                $pullLog['add_time']     = time();
+                $pullData                = DB::table('pull_log')
+                                             ->where([
+                                                         'pull_url'     => $url,
+                                                         'current_page' => $page,
+                                                         'type'         => 1,
+                                                     ])
+                                             ->first('id');
+                if (empty($pullData)){
+                    $pullLog['spend_time'] = time() - $beginTime;
+                    DB::beginTransaction();
+                    try {
+                        DB::table('ship')->insert($orderShip);
+                        DB::table('e_order_goods')->insert($orderTotalGoodsData);
+                        DB::table('e_address')->insert($orderTotalAddressData);
+                        DB::table('pull_log')->insert($pullLog);
+                        DB::table('e_orders')->insert($orderTotalData);
+
+                        DB::commit();
+                        $endTime = time();
+                        ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
+
+                    } catch (\Exception $e) {
+                        DB::rollBack();
+                        ajaxReturn(4001, 'error', $e->getMessage());
+                        $pullLog['status']  = 0;
+                        $pullLog['err_msg'] = $e->getMessage();
+                        DB::table('pull_log')->insert($pullLog);
+
+                    }
+                }else{
+                    ajaxReturn(4002,'已有该记录');
+                };
+            } else {
+
+                ajaxReturn(4001, 'not find data');
+            }
+
         }
 
         /**
@@ -576,23 +769,22 @@
                                ->where('warehouseOrderCode', '!=', '')
                                ->where(['pull_cost' => 0])
                                ->selectRaw('warehouseOrderCode,pull_cost')
-                                ->limit($pageSize)
+                               ->limit($pageSize)
                                ->get();
             $orderCodeList = toArr($orderCodeList);
             $orderCode     = [];
             foreach ($orderCodeList as $key1 => $val1) {
                 $orderCode[] = $val1['warehouseOrderCode'];
             }
-            if(!empty($orderCode)){
+            if ( !empty($orderCode)){
                 $params              = [];
                 $params['orderCode'] = $orderCode;
-
                 $result              = self::soapRequest($service, 'WMS', $params);
                 if ( !empty($result)){
                     $orderCostLists = [];
                     foreach ($result['data'] as $key => $val) {
                         $webId                              = DB::table('e_orders')->where(['warehouseOrderCode' => $val['reference_no']])->first('webId');
-                        $webId                              = $webId->webId?:0;
+                        $webId                              = $webId->webId ?: 0;
                         $orderCost                          = [];
                         $orderCost['order_platform_type']   = $val['order_platform_type'];
                         $orderCost['reference_no']          = $val['reference_no'];
@@ -652,7 +844,7 @@
                     if (empty($pullData)){
                         DB::beginTransaction();
                         try {
-                            DB::table('e_orders')->whereIn('warehouseOrderCode',$orderCode)->update(['pull_cost'=>1]);
+                            DB::table('e_orders')->whereIn('warehouseOrderCode', $orderCode)->update(['pull_cost' => 1]);
                             DB::table('e_order_cost')->insert($orderCostLists);
                             $pullLog['spend_time'] = time() - $beginTime;
                             DB::table('pull_log')->insert($pullLog);
@@ -711,209 +903,6 @@
             ajaxReturn(200, Code::$com[200], $result);
         }
 
-
-        /**
-         * 拉取订单存入数据库
-         *
-         * @param $url
-         *
-         * @throws \SoapFault
-         * pullOrderList
-         * author: walker
-         * Date: 2019/12/10
-         * Time: 15:21
-         * Note:
-         */
-        private function pullOrderList($url)
-        {
-            $beginTime = time();
-
-            $info = DB::table('pull_log')
-                      ->where(['pull_url' => $url, 'status' => 1, 'type' => 1])
-                      ->orderBy('add_time', 'desc')
-                      ->first('current_page');
-
-            $page = empty($info) ? 1 : $info->current_page + 1;
-
-            $params               = [];
-            $params['getDetail']  = 1;
-            $params['getAddress'] = 1;
-            $params['page']       = $page;
-            $params['pageSize']   = 50;
-            $params['getAddress'] = 1;
-
-            $service = 'getOrderList';
-            $result  = self::soapRequest($service, 'EB', $params);
-
-            if ( !empty($result['data'])){
-                //                $siteList              = $this->getSiteList();
-                $orderTotalData        = [];
-                $orderTotalGoodsData   = [];
-                $orderTotalAddressData = [];
-                $orderShip             = [];
-                foreach ($result['data'] as $key => $val) {
-                    //订单
-                    $referenceNo = (int)$val['saleOrderCode'];
-                    //                    fp($referenceNo);
-                    $orderStatus = $val['status'];
-                    $webId       = $this->getWebId($referenceNo) ?: 0;
-
-                    $orderData                       = [];
-                    $orderData['platform']           = $val['platform'];
-                    $orderData['orderType']          = $val['orderType'];
-                    $orderData['status']             = $orderStatus;
-                    $orderData['processAgain']       = $val['processAgain'];
-                    $orderData['refNo']              = $val['refNo'];
-                    $orderData['saleOrderCode']      = $val['saleOrderCode'];
-                    $orderData['warehouseOrderCode'] = $val['warehouseOrderCode'];
-                    $orderData['companyCode']        = $val['companyCode'];
-                    $orderData['userAccount']        = $val['userAccount'];
-                    //                    $orderData['platformUserName']       = $val['platformUserName'];
-                    $orderData['shippingMethod']         = $val['shippingMethod'];
-                    $orderData['shippingMethodNo']       = $val['shippingMethodNo'];
-                    $orderData['shippingMethodPlatform'] = $val['shippingMethodPlatform'];
-                    $orderData['warehouseId']            = $val['warehouseId'];
-                    $orderData['warehouseCode']          = $val['warehouseCode'];
-                    $orderData['createdDate']            = $val['createdDate'];
-                    $orderData['updateDate']             = $val['updateDate'];
-                    $orderData['datePaidPlatform']       = strtotime($val['datePaidPlatform']) > 0 ? strtotime($val['datePaidPlatform']) : 0;
-                    $orderData['platformShipStatus']     = $val['platformShipStatus'] ?: null;
-                    $orderData['platformShipTime']       = strtotime($val['platformShipTime']) > 0 ? strtotime($val['platformShipTime']) : 0;
-                    $orderData['dateWarehouseShipping']  = strtotime($val['dateWarehouseShipping']) > 0 ? strtotime($val['dateWarehouseShipping']) : 0;
-
-                    $orderData['dateLatestShip']     = strtotime($val['dateLatestShip']);
-                    $orderData['currency']           = $val['currency'];
-                    $orderData['amountpaid']         = $val['amountpaid'];
-                    $orderData['subtotal']           = $val['subtotal'];
-                    $orderData['shipFee']            = $val['shipFee'];
-                    $orderData['platformFeeTotal']   = $val['platformFeeTotal'];
-                    $orderData['finalvaluefeeTotal'] = $val['finalvaluefeeTotal'];
-                    $orderData['otherFee']           = $val['otherFee'];
-                    //                    $orderData['costShipFee']            = $val['costShipFee'];
-                    $orderData['buyerId']             = $val['buyerId'];
-                    $orderData['buyerName']           = $val['buyerName'];
-                    $orderData['buyerMail']           = $val['buyerMail'];
-                    $orderData['site']                = $val['site'];
-                    $orderData['countryCode']         = $val['countryCode'];
-                    $orderData['productCount']        = $val['productCount'];
-                    $orderData['orderWeight']         = $val['orderWeight'];
-                    $orderData['orderDesc']           = $val['orderDesc'];
-                    $orderData['paypalTransactionId'] = $val['paypalTransactionId'];
-                    $orderData['abnormalType']        = $val['abnormalType'];
-                    $orderData['abnormalReason']      = $val['abnormalReason'];
-                    //                    $orderData['orderConfigDatas']       = $val['orderConfigDatas'];
-                    $orderData['addTime'] = time();
-                    $orderData['webId']   = $webId;
-
-                    $orderData['addTime'] = time();
-                    $orderTotalData[]     = $orderData;
-                    if ( !empty($val['platformShipStatus'])){
-                        $ship                          = [];
-                        $ship['warehouseOrderCode']    = $val['warehouseOrderCode'];
-                        $ship['saleOrderCode']         = $val['saleOrderCode'];
-                        $ship['shippingMethodNo']      = $val['shippingMethodNo'];
-                        $ship['orderWeight']           = $val['orderWeight'];
-                        $ship['shippingMethod']        = $val['shippingMethod'];
-                        $ship['platformFeeTotal']      = $val['platformFeeTotal'];
-                        $ship['shipFee']               = $val['shipFee'];
-                        $ship['dateWarehouseShipping'] = strtotime($val['dateWarehouseShipping']);
-                        $ship['addTime']               = \date('Y-m-d H:i:s');
-                        $ship['webId']                 = $webId;
-                        $ship['totalFee']              = round($val['platformFeeTotal'], 3) + round($val['shipFee'], 3);
-                        $orderShip[]                   = $ship;
-                    }
-
-                    //订单商品
-                    if ( !empty($val['orderDetails'])){
-                        foreach ($val['orderDetails'] as $key1 => $val1) {
-                            $orderGoodsData               = [];
-                            $orderGoodsData['productSku'] = $val1['productSku'];
-                            //                            $orderGoodsData['sku']               = $val1['sku'];
-                            $orderGoodsData['unitPrice']         = round($val1['unitPrice'], 3);
-                            $orderGoodsData['qty']               = $val1['qty'];
-                            $orderGoodsData['productTitle']      = $val1['productTitle'];
-                            $orderGoodsData['pic']               = $val1['pic'];
-                            $orderGoodsData['opSite']            = $val1['opSite'];
-                            $orderGoodsData['productUrl']        = $val1['productUrl'];
-                            $orderGoodsData['refItemId']         = $val1['refItemId'];
-                            $orderGoodsData['opRefItemLocation'] = $val1['opRefItemLocation'];
-                            $orderGoodsData['unitFinalValueFee'] = round($val1['unitFinalValueFee'], 3);
-                            $orderGoodsData['transactionPrice']  = round($val1['transactionPrice'], 3);
-                            $orderGoodsData['operTime']          = $val1['operTime'];
-
-                            $orderGoodsData['orderStatus']   = $orderStatus;
-                            $orderGoodsData['saleOrderCode'] = $referenceNo;
-                            $orderGoodsData['addTime']       = time();
-                            $orderGoodsData['webId']         = $webId;
-                            $orderTotalGoodsData[]           = $orderGoodsData;
-                        }
-                    }
-                    //订单地址
-                    if ( !empty($val['orderAddress'])){
-                        $orderAddress                = [];
-                        $orderAddress['name']        = $val['orderAddress']['name'];
-                        $orderAddress['companyName'] = $val['orderAddress']['companyName'];
-                        $orderAddress['line1']       = $val['orderAddress']['line1'];
-                        $orderAddress['line2']       = $val['orderAddress']['line2'];
-                        $orderAddress['line3']       = $val['orderAddress']['line3'];
-                        $orderAddress['district']    = $val['orderAddress']['district'];
-                        $orderAddress['cityName']    = $val['orderAddress']['cityName'];
-                        $orderAddress['postalCode']  = $val['orderAddress']['postalCode'];
-                        $orderAddress['phone']       = $val['orderAddress']['phone'];
-                        $orderAddress['state']       = $val['orderAddress']['state'];
-                        $orderAddress['countryCode'] = $val['orderAddress']['countryCode'];
-                        $orderAddress['countryName'] = $val['orderAddress']['countryName'];
-                        $orderAddress['doorplate']   = $val['orderAddress']['doorplate'];
-                        $orderAddress['createdDate'] = $val['orderAddress']['createdDate'];
-                        $orderAddress['updateDate']  = $val['orderAddress']['updateDate'];
-
-                        $orderAddress['orderStatus']   = $orderStatus;
-                        $orderAddress['saleOrderCode'] = $referenceNo;
-                        $orderAddress['addTime']       = time();
-                        $orderAddress['webId']         = $webId;
-                        $orderTotalAddressData[]       = $orderAddress;
-                    }
-                }
-                $pullLog                 = [];
-                $pullLog['pull_url']     = $url;
-                $pullLog['pull_time']    = \date('Y/m/d H:i:s');
-                $pullLog['count']        = $result['totalCount'];
-                $pullLog['page_size']    = $result['pageSize'];
-                $pullLog['current_page'] = $page;
-                $pullLog['status']       = 1;
-                $pullLog['type']         = 1;
-                $pullLog['add_time']     = time();
-                $pullData                = DB::table('pull_log')
-                                             ->where(['pull_url' => $url, 'current_page' => $page])
-                                             ->first('id');
-                if (empty($pullData)){
-                    $pullLog['spend_time'] = time() - $beginTime;
-                    DB::beginTransaction();
-                    try {
-                        DB::table('ship')->insert($orderShip);
-                        DB::table('e_order_goods')->insert($orderTotalGoodsData);
-                        DB::table('e_address')->insert($orderTotalAddressData);
-                        DB::table('pull_log')->insert($pullLog);
-                        DB::table('e_orders')->insert($orderTotalData);
-
-                        DB::commit();
-                        $endTime = time();
-                        ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
-
-                    } catch (\Exception $e) {
-                        DB::rollBack();
-                        $pullLog['status']  = 0;
-                        $pullLog['err_msg'] = $e->getMessage();
-                        DB::table('pull_log')->insert($pullLog);
-
-                    }
-                };
-            } else {
-
-                ajaxReturn(4001, 'not find data');
-            }
-
-        }
 
         /**
          * 获取物流方式字典
