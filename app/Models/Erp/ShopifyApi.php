@@ -410,7 +410,6 @@
                     } catch (\Exception $exception) {
 
                         DB::rollBack();
-                        ajaxReturn(4001, 'err', $exception->getMessage());
                         $pullLog['spend_time']              = time() - $beginTime;
                         $addData                            = [];
                         $addData['shopify_order']           = $shopifyOrderData;
@@ -422,13 +421,15 @@
                         $pullLogData['err_msg']             = $exception->getMessage();
                         $pullLogData['insert_data']         = json_encode($addData, true);
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
-                        DB::commit();
+                        ajaxReturn(4003,'error',$exception->getMessage());
                         //                        DB::table('shopify_pull_log')
                         //                          ->where(['id' => $pullLog['id']])
                         //                          ->update($pullLogData);
                     }
 
                     //修改订单状态
+                }else{
+                    ajaxReturn(4003,'订单没有数据',$res);
                 }
             }
 
