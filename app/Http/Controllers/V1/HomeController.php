@@ -14,8 +14,8 @@
 
         public function homeIndex(Request $request)
         {
-            $start       = $request->start_time ? strtotime($request->start_time) : strtotime("2019-10-14");
-            $end         = $request->end_time ? strtotime($request->end_time) : strtotime("2019-12-16");
+            $start       = $request->start_time ? strtotime($request->start_time) : strtotime("Y-m-d");
+            $end         = $request->end_time ? strtotime($request->end_time) : time();
             $topProducts = DB::table('shopify_order_line_item')
                              ->select(DB::raw("count(order_goods_id) as sale_times,name"))
                              ->whereBetween('created_at', [$start, $end])
