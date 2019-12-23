@@ -25,6 +25,10 @@
     $api->version('v1', ['middleware' => 'api:auth', 'namespace' => '\App\Http\Controllers\V1'], function($api) {
         $api->post('addMenu', 'DepartmentController@addMenu');//添加菜单
         /**
+         * 首页
+         */
+        $api->post('homeIndex', 'HomeController@homeIndex');//首页数据
+        /**
          * 用户管理
          */
         $api->post('getUserList', 'UsersController@getUserList');//用户列表

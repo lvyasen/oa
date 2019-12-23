@@ -218,6 +218,7 @@
                     foreach ($res['orders'] as $key => $val) {
                         $orderId                  = $val['id'] ?: 0;
                         $createTime               = strtotime($val['created_at']);
+                        $updateTime               = strtotime($val['updated_at']);
                         $insertData               = [];
                         $insertData['email']      = $val['email'];
                         $insertData['shopify_id'] = $orderId;
@@ -308,8 +309,11 @@
                                 $goodsItem['total_discount_set']           = json_encode($val1['total_discount_set'], true);
                                 $goodsItem['origin_location']              = json_encode($val1['origin_location'], true);
                                 $goodsItem['web_id']                       = $webId;
+                                $goodsItem['created_at']                   = $createTime;
+                                $goodsItem['updated_at']                   = $updateTime;
                                 $goodsItem['order_id']                     = $orderId;
-                                $shopifyOrderLineItem[]                    = $goodsItem;
+
+                                $shopifyOrderLineItem[] = $goodsItem;
                             }
                         }
                         //订单来源客户端
@@ -407,7 +411,7 @@
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
 
                         DB::commit();
-                        ajaxReturn(200,'成功');
+                        ajaxReturn(200, '成功');
 
                     } catch (\Exception $exception) {
 
@@ -423,27 +427,26 @@
                         $pullLogData['err_msg']             = $exception->getMessage();
                         $pullLogData['insert_data']         = json_encode($addData, true);
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
-                        ajaxReturn(4003,'error',$exception->getMessage());
+                        ajaxReturn(4003, 'error', $exception->getMessage());
 
                     }
 
                     //修改订单状态
-                }else{
-                    $pullLogData                 = [];
-                    $pullLogData['pull_time']    = date('Y-m-d H:i:s');
-                    $pullLogData['pull_status']  = 1;
-                    $pullLogData['spend_time']   = time() - $beginTime;
-                    $pullLogData['update_time']  = date('Y-m-d H:i:s');
-                    $pullLogData['err_msg']  ='订单没有数据'.json_encode($res,true);
+                } else {
+                    $pullLogData                = [];
+                    $pullLogData['pull_time']   = date('Y-m-d H:i:s');
+                    $pullLogData['pull_status'] = 1;
+                    $pullLogData['spend_time']  = time() - $beginTime;
+                    $pullLogData['update_time'] = date('Y-m-d H:i:s');
+                    $pullLogData['err_msg']     = '订单没有数据' . json_encode($res, true);
                     DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
-                    ajaxReturn(4003,'订单没有数据',$res);
+                    ajaxReturn(4003, '订单没有数据', $res);
                 }
-            }else{
-                ajaxReturn(4004,'未查到该日志',$pullLog);
+            } else {
+                ajaxReturn(4004, '未查到该日志', $pullLog);
             }
 
         }
-
 
 
         /**
