@@ -27,7 +27,6 @@
         /**
          * 首页
          */
-        $api->post('homeIndex', 'HomeController@homeIndex');//首页数据
         /**
          * 用户管理
          */
@@ -157,6 +156,8 @@
         $api->post('getDepartmentList', 'DepartmentController@getDepartmentList');
         $api->any('pullEorders', 'ErpController@pullEorders');//获取订单列表
         $api->any('pullOrderCostDetail', 'ErpController@pullOrderCostDetail');//获取订单成本
+
+        $api->any('home', 'HomeController@homeIndex');//首页数据
 
         //        $api->post();
         //        $api->post('test', 'CommonController@test');//测试站点

@@ -895,7 +895,7 @@
                                ]);
             //分组条件 1天内按小时分组,否则按天/月分组
             //86400/1天 2678400/1月
-            $start = $request->start_time ? strtotime($request->start_time) : strtotime('-4 year');
+            $start = $request->start_time ? strtotime($request->start_time) : strtotime('-1 year');
             $end   = $request->end_time ? strtotime($request->end_time) : time();
             $diff  = $end - $start;
             if ($diff < 86400 && $diff > 0){
@@ -915,6 +915,7 @@
                          ->whereBetween('dateWarehouseShipping', [$start, $end])
                          ->get();
             $shipFee = toArr($shipFee);
+            fp($shipFee);
             //物料费用
             $material = DB::table('material')
                           ->select(DB::raw("FROM_UNIXTIME(add_time,'{$sort}') as create_time,sum(total_price) as total_price  "))

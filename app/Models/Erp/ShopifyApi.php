@@ -408,6 +408,7 @@
                         //shopify客户端信息
                         DB::table('shopify_order_client')->insert($shopifyOrderClient);
                         //日志
+                        $pullLogData['err_msg']='下载订单成功';
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
 
                         DB::commit();
