@@ -429,6 +429,13 @@
 
                     //修改订单状态
                 }else{
+                    $pullLogData                 = [];
+                    $pullLogData['pull_time']    = date('Y-m-d H:i:s');
+                    $pullLogData['pull_status']  = 1;
+                    $pullLogData['spend_time']   = time() - $beginTime;
+                    $pullLogData['update_time']  = date('Y-m-d H:i:s');
+                    $pullLogData['err_msg']  ='订单没有数据'.json_encode($res,true);
+                    DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
                     ajaxReturn(4003,'订单没有数据',$res);
                 }
             }else{
