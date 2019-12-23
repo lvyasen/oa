@@ -436,7 +436,7 @@
                 } else {
                     $pullLogData                = [];
                     $pullLogData['pull_time']   = date('Y-m-d H:i:s');
-                    $pullLogData['pull_status'] = 1;
+                    $pullLogData['pull_status'] = 2;
                     $pullLogData['spend_time']  = time() - $beginTime;
                     $pullLogData['update_time'] = date('Y-m-d H:i:s');
                     $pullLogData['err_msg']     = '订单没有数据' . json_encode($res, true);
