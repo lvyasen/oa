@@ -814,7 +814,7 @@
             $orderCostTotal = $orderCostTotal->total_price ?: 0;
             $totalCost      = $shipTotalFee + $materialTotalFee + $orderCostTotal;
 
-            //date_format  FROM_UNIXTIME
+            //date_format  FROM_UNIXTIME1
             $data['total_cost']  = $totalCost;
             $data['order_sales'] = $totalOrderSale;
             $data['pct']         = $pct;
