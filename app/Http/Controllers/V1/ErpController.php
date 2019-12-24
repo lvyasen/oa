@@ -438,19 +438,15 @@
                 if (empty($pullData)){
                     DB::beginTransaction();
                     try {
-                        DB::beginTransaction();
                         DB::table('e_purchase_orders')->insert($totalPurchaseOrders);
-                        DB::rollBack();
                         DB::table('e_purchase_orders_detail')->insert($totalPurchaseOrdersDetail);
-                        DB::rollBack();
                         $pullLog['spend_time'] = time() - $beginTime;
                         DB::table('pull_log')->insert($pullLog);
-                        DB::rollBack();
                         DB::commit();
                         $endTime = time();
                         ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
-
                     } catch (\Exception $e) {
+                        DB::rollBack();
                         $pullLog['status']  = 0;
                         $pullLog['err_msg'] = $e->getMessage();
                         DB::table('pull_log')->insert($pullLog);
