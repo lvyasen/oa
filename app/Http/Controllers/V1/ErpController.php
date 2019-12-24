@@ -663,6 +663,7 @@
             $end   = time();
             $diff  = $end - $start;
             $where = [];
+            $where1 = [];
             if ($diff < 86400 && $diff > 0){
                 $sort = '%H';
             } elseif ($diff < 2678400) {
