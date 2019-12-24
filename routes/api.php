@@ -105,11 +105,17 @@
         $api->post('getWarehouse', 'ErpController@getWarehouse');//获取仓库列表
         $api->post('getEOrders', 'ErpController@getEOrders');//获取订单列表
         $api->post('getShippingMethod', 'ErpController@getShippingMethod');//获取运输方式
-        $api->post('addLogistics', 'ErpController@addLogistics');//添加物流费用
-        $api->post('editLogistics', 'ErpController@editLogistics');//修改物流费用
-        $api->post('delLogistics', 'ErpController@delLogistics');//删除 物流费用
+
         $api->post('pullEPurchaseOrders', 'ErpController@pullEPurchaseOrders');//拉取采购单
         $api->post('getTotalFeeData', 'ErpController@getTotalFeeData');//费用总数据
+        /**
+         * 物流费用
+         */
+        $api->post('addLogistics', 'ShipController@addLogistics');//添加物流费用
+        $api->post('editLogistics', 'ShipController@editLogistics');//修改物流费用
+        $api->post('delLogistics', 'ShipController@delLogistics');//删除 物流费用
+        $api->any('getLogisticsList', 'ShipController@getLogisticsList');//获取物流列表
+        $api->any('getLogisticsLineChart', 'ShipController@getLogisticsLineChart');//获取物流列表分析
         /**
          * 采购费用
          */
@@ -147,8 +153,7 @@
         /**
          * ERP
          */
-        $api->any('getLogisticsList', 'ErpController@getLogisticsList');//获取物流列表
-        $api->any('getLogisticsLineChart', 'ErpController@getLogisticsLineChart');//获取物流列表分析
+
 
     });
     /**
