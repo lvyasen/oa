@@ -25,7 +25,16 @@
      */
     class MaterialController extends Controller
     {
-        //
+        /**
+         * 添加物料
+         *
+         * @param Request $request
+         * addMaterial
+         * author: walker
+         * Date: 2019/12/16
+         * Time: 16:33
+         * Note:
+         */
         public function addMaterial(Request $request)
         {
             $request->validate([
@@ -36,6 +45,7 @@
                                    'ticket_price'         => 'required|string',
                                    'ticket_num'           => 'required|integer',
                                    'buy_time'             => 'required|date',
+                                   'web_id'               => 'required|string',
                                ]);
             $model                             = new Material();
             $model->package_num                = $request->package_num;
@@ -49,6 +59,8 @@
             $model->ticker_total_price         = (int)$request->ticket_num * number_format($request->ticket_price, 2);
             $model->total_price                = $model->package_total_price + $model->zipper_package_total_price + $model->ticker_total_price;
             $model->buy_time                   = strtotime($request->buy_time);
+            $model->web_id                     = $request->web_id;
+            $model->buy_at                     = date('Y-m-d H:i:s', strtotime($request->buy_time));
             if ($request->file('image')){
                 $path            = $request->file('image')->store("public");
                 $model->img_path = Storage::url($path);
@@ -95,6 +107,8 @@
             $model->ticker_total_price         = (int)$request->ticket_num * number_format($request->ticket_price, 2);
             $model->total_price                = $model->package_total_price + $model->zipper_package_total_price + $model->ticker_total_price;
             $model->buy_time                   = strtotime($request->buy_time);
+            $model->web_id                     = $request->web_id;
+            $model->buy_at                     = date('Y-m-d H:i:s', strtotime($request->buy_time));
             if ($request->file('image')){
                 $path            = $request->file('image')->store("public");
                 $model->img_path = Storage::url($path);
@@ -146,7 +160,7 @@
 
             $request->validate([
                                    'start_time' => 'nullable|date',
-                                   'end_time' => 'nullable|date',
+                                   'end_time'   => 'nullable|date',
                                ]);
             $page            = (int)$request->page ?: 1;
             $pageNum         = $request->pageNum ?: 10;
@@ -164,7 +178,7 @@
             $data['list']  = $list;
             $data['page']  = $page;
             $data['count'] = $count;
-            if (!empty($request->download)){
+            if ( !empty($request->download)){
                 return Excel::download(new MaterialExport(toArr($list)), 'test.xlsx');
             };
             ajaxReturn(200, Code::$com[200], $data);

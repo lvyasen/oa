@@ -4,6 +4,7 @@
 
     use App\Dictionary\Code;
     use App\Http\Controllers\Controller;
+    use App\Models\Erp\SiteWeb;
     use App\Models\V1\GaConfig;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
@@ -44,6 +45,38 @@
             } catch (\Exception $e) {
                 ajaxReturn(4005, $e->getMessage());
             }
+        }
+
+        /**
+         * 通用获取GA接口数据
+         *
+         * @param Request $request
+         *
+         * @throws \Exception
+         * getGaCommonApi
+         * author: walker
+         * Date: 2019/12/19
+         * Time: 10:31
+         * Note:
+         */
+        public function getGaCommonApi(Request $request)
+        {
+            $request->validate([
+                                   'start_time' => 'nullable|date',
+                                   'end_time'   => 'nullable|date',
+                                   'view_id'    => 'required|string',
+                                   'metrics'    => 'required |string ',
+                                   'dimensions' => 'required |string ',
+                               ]);
+            $date = $this->getDate(4, '', $request->start_time, $request->end_time);
+            $params = [
+                'dimensions' => 'ga:userGender',//维度
+            ];
+//            fp($params);
+            $metrics =$request->metrics?:'ga:sessions';//维度
+
+            $info = $this->getGaCommonMethod($date,$metrics,$params);
+            ajaxReturn(200, Code::$com[200], $info);
         }
 
         /**
@@ -161,9 +194,11 @@
                     $dateObj = Period::years($dateVal);
                     break;
                 case '4'://自定义日期
-                    $startTime = new \DateTime($startTime);
-                    $endTime   = new \DateTime($endTime);
-                    $dateObj   = Period::create($startTime, $endTime);
+                    $startTime = $startTime ? date('Y-m-d', strtotime($startTime)) : date('Y-m-d', strtotime("-30 day"));
+                    $endTime   = $endTime ? date('Y-m-d', strtotime($endTime)) : date('Y-m-d');
+                    $start     = new \DateTime($startTime);
+                    $end       = new \DateTime($endTime);
+                    $dateObj   = Period::create($start, $end);
                     break;
                 default:
                     ajaxReturn(4001, Code::$com[4001]);
@@ -233,9 +268,9 @@
          * Time: 14:40
          * Note:
          */
-        private function getGaCommonMethod($date, $other = [], string $metrics = 'ga:sessions')
+        private function getGaCommonMethod($date,$metrics,$params)
         {
-            return toArr(AnalyticsFacade::performQuery($date, $metrics, $other));
+            return toArr(AnalyticsFacade::performQuery($date,$metrics, $params));
         }
 
         /**
@@ -252,11 +287,11 @@
         {
 
             $page          = (int)$request->page ?: 1;
-            $pageNum       = $request->pageNum ?: 10;
+            $pageNum       = $request->pageNum ?: 100;
             $pageStart     = ($page - 1) * $pageNum;
-            $table         = DB::table('ga_config');
-            $list          = $table->offset($pageStart)->limit($pageNum)->get();
-            $count         = $table->count();
+            $table         = new SiteWeb();
+            $list          = $table->where(['is_delete'=>0,'type'=>1])->selectRaw('web_id,web_name')->offset($pageStart)->limit($pageNum)->get();
+            $count         = $table->where(['is_delete'=>0,'type'=>1])->count();
             $data          = [];
             $data['list']  = $list;
             $data['page']  = $page;
@@ -345,10 +380,12 @@
         public function gaTest(Request $request)
         {
             return view('test');
+
         }
 
         /**
          * GA授权
+         *
          * @param Request $request
          *
          * @throws \Google_Exception
@@ -362,9 +399,9 @@
         {
             $client     = new \Google_Client();
             $configPath = storage_path('client_secret.json');
-            $res = $client->setAuthConfig($configPath);
+            $res        = $client->setAuthConfig($configPath);
 
-            $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/oauthCallback.php');
+            $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/oauthCallback');
             $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
             if ( !isset($request->code)){
                 $auth_url = $client->createAuthUrl();
@@ -376,6 +413,5 @@
                 header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
             }
         }
-
 
     }

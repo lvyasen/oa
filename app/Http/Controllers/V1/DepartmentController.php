@@ -93,8 +93,7 @@
             $data['manager_user_id']    = $request->manager_user_id;
             $departmentId               = $request->department_id;
             $model                      = new Department();
-
-            $result = $model->editDepartment($departmentId, $data);
+            $result                     = $model->editDepartment($departmentId, $data);
             if (empty($result)) ajaxReturn(4003, Code::$com[4003]);
             SystemController::sysLog($request, '修改部门');
             ajaxReturn(200, Code::$com[200]);
@@ -201,7 +200,7 @@
             $where           = [];
             $where['status'] = 1;
             if ( !empty($departmentId)) $where['department_id'] = $departmentId;
-            $table = DB::table('users');
+            $table         = DB::table('users');
             $list          = $table->where($where)->offset($pageStart)->limit($pageNum)->get();
             $count         = $table->where($where)->count();
             $data          = [];

@@ -12,4 +12,5 @@
         protected $dateFormat = 'U';
         const CREATED_AT = 'add_time';
         const UPDATED_AT = 'update_time';
+
     }

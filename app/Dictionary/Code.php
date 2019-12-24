@@ -31,6 +31,7 @@
                 'get_user_info_fail'    => ['code' => 4001, 'msg' => '获取用户信息失败'],
                 'login_fail'            => ['code' => 4003, 'msg' => '用户账户密码错误'],
                 'not_login'             => ['code' => 4004, 'msg' => '用户未登录'],
+                'not_have_promise'      => ['code' => 4005, 'msg' => '用户没有权限'],
             ];
 
 
