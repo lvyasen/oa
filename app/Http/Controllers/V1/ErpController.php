@@ -637,6 +637,8 @@
                         }
                     };
                 }
+            }else{
+                ajaxReturn(4003,'没有订单号',$orderCode);
             }
 
         }
