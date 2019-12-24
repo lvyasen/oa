@@ -67,7 +67,7 @@
                 query: {
                     ids: ids
                 }
-            }
+            };
             timeline.set(newIds).execute();
         });
     });
