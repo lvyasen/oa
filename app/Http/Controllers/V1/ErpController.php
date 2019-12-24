@@ -40,7 +40,6 @@
         }
 
 
-
         /**
          * 获取E仓仓库列表
          *
@@ -522,9 +521,6 @@
         }
 
 
-
-
-
         /**
          * 获取采购费用
          *
@@ -647,7 +643,7 @@
         }
 
         /**
-         * 费用总数据
+         * 费用总数据走势图
          *
          * @param Request $request
          * getTotalFeeData
@@ -666,6 +662,7 @@
             $start = $request->start_time ? strtotime($request->start_time) : strtotime('-1 year');
             $end   = $request->end_time ? strtotime($request->end_time) : time();
             $diff  = $end - $start;
+            $where          = [];
             if ($diff < 86400 && $diff > 0){
                 $sort = '%H';
             } elseif ($diff < 2678400) {
@@ -673,54 +670,6 @@
             } else {
                 $sort = '%Y-%m';
             }
-            $where = [];
-            if ( !empty($request->web_id)){
-                $where['web_id'] = $request->web_id;
-            }
-
-            $totalOrderSale = DB::table('shopify_order')
-                                ->whereBetween('created_at', [$start, $end])
-                                ->select(DB::raw("sum(total_price_usd) as total_pirce"))
-                                ->where($where)
-                                ->first();
-            $totalOrderSale = $totalOrderSale->total_pirce ?: 0;//订单总销售额
-            $countUser      = DB::table('shopify_order')
-                                ->whereBetween('created_at', [$start, $end])
-                                ->select(DB::raw("count(email) as user_nums"))
-                                ->groupBy('email')
-                                ->where($where)
-                                ->first();
-            $countUser      = $countUser->user_nums ?: 0;
-            //客单价
-            $pct = $totalOrderSale / $countUser;
-            //物流费用
-            $ship = DB::table('ship');
-            if ( !empty($request->web_id)){
-                $ship->where(['webId' => $request->web_id]);
-            }
-            $shipTotalFee = $ship
-                ->select(DB::raw("sum(totalFee) as total_price"))
-                ->whereBetween('dateWarehouseShipping', [$start, $end])
-                ->first();
-            $shipTotalFee = $shipTotalFee->total_price ?: 0;
-            //物料费用
-            $materialTotalFee = DB::table('material')
-                                  ->where($where)
-                                  ->where(['is_del' => 0, 'status' => 1])
-                                  ->select(DB::raw("sum(total_price) as total_price"))
-                                  ->whereBetween('buy_time', [$start, $end])
-                                  ->first();
-            $materialTotalFee = $materialTotalFee->total_price ?: 0;
-            //采购费用
-            $orderCostTotal = DB::table('e_order_cost')
-                                ->where($where)
-                                ->whereBetween('pay_time', [\date('Y-m-d H:i:s', $start), \date('Y-m-d H:i:s', $end)])
-                                ->select(DB::raw("sum(totalCost) as total_price"))
-                                ->first();
-            $orderCostTotal = $orderCostTotal->total_price ?: 0;
-            $totalCost      = $shipTotalFee + $materialTotalFee + $orderCostTotal;
-            $where          = [];
-            //date_format  FROM_UNIXTIME
             //物流费用统计
             $shipFee = DB::table('ship')
                          ->select(DB::raw("FROM_UNIXTIME(dateWarehouseShipping,'{$sort}') as create_time,sum(totalFee) as total_price"))
@@ -800,13 +749,78 @@
                 //                fp($val);
             }
 
-            $data['total_cost']  = $totalCost;
-            $data['order_sales'] = $totalOrderSale;
-            $data['pct'] = $pct;
+
             ajaxReturn(200, Code::$com[200], $data);
 
         }
 
+        /**
+         * 费用总数据
+         * @param Request $request
+         * getTotalFee
+         * author: walker
+         * Date: 2019/12/24
+         * Time: 14:25
+         * Note:
+         */
+        public function getTotalFee(Request $request)
+        {
+            $start = $request->start_time ? strtotime($request->start_time) : strtotime('-1 year');
+            $end   = $request->end_time ? strtotime($request->end_time) : time();
+            $where = [];
+            if ( !empty($request->web_id)){
+                $where['web_id'] = $request->web_id;
+            }
+
+            $totalOrderSale = DB::table('shopify_order')
+                                ->whereBetween('created_at', [$start, $end])
+                                ->select(DB::raw("sum(total_price_usd) as total_pirce"))
+                                ->where($where)
+                                ->first();
+            $totalOrderSale = $totalOrderSale->total_pirce ?: 0;//订单总销售额
+            $countUser      = DB::table('shopify_order')
+                                ->whereBetween('created_at', [$start, $end])
+                                ->select(DB::raw("count(email) as user_nums"))
+                                ->groupBy('email')
+                                ->where($where)
+                                ->first();
+            $countUser      = $countUser->user_nums ?: 0;
+            //客单价
+            $pct = $totalOrderSale / $countUser;
+            //物流费用
+            $ship = DB::table('ship');
+            if ( !empty($request->web_id)){
+                $ship->where(['webId' => $request->web_id]);
+            }
+            $shipTotalFee = $ship
+                ->select(DB::raw("sum(totalFee) as total_price"))
+                ->whereBetween('dateWarehouseShipping', [$start, $end])
+                ->first();
+            $shipTotalFee = $shipTotalFee->total_price ?: 0;
+            //物料费用
+            $materialTotalFee = DB::table('material')
+                                  ->where($where)
+                                  ->where(['is_del' => 0, 'status' => 1])
+                                  ->select(DB::raw("sum(total_price) as total_price"))
+                                  ->whereBetween('buy_time', [$start, $end])
+                                  ->first();
+            $materialTotalFee = $materialTotalFee->total_price ?: 0;
+            //采购费用
+            $orderCostTotal = DB::table('e_order_cost')
+                                ->where($where)
+                                ->whereBetween('pay_time', [\date('Y-m-d H:i:s', $start), \date('Y-m-d H:i:s', $end)])
+                                ->select(DB::raw("sum(totalCost) as total_price"))
+                                ->first();
+            $orderCostTotal = $orderCostTotal->total_price ?: 0;
+            $totalCost      = $shipTotalFee + $materialTotalFee + $orderCostTotal;
+
+            //date_format  FROM_UNIXTIME
+            $data['total_cost']  = $totalCost;
+            $data['order_sales'] = $totalOrderSale;
+            $data['pct']         = $pct;
+            ajaxReturn(200, Code::$com[200], $data);
+
+        }
 
         /**
          * 获取物流费用

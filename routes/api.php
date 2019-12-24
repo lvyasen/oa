@@ -108,6 +108,7 @@
 
         $api->post('pullEPurchaseOrders', 'ErpController@pullEPurchaseOrders');//拉取采购单
         $api->post('getTotalFeeData', 'ErpController@getTotalFeeData');//费用总数据
+        $api->post('getTotalFee', 'ErpController@getTotalFee');//费用总数据-饼图
         /**
          * 物流费用
          */
