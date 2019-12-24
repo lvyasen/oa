@@ -645,6 +645,17 @@
 
         }
 
+        public function pullProductSkuCost(Request $request)
+        {
+            $url       = $request->route()->getActionName();
+            $beginTime = time();
+            $service       = 'getOrderCostDetailSku';
+            $params              = [];
+            $params['orderCode'] = ['CSGW0043010103'];
+            $result              = self::soapRequest($service, 'WMS', $params);
+            fp($result);
+        }
+
         /**
          * 费用总数据走势图
          *
