@@ -663,7 +663,7 @@
             $end   = time();
             $diff  = $end - $start;
             $where = [];
-            $where1 = [];
+            $whereWeb = [];
             if ($diff < 86400 && $diff > 0){
                 $sort = '%H';
             } elseif ($diff < 2678400) {
@@ -673,14 +673,14 @@
             }
             if(!empty($request->web_id)){
                 $where['web_id'] = $request->web_id;
-                $where1['webId'] = $request->web_id;
+                $whereWeb['webId'] = $request->web_id;
             }
             //物流费用统计
             $shipFee = DB::table('ship')
                          ->select(DB::raw("FROM_UNIXTIME(dateWarehouseShipping,'{$sort}') as create_time,sum(totalFee) as total_price"))
                          ->groupBy(DB::raw("FROM_UNIXTIME(dateWarehouseShipping,'{$sort}')"))
                          ->orderBy('create_time', 'asc')
-                         ->where($where1)
+                         ->where($whereWeb)
                          ->whereBetween('dateWarehouseShipping', [$start, $end])
                          ->get();
             $shipFee = toArr($shipFee);
