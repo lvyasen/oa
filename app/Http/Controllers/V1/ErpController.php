@@ -65,7 +65,7 @@
             $startTime   = $request->start_time ? strtotime($request->start_time) : 0;
             $endTime     = $request->end_time ? strtotime($request->end) : time();
             if ( !empty($orderStatus)) $where['status'] = $orderStatus;
-            $table = new OrderE();
+            $table = new Ship();
             $table->whereBetween('createdDate', [\date('Y-m-d H:i:s', $startTime), \date('Y-m-d H:i:s', $endTime)]);
             $list          = $table->where($where)->offset($pageStart)->limit($pageNum)->get();
             $count         = $table->where($where)->count();

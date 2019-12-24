@@ -4,6 +4,7 @@
 
     use App\Dictionary\Code;
     use App\Http\Controllers\Controller;
+    use App\Models\Erp\SiteWeb;
     use App\Models\V1\GaConfig;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
@@ -286,11 +287,11 @@
         {
 
             $page          = (int)$request->page ?: 1;
-            $pageNum       = $request->pageNum ?: 10;
+            $pageNum       = $request->pageNum ?: 100;
             $pageStart     = ($page - 1) * $pageNum;
-            $table         = DB::table('ga_config');
-            $list          = $table->offset($pageStart)->limit($pageNum)->get();
-            $count         = $table->count();
+            $table         = new SiteWeb();
+            $list          = $table->where(['is_delete'=>0,'type'=>1])->selectRaw('web_id,web_name')->offset($pageStart)->limit($pageNum)->get();
+            $count         = $table->where(['is_delete'=>0,'type'=>1])->count();
             $data          = [];
             $data['list']  = $list;
             $data['page']  = $page;
