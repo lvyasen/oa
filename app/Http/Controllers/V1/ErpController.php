@@ -116,9 +116,9 @@
             $params['pageSize']   = 50;
             $params['getAddress'] = 1;
 
-            $service = 'getOrderList';
-            $result  = self::soapRequest($service, 'EB', $params);
-
+            $service      = 'getOrderList';
+            $result       = self::soapRequest($service, 'EB', $params);
+            $request_time = time();
             if ( !empty($result['data'])){
                 //                $siteList              = $this->getSiteList();
                 $orderTotalData        = [];
@@ -277,7 +277,10 @@
 
                         DB::commit();
                         $endTime = time();
-                        ajaxReturn(200, 'success', ['spend_time' => $endTime - $beginTime]);
+                        ajaxReturn(200, 'success', [
+                            'spend_time'   => $endTime - $beginTime,
+                            'request_time' => $endTime - $request_time,
+                        ]);
 
                     } catch (\Exception $e) {
                         DB::rollBack();
@@ -294,7 +297,7 @@
                 };
             } else {
 
-                ajaxReturn(4001, 'not find data');
+                ajaxReturn(4001, 'not find data', $result);
             }
 
         }
@@ -501,16 +504,16 @@
          */
         private function getWebId($referenceNo)
         {
-            //            $model = new OrderInfo();
-            $model = DB::table('shopify_order');
-            $info  = $model->where(['shopify_id' => $referenceNo])
-                           ->first('web_id');
 
+            $model = new OrderInfo();
+            $info  = $model->where(['source_id' => $referenceNo])
+                           ->first('web_id');
             if ( !empty($info)){
                 return $info->web_id;
             } else {
-                $model = new OrderInfo();
-                $info  = $model->where(['source_id' => $referenceNo])
+                //                            $model = new OrderInfo();
+                $model = DB::table('shopify_order');
+                $info  = $model->where(['shopify_id' => $referenceNo])
                                ->first('web_id');
                 if ( !empty($info)){
                     return $info->web_id;
@@ -659,10 +662,10 @@
                                ]);
             //分组条件 1天内按小时分组,否则按天/月分组
             //86400/1天 2678400/1月
-            $start = strtotime('-1 year');
-            $end   = time();
-            $diff  = $end - $start;
-            $where = [];
+            $start    = strtotime('-1 year');
+            $end      = time();
+            $diff     = $end - $start;
+            $where    = [];
             $whereWeb = [];
             if ($diff < 86400 && $diff > 0){
                 $sort = '%H';
@@ -671,8 +674,8 @@
             } else {
                 $sort = '%Y-%m';
             }
-            if(!empty($request->web_id)){
-                $where['web_id'] = $request->web_id;
+            if ( !empty($request->web_id)){
+                $where['web_id']   = $request->web_id;
                 $whereWeb['webId'] = $request->web_id;
             }
             //物流费用统计

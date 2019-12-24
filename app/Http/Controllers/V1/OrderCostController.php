@@ -45,7 +45,5 @@
                 ->get();
             ajaxReturn(200,Code::$com[200],$list);
 
-
-
         }
     }
