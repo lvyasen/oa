@@ -636,6 +636,8 @@
                             ajaxReturn(4002, 'error', $e->getMessage());
                         }
                     };
+                }else{
+                    ajaxReturn(4002,'请求接口失败',$result);
                 }
             }else{
                 ajaxReturn(4003,'没有订单号',$orderCode);
