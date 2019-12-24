@@ -111,6 +111,10 @@
         $api->post('pullEPurchaseOrders', 'ErpController@pullEPurchaseOrders');//拉取采购单
         $api->post('getTotalFeeData', 'ErpController@getTotalFeeData');//费用总数据
         /**
+         * 采购费用
+         */
+        $api->post('getOrderCostList', 'OrderCostController@getOrderCostList');//采购费用列表
+        /**
          * 物流费用相关接口
          */
         $api->post('getShippingList', 'ShipController@getShippingList');//获取物流费用列表
