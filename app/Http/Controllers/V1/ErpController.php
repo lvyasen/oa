@@ -39,42 +39,7 @@
             ajaxReturn(4001, Code::$com[4001]);
         }
 
-        /**
-         * 获取物流费用列表
-         *
-         * @param Request $request
-         * getShippingList
-         * author: walker
-         * Date: 2019/12/11
-         * Time: 9:51
-         * Note:
-         */
-        public function getShippingList(Request $request)
-        {
-            $request->validate([
-                                   'start_time' => 'nullable|date',
-                                   'end_time'   => 'nullable|date',
-                                   //                                   'web_id'   => 'nullable|string|exists:connection.erp.siteweb',
-                               ]);
-            $page        = (int)$request->page ?: 1;
-            $pageNum     = $request->pageNum ?: 10;
-            $pageStart   = ($page - 1) * $pageNum;
-            $webId       = $request->web_id;
-            $orderStatus = $request->status;
-            $where       = [];
-            $startTime   = $request->start_time ? strtotime($request->start_time) : 0;
-            $endTime     = $request->end_time ? strtotime($request->end) : time();
-            if ( !empty($orderStatus)) $where['status'] = $orderStatus;
-            $table = new Ship();
-            $table->whereBetween('createdDate', [\date('Y-m-d H:i:s', $startTime), \date('Y-m-d H:i:s', $endTime)]);
-            $list          = $table->where($where)->offset($pageStart)->limit($pageNum)->get();
-            $count         = $table->where($where)->count();
-            $data          = [];
-            $data['list']  = $list;
-            $data['page']  = $page;
-            $data['count'] = $count;
-            ajaxReturn(200, Code::$com[200], $data);
-        }
+
 
         /**
          * 获取E仓仓库列表

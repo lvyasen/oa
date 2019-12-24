@@ -113,7 +113,7 @@
         /**
          * 物流费用相关接口
          */
-        $api->post('getShippingList', 'ErpController@getShippingList');//获取物流费用列表
+        $api->post('getShippingList', 'ShipController@getShippingList');//获取物流费用列表
         /**
          * GA接口相关
          */
