@@ -659,10 +659,10 @@
                                ]);
             //分组条件 1天内按小时分组,否则按天/月分组
             //86400/1天 2678400/1月
-            $start = $request->start_time ? strtotime($request->start_time) : strtotime('-1 year');
-            $end   = $request->end_time ? strtotime($request->end_time) : time();
+            $start = strtotime('-1 year');
+            $end   = time();
             $diff  = $end - $start;
-            $where          = [];
+            $where = [];
             if ($diff < 86400 && $diff > 0){
                 $sort = '%H';
             } elseif ($diff < 2678400) {
@@ -670,12 +670,16 @@
             } else {
                 $sort = '%Y-%m';
             }
+            if(!empty($request->web_id)){
+                $where['web_id'] = $request->web_id;
+                $where1['webId'] = $request->web_id;
+            }
             //物流费用统计
             $shipFee = DB::table('ship')
                          ->select(DB::raw("FROM_UNIXTIME(dateWarehouseShipping,'{$sort}') as create_time,sum(totalFee) as total_price"))
                          ->groupBy(DB::raw("FROM_UNIXTIME(dateWarehouseShipping,'{$sort}')"))
                          ->orderBy('create_time', 'asc')
-                         ->where($where)
+                         ->where($where1)
                          ->whereBetween('dateWarehouseShipping', [$start, $end])
                          ->get();
             $shipFee = toArr($shipFee);
@@ -756,6 +760,7 @@
 
         /**
          * 费用总数据
+         *
          * @param Request $request
          * getTotalFee
          * author: walker

@@ -11,36 +11,32 @@
 
     class FaceBookController extends Controller
     {
-        private static $access_token  = 'EAAHSAZC8QX2ABAEHVMIDNMjEQ9uBNVV3voe8NdeOuP2Kxd56u8J3YrMC1JtzzLqZBjBGAvYCIQfJP3FrX0cz1bZABVKcQIjPxr7EhZAFA9j7VnepqZADrGs999NlkHocffIlFGfBg0XaSNoYNR5C31bNRbU9S2Cr6mO0pcrZCRopNo52j20WtG9fikGgKSw5YZD';
-        private static $ad_account_id = 'act_954424211597267';
-        private static $app_secret    = 'c600725b9c87e95d7e92e27117a1ddfb';
-        private static $app_id        = '102541504485683';
+        private static $access_token  = 'EAAHSAZC8QX2ABAIWmuZAqqmvk5kBZCCKJ42XE9nOLOclun2YbREnWp15qZB5nsRsrkxkIVcfLPn6ePJZANonuuUeUcghciFM0CnUrmcXoxbEUPIqlxkfFVNrcMiX49NLXVFtRRmHnZAVROwyP7VF3O25QTb136vV6lP4k7meWV8iBehOxZBrzMWRQcdb1NrSNsZD';
+        private static $ad_account_id = '512389582708576';
+        private static $app_secret    = '6d0ad231608af84f6c214a64bceb24dc';
+        private static $app_id        = '512389582708576';
 
         //
         public function getAds(Request $request)
         {
 
-            $fields = array(
+            $fields = [
                 'spend',
-                'account_currency',
-                'ad_id',
-                'ad_name',
-                'account_id',
-                'unique_ctr',
-                'unique_inline_link_clicks',
 
-            );
-            $params = array(
-                'level' => 'account',
-                'filtering' => array(),
-                'breakdowns' => array(),
-                'time_range' => array('since' => '2019-11-10','until' => '2019-12-10'),
-            );
+                'clicks'
+                //                'unique_actions:link_click',
+            ];
+            $params = [
+                'level'      => 'account',
+                'filtering'  => [],
+                'breakdowns' => [],
+                'time_range' => ['since' => '2019-01-10', 'until' => '2019-12-10'],
+            ];
             $api    = Api::init(self::$app_id, self::$app_secret, self::$access_token);
             $api->setLogger(new CurlLogger());
             $adAccount = new AdAccount(self::$ad_account_id);
-//            $res = $adAccount->getUsers();
-            $res       = $adAccount->getInsights($fields, $params)->getResponse()->getContent();
+            //            $res = $adAccount->getUsers();
+            $res = $adAccount->getInsights($fields, $params)->getResponse()->getContent();
             fp($res);
 
         }
