@@ -191,7 +191,6 @@
                         $ship['platformFeeTotal']        = $val['platformFeeTotal'];
                         $ship['shipFee']                 = $val['shipFee'];
                         $ship['dateWarehouseShipping']   = strtotime($val['dateWarehouseShipping']);
-                        $ship['dateWarehouseShippingAt'] = \date('Y-m-d H:i:s', strtotime($val['dateWarehouseShipping']));
                         $ship['addTime']                 = \date('Y-m-d H:i:s');
                         $ship['webId']                   = $webId;
                         $ship['totalFee']                = round($val['platformFeeTotal'], 3) + round($val['shipFee'], 3);
