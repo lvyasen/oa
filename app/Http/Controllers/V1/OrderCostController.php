@@ -43,9 +43,9 @@
                 ->offset($pageStart)
                 ->limit($pageNum)
                 ->get();
-            $count = $table->where($where)
+            $count = DB::table('e_order_goods_cost')
                           ->whereBetween('pay_time',[date("Y-m-d H:i:s",$start),date("Y-m-d H:i:s",$end)])
-                          ->count();
+                          ->count('id');
             $data['list']  = $list;
             $data['page']  = $page;
             $data['count'] = $count;
