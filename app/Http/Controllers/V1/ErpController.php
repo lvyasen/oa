@@ -645,13 +645,27 @@
 
         }
 
+        /**
+         * 获取采购费用按SKU
+         * @param Request $request
+         *
+         * @throws \SoapFault
+         * pullProductSkuCost
+         * author: walker
+         * Date: 2019/12/24
+         * Time: 18:18
+         * Note:
+         */
         public function pullProductSkuCost(Request $request)
         {
             $url       = $request->route()->getActionName();
             $beginTime = time();
             $service       = 'getOrderCostDetailSku';
             $params              = [];
-            $params['orderCode'] = ['CSGW0043010103'];
+//            $params['orderCode'] = ['391528067122301854'];
+//            $params['orderCode'] = ['SF19041730215'];
+            $params['dateFor'] = "2018-03-18";
+            $params['dateTo'] = \date("Y-m-d");
             $result              = self::soapRequest($service, 'WMS', $params);
             fp($result);
         }
