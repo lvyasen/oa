@@ -863,7 +863,7 @@
                           ->get();
             $material = toArr($material);
             //采购费用
-            $orderCost = DB::table('e_order_cost')
+            $orderCost = DB::table('e_order_goods_cost')
                            ->select(DB::raw("date_format(pay_time,'{$sort}') as create_time,sum(totalCost) as total_price"))
                            ->groupBy(DB::raw("date_format(pay_time,'{$sort}')"))
                            ->orderBy('create_time', 'asc')

@@ -35,11 +35,11 @@
             $end   = $request->end_time ? strtotime($request->end_time) : time();
             $where = [];
             if ( !empty($request->web_id))$where['web_id'] = $request->web_id;
-            $field = "id,reference_no,orderTotalAmount,platformCost,purchaseCost,currency_rate,pay_time,totalCost,grossProfit,sku_quantity,web_id";
-            $table = DB::table('e_order_cost');
+            $field = "";
+            $table = DB::table('e_order_goods_cost');
             $list = $table->where($where)
                 ->whereBetween('pay_time',[date("Y-m-d H:i:s",$start),date("Y-m-d H:i:s",$end)])
-                ->selectRaw($field)
+//                ->selectRaw($field)
                 ->offset($pageStart)
                 ->limit($pageNum)
                 ->get();
