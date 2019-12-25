@@ -636,17 +636,18 @@
                             ajaxReturn(4002, 'error', $e->getMessage());
                         }
                     };
-                }else{
-                    ajaxReturn(4002,'请求接口失败',$result);
+                } else {
+                    ajaxReturn(4002, '请求接口失败', $result);
                 }
-            }else{
-                ajaxReturn(4003,'没有订单号',$orderCode);
+            } else {
+                ajaxReturn(4003, '没有订单号', $orderCode);
             }
 
         }
 
         /**
          * 获取采购费用按SKU
+         *
          * @param Request $request
          *
          * @throws \SoapFault
@@ -660,14 +661,155 @@
         {
             $url       = $request->route()->getActionName();
             $beginTime = time();
-            $service       = 'getOrderCostDetailSku';
-            $params              = [];
-//            $params['orderCode'] = ['391528067122301854'];
-//            $params['orderCode'] = ['SF19041730215'];
-            $params['dateFor'] = "2018-03-18";
-            $params['dateTo'] = \date("Y-m-d");
-            $result              = self::soapRequest($service, 'WMS', $params);
-            fp($result);
+            $service   = 'getOrderCostDetailSku';
+
+            $where              = [
+                'pull_url' => $url,
+                'status'   => 1,
+                'type'     => 4,
+            ];
+            $info               = DB::table('pull_log')
+                                    ->where($where)
+                                    ->orderBy('current_page', 'desc')
+                                    ->first('current_page');
+            $page               = empty($info) ? 1 : $info->current_page + 1;
+            $params             = [];
+            $params['page']     = $page;
+            $params['pageSize'] = 50;
+            $params['dateFor']  = "2018-03-18";
+            $params['dateTo']   = \date("Y-m-d");
+            $logTable           = DB::table('pull_log');
+            $result             = self::soapRequest($service, 'WMS', $params);
+
+            $pullLogData                 = [];
+            $pullLogData['pull_url']     = $url;
+            $pullLogData['current_page'] = $page;
+            $pullLogData['pull_time']    = \date('Y/m/d H:i:s');
+            $pullLogData['add_time']     = time();
+            $pullLogData['type']         = 4;
+            if ( !empty($result)){
+                if ( !empty($result['data'])){
+                    $totalGoodsCost = [];
+                    foreach ($result['data'] as $key => $val) {
+                        $goodsCost                               = [];
+                        $webId                                   = $this->getWebId($val['platformReferenceNo']);
+                        $goodsCost['platform']                   = $val['platform'];
+                        $goodsCost['orderPlatformType']          = $val['orderPlatformType'];
+                        $goodsCost['referenceNo']                = $val['referenceNo'];
+                        $goodsCost['platformReferenceNo']        = $val['platformReferenceNo'];
+                        $goodsCost['receivingCode']              = $val['receivingCode'];
+                        $goodsCost['productId']                  = $val['productId'];
+                        $goodsCost['orderSaleType']              = $val['orderSaleType'];
+                        $goodsCost['siteId']                     = $val['siteId'];
+                        $goodsCost['sellerId']                   = $val['sellerId'];
+                        $goodsCost['warehouseId']                = $val['warehouseId'];
+                        $goodsCost['productBarcode']             = $val['productBarcode'];
+                        $goodsCost['opPlatformSalesSku']         = $val['opPlatformSalesSku'];
+                        $goodsCost['opPlatformSalesSkuQuantity'] = $val['opPlatformSalesSkuQuantity'];
+                        $goodsCost['quantity']                   = $val['quantity'];
+                        $goodsCost['productTitle']               = $val['productTitle'];
+                        $goodsCost['orderTotalAmount']           = round($val['orderTotalAmount'], 3);
+                        $goodsCost['productAmount']              = round($val['productAmount'], 3);
+                        $goodsCost['orderTotalAmount']           = round($val['orderTotalAmount'], 3);
+                        $goodsCost['buyerPayShipping']           = round($val['buyerPayShipping'], 3);
+                        $goodsCost['ebaySellerRebate']           = round($val['ebaySellerRebate'], 3);
+                        $goodsCost['shippingFee']                = round($val['shippingFee'], 3);
+                        $goodsCost['paymentPlatformFee']         = round($val['paymentPlatformFee'], 3);
+                        $goodsCost['platformCost']               = round($val['platformCost'], 3);
+                        $goodsCost['fbaFee']                     = round($val['fbaFee'], 3);
+                        $goodsCost['packageFee']                 = round($val['packageFee'], 3);
+                        $goodsCost['warehouseStorageCharges']    = round($val['warehouseStorageCharges'], 3);
+                        $goodsCost['processingFee']              = round($val['processingFee'], 3);
+                        $goodsCost['otherFee']                   = round($val['otherFee'], 3);
+                        $goodsCost['purchaseShippingFee']        = round($val['purchaseShippingFee'], 3);
+                        $goodsCost['purchaseTaxationFee']        = round($val['purchaseTaxationFee'], 3);
+                        $goodsCost['purchaseCost']               = round($val['purchaseCost'], 3);
+                        $goodsCost['serviceTransportFee']        = round($val['serviceTransportFee'], 3);
+                        $goodsCost['currency_rate']              = round($val['currency_rate'], 3);
+                        $goodsCost['referencePrice']             = round($val['referencePrice'], 3);
+                        $goodsCost['avgUnitPrice']               = round($val['avgUnitPrice'], 3);
+                        $goodsCost['avgPurchasePrice']           = round($val['avgPurchasePrice'], 3);
+                        $goodsCost['firstCarrierFreight']        = round($val['firstCarrierFreight'], 3);
+                        $goodsCost['tariffFee']                  = round($val['tariffFee'], 3);
+                        $goodsCost['orderTotalAmountOrg']        = round($val['orderTotalAmountOrg'], 3);
+                        $goodsCost['productAmountOrg']           = round($val['productAmountOrg'], 3);
+                        $goodsCost['buyerPayShippingOrg']        = round($val['buyerPayShippingOrg'], 3);
+                        $goodsCost['shippingFeeOrg']             = round($val['shippingFeeOrg'], 3);
+                        $goodsCost['paymentPlatformFeeOrg']      = round($val['paymentPlatformFeeOrg'], 3);
+                        $goodsCost['platformCostOrg']            = round($val['platformCostOrg'], 3);
+                        $goodsCost['fbaFeeOrg']                  = round($val['fbaFeeOrg'], 3);
+                        $goodsCost['packageFeeOrg']              = round($val['packageFeeOrg'], 3);
+                        $goodsCost['warehouseStorageChargesOrg'] = round($val['warehouseStorageChargesOrg'], 3);
+                        $goodsCost['avgUnitPriceOrg']            = round($val['avgUnitPriceOrg'], 3);
+                        $goodsCost['processingFeeOrg']           = round($val['processingFeeOrg'], 3);
+                        $goodsCost['otherFeeOrg']                = round($val['otherFeeOrg'], 3);
+                        $goodsCost['ebaySellerRebateOrg']        = round($val['ebaySellerRebateOrg'], 3);
+                        $goodsCost['currencyCodeOrg']            = round($val['currencyCodeOrg'], 3);
+                        $goodsCost['currencyCode']               = round($val['currencyCode'], 3);
+                        $goodsCost['totalCost']                  = round($val['totalCost'], 3);
+                        $goodsCost['grossProfit']                = round($val['grossProfit'], 3);
+                        $goodsCost['grossProfitRate']            = round($val['grossProfitRate'], 3);
+                        $goodsCost['factoryGrossProfit']         = round($val['factoryGrossProfit'], 3);
+                        $goodsCost['factoryGrossMargin']         = round($val['factoryGrossMargin'], 3);
+                        $goodsCost['asinOrItem']                 = $val['asinOrItem'];
+                        $goodsCost['destinationCountry']         = $val['destinationCountry'];
+                        $goodsCost['dateRelease']                = $val['dateRelease'];
+                        $goodsCost['soShipTime']                 = $val['soShipTime'];
+                        $goodsCost['developResponsibleName']     = $val['developResponsibleName'];
+                        $goodsCost['sellerResponsibleName']      = $val['sellerResponsibleName'];
+                        $goodsCost['buyerName']                  = $val['buyerName'];
+                        $goodsCost['smCode']                     = $val['smCode'];
+
+                        $goodsCost['pay_time']   = $val['pay_time'];
+                        $goodsCost['updateTime'] = $val['updateTime'];
+                        $goodsCost['web_id']     = $webId;
+                        $totalGoodsCost[]        = $goodsCost;
+                    }
+                    $pullLogData['current_page'] = $result['page'];
+                    $pullLogData['page_size']    = $result['pageSize'];
+                    $pullLogData['count']        = $result['totalCount'];
+                    $pullLogData['spend_time']   = time() - $beginTime;
+//                    $logInfo                     = $logTable->where($where)->first('id');
+                    DB::beginTransaction();
+                    try {
+                        DB::table('e_order_goods_cost')->insert($totalGoodsCost);
+                        $pullLogData['status']  = 1;
+                        $pullLogData['err_msg'] = '下载订单费用和成本明细(按SKU)成功';
+
+                            DB::table('pull_log')->insert($pullLogData);
+                        DB::commit();
+                        ajaxReturn(200, '下载订单费用和成本明细(按SKU)成功',['spend_time'=>time()-$beginTime]);
+                    } catch (\Exception $exception) {
+                        DB::rollBack();
+                        $pullLogData['err_msg'] = $exception->getMessage();
+                        $pullLogData['status']  = 0;
+//                        if (empty($logInfo)){
+//                            $logTable->insert($pullLogData);
+//                        } else {
+//                            $id = $logInfo->id;
+//                            $logTable->where(['id' => $id])->update($pullLogData);
+//                        }
+                        ajaxReturn(4003, '添加数据失败', $exception->getMessage());
+                    }
+                } else {
+                    ajaxReturn(4002, '到头了');
+                }
+                fp($result);
+            } else {
+                $where['current_page']  = $page;
+                $pullLogData['err_msg'] = '没有获取到数据' . $result;
+                $where['status']        = 0;
+//                $logInfo                = $logTable->where($where)->first('id');
+//                if (empty($logInfo)){
+//                    $pullLogData['spend_time'] = time() - $beginTime;
+//                    $logTable->insert($pullLogData);
+//                } else {
+//                    $id = $logInfo->id;
+//                    $logTable->where(['id' => $id])->update($pullLogData);
+//                }
+                ajaxReturn(4001, '没有获取到数据' . $result);
+            }
+            //            fp($result);
         }
 
         /**
