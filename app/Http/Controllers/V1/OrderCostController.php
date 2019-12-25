@@ -43,7 +43,13 @@
                 ->offset($pageStart)
                 ->limit($pageNum)
                 ->get();
-            ajaxReturn(200,Code::$com[200],$list);
+            $count = $table->where($where)
+                          ->whereBetween('pay_time',[date("Y-m-d H:i:s",$start),date("Y-m-d H:i:s",$end)])
+                          ->count();
+            $data['list']  = $list;
+            $data['page']  = $page;
+            $data['count'] = $count;
+            ajaxReturn(200,Code::$com[200],$data);
 
         }
     }
