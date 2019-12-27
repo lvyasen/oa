@@ -199,201 +199,224 @@
                                  ])
                          ->orderBy('id', 'asc')
                          ->orderBy('current_page', 'asc')
-                         ->first();
+                         ->limit(10)
+                         ->get();
 
-            $pullLog = toArr($pullLog);
-            if ( !empty($pullLog)){
-                $url   = $pullLog['pull_url'];
-                $webId = $pullLog['web_id'];
-                $res   = $this->shopifyCurl($url);
+            $pullLogs = toArr($pullLog);
+            if ( !empty($pullLogs)){
+                $shopifyOrderData       = [];
+                $shopifyOrderLineItem   = [];
+                $shopifyOrderClient     = [];
+                $shopifyCustomer        = [];
+                $shopifyCustomerAddress = [];
+                $repeatOrder            = [];
+                $primaryIds             = [];
+                $notPrimaryIds          = [];
+                foreach ($pullLogs as $pullKey => $pullLog) {
+                    $url   = $pullLog['pull_url'];
+                    $webId = $pullLog['web_id'];
 
-                if ( !empty($res['orders'])){
-                    $shopifyOrderData       = [];
-                    $shopifyOrderLineItem   = [];
-                    $shopifyOrderClient     = [];
-                    $shopifyCustomer        = [];
-                    $shopifyCustomerAddress = [];
-                    $repeatOrder            = [];
+                    $res = $this->shopifyCurl($url);
+                    if ( !empty($res['orders'])){
+                        $primaryIds[] = $pullLog['id'];
+                        foreach ($res['orders'] as $key => $val) {
+                            $orderId                  = $val['id'] ?: 0;
+                            $createTime               = strtotime($val['created_at']);
+                            $updateTime               = strtotime($val['updated_at']);
+                            $insertData               = [];
+                            $insertData['email']      = $val['email'];
+                            $insertData['shopify_id'] = $orderId;
+                            $insertData['created_at'] = strtotime($val['created_at']);
+                            $insertData['updated_at'] = strtotime($val['updated_at']);
 
-                    foreach ($res['orders'] as $key => $val) {
-                        $orderId                  = $val['id'] ?: 0;
-                        $createTime               = strtotime($val['created_at']);
-                        $updateTime               = strtotime($val['updated_at']);
-                        $insertData               = [];
-                        $insertData['email']      = $val['email'];
-                        $insertData['shopify_id'] = $orderId;
-                        $insertData['created_at'] = strtotime($val['created_at']);
-                        $insertData['updated_at'] = strtotime($val['updated_at']);
+                            $insertData['create_time'] = date('Y-m-d H:i:s', strtotime($val['created_at']));
+                            $insertData['update_time'] = date('Y-m-d H:i:s', strtotime($val['updated_at']));
 
-                        $insertData['create_time'] = date('Y-m-d H:i:s', strtotime($val['created_at']));
-                        $insertData['update_time'] = date('Y-m-d H:i:s', strtotime($val['updated_at']));
+                            $insertData['number']                  = $val['number'];
+                            $insertData['note']                    = $val['note'];
+                            $insertData['token']                   = $val['token'];
+                            $insertData['gateway']                 = $val['gateway'];
+                            $insertData['total_price']             = round($val['total_price'], 2);
+                            $insertData['subtotal_price']          = round($val['subtotal_price'], 2);
+                            $insertData['total_tax']               = round($val['total_tax'], 2);
+                            $insertData['total_discounts']         = round($val['total_discounts'], 2);
+                            $insertData['total_line_items_price']  = round($val['total_line_items_price'], 2);
+                            $insertData['total_price_usd']         = round($val['total_price_usd'], 2);
+                            $insertData['total_tip_received']      = round($val['total_tip_received'], 2);
+                            $insertData['total_weight']            = $val['total_weight'];
+                            $insertData['currency']                = $val['currency'];
+                            $insertData['financial_status']        = $val['financial_status'];
+                            $insertData['confirmed']               = $val['confirmed'];
+                            $insertData['buyer_accepts_marketing'] = $val['buyer_accepts_marketing'];
+                            $insertData['name']                    = $val['name'];
+                            $insertData['referring_site']          = $val['referring_site'];
+                            $insertData['cancelled_at']            = strtotime($val['cancelled_at']);
+                            $insertData['cancel_reason']           = $val['cancel_reason'];
+                            $insertData['checkout_token']          = $val['checkout_token'];
+                            $insertData['reference']               = $val['reference'];
+                            $insertData['source_url']              = $val['source_url'];
+                            $insertData['processed_at']            = strtotime($val['processed_at']);
+                            $insertData['customer_locale']         = $val['customer_locale'];
+                            $insertData['app_id']                  = $val['app_id'];
+                            $insertData['browser_ip']              = $val['browser_ip'];
+                            $insertData['order_number']            = (int)$val['order_number'];
+                            $insertData['checkout_id']             = $val['checkout_id'];
+                            $insertData['source_name']             = $val['source_name'];
+                            $insertData['tags']                    = $val['tags'];
+                            $insertData['contact_email']           = $val['contact_email'];
+                            $insertData['order_status_url']        = $val['order_status_url'];
+                            $insertData['presentment_currency']    = $val['presentment_currency'];
+                            $insertData['user_name']               = $val['billing_address']['name'];
+                            $insertData['first_name']              = $val['billing_address']['first_name'];
+                            $insertData['last_name']               = $val['billing_address']['last_name'];
+                            $insertData['address1']                = $val['billing_address']['address1'];
+                            $insertData['address2']                = $val['billing_address']['address2'];
+                            $insertData['company']                 = $val['billing_address']['company'];
+                            $insertData['phone']                   = $val['billing_address']['phone'];
+                            $insertData['city']                    = $val['billing_address']['city'];
+                            $insertData['zip']                     = $val['billing_address']['zip'];
+                            $insertData['province_code']           = $val['billing_address']['province_code'];
+                            $insertData['country_code']            = $val['billing_address']['country_code'];
+                            $insertData['province']                = $val['billing_address']['province'];
+                            $insertData['country']                 = $val['billing_address']['country'];
+                            $insertData['latitude']                = $val['billing_address']['latitude'];
+                            $insertData['longitude']               = $val['billing_address']['longitude'];
 
-                        $insertData['number']                  = $val['number'];
-                        $insertData['note']                    = $val['note'];
-                        $insertData['token']                   = $val['token'];
-                        $insertData['gateway']                 = $val['gateway'];
-                        $insertData['total_price']             = round($val['total_price'], 2);
-                        $insertData['subtotal_price']          = round($val['subtotal_price'], 2);
-                        $insertData['total_tax']               = round($val['total_tax'], 2);
-                        $insertData['total_discounts']         = round($val['total_discounts'], 2);
-                        $insertData['total_line_items_price']  = round($val['total_line_items_price'], 2);
-                        $insertData['total_price_usd']         = round($val['total_price_usd'], 2);
-                        $insertData['total_tip_received']      = round($val['total_tip_received'], 2);
-                        $insertData['total_weight']            = $val['total_weight'];
-                        $insertData['currency']                = $val['currency'];
-                        $insertData['financial_status']        = $val['financial_status'];
-                        $insertData['confirmed']               = $val['confirmed'];
-                        $insertData['buyer_accepts_marketing'] = $val['buyer_accepts_marketing'];
-                        $insertData['name']                    = $val['name'];
-                        $insertData['referring_site']          = $val['referring_site'];
-                        $insertData['cancelled_at']            = strtotime($val['cancelled_at']);
-                        $insertData['cancel_reason']           = $val['cancel_reason'];
-                        $insertData['checkout_token']          = $val['checkout_token'];
-                        $insertData['reference']               = $val['reference'];
-                        $insertData['source_url']              = $val['source_url'];
-                        $insertData['processed_at']            = strtotime($val['processed_at']);
-                        $insertData['customer_locale']         = $val['customer_locale'];
-                        $insertData['app_id']                  = $val['app_id'];
-                        $insertData['browser_ip']              = $val['browser_ip'];
-                        $insertData['order_number']            = (int)$val['order_number'];
-                        $insertData['checkout_id']             = $val['checkout_id'];
-                        $insertData['source_name']             = $val['source_name'];
-                        $insertData['tags']                    = $val['tags'];
-                        $insertData['contact_email']           = $val['contact_email'];
-                        $insertData['order_status_url']        = $val['order_status_url'];
-                        $insertData['presentment_currency']    = $val['presentment_currency'];
-                        $insertData['user_name']               = $val['billing_address']['name'];
-                        $insertData['first_name']              = $val['billing_address']['first_name'];
-                        $insertData['last_name']               = $val['billing_address']['last_name'];
-                        $insertData['address1']                = $val['billing_address']['address1'];
-                        $insertData['address2']                = $val['billing_address']['address2'];
-                        $insertData['company']                 = $val['billing_address']['company'];
-                        $insertData['phone']                   = $val['billing_address']['phone'];
-                        $insertData['city']                    = $val['billing_address']['city'];
-                        $insertData['zip']                     = $val['billing_address']['zip'];
-                        $insertData['province_code']           = $val['billing_address']['province_code'];
-                        $insertData['country_code']            = $val['billing_address']['country_code'];
-                        $insertData['province']                = $val['billing_address']['province'];
-                        $insertData['country']                 = $val['billing_address']['country'];
-                        $insertData['latitude']                = $val['billing_address']['latitude'];
-                        $insertData['longitude']               = $val['billing_address']['longitude'];
+                            $insertData['web_id']   = $webId;
+                            $insertData['add_time'] = date('Y-h-d H:i:s');
+                            $shopifyOrderData[]     = $insertData;
+                            //订单商品
+                            if ( !empty($val['line_items'])){
 
-                        $insertData['web_id']   = $webId;
-                        $insertData['add_time'] = date('Y-h-d H:i:s');
-                        $shopifyOrderData[]     = $insertData;
-                        //订单商品
-                        if ( !empty($val['line_items'])){
+                                foreach ($val['line_items'] as $key1 => $val1) {
+                                    $goodsItem                                 = [];
+                                    $goodsItem['order_goods_id']               = $val1['id'];
+                                    $goodsItem['variant_id']                   = $val1['variant_id'];
+                                    $goodsItem['title']                        = $val1['title'];
+                                    $goodsItem['quantity']                     = $val1['quantity'];
+                                    $goodsItem['sku']                          = $val1['sku'];
+                                    $goodsItem['variant_title']                = $val1['variant_title'];
+                                    $goodsItem['vendor']                       = $val1['vendor'];
+                                    $goodsItem['fulfillment_service']          = $val1['fulfillment_service'];
+                                    $goodsItem['product_id']                   = $val1['product_id'];
+                                    $goodsItem['requires_shipping']            = $val1['requires_shipping'];
+                                    $goodsItem['taxable']                      = $val1['taxable'];
+                                    $goodsItem['gift_card']                    = $val1['gift_card'];
+                                    $goodsItem['name']                         = $val1['name'];
+                                    $goodsItem['variant_inventory_management'] = $val1['variant_inventory_management'];
+                                    $goodsItem['product_exists']               = $val1['product_exists'];
+                                    $goodsItem['fulfillable_quantity']         = $val1['fulfillable_quantity'];
+                                    $goodsItem['grams']                        = $val1['grams'];
+                                    $goodsItem['price']                        = round($val1['price'], 2);
+                                    $goodsItem['total_discount']               = round($val1['total_discount'], 2);
+                                    $goodsItem['price_set']                    = json_encode($val1['price_set'], true);
+                                    $goodsItem['total_discount_set']           = json_encode($val1['total_discount_set'], true);
+                                    $goodsItem['origin_location']              = json_encode($val1['origin_location'], true);
+                                    $goodsItem['web_id']                       = $webId;
+                                    $goodsItem['created_at']                   = $createTime;
+                                    $goodsItem['updated_at']                   = $updateTime;
+                                    $goodsItem['order_id']                     = $orderId;
 
-                            foreach ($val['line_items'] as $key1 => $val1) {
-                                $goodsItem                                 = [];
-                                $goodsItem['order_goods_id']               = $val1['id'];
-                                $goodsItem['variant_id']                   = $val1['variant_id'];
-                                $goodsItem['title']                        = $val1['title'];
-                                $goodsItem['quantity']                     = $val1['quantity'];
-                                $goodsItem['sku']                          = $val1['sku'];
-                                $goodsItem['variant_title']                = $val1['variant_title'];
-                                $goodsItem['vendor']                       = $val1['vendor'];
-                                $goodsItem['fulfillment_service']          = $val1['fulfillment_service'];
-                                $goodsItem['product_id']                   = $val1['product_id'];
-                                $goodsItem['requires_shipping']            = $val1['requires_shipping'];
-                                $goodsItem['taxable']                      = $val1['taxable'];
-                                $goodsItem['gift_card']                    = $val1['gift_card'];
-                                $goodsItem['name']                         = $val1['name'];
-                                $goodsItem['variant_inventory_management'] = $val1['variant_inventory_management'];
-                                $goodsItem['product_exists']               = $val1['product_exists'];
-                                $goodsItem['fulfillable_quantity']         = $val1['fulfillable_quantity'];
-                                $goodsItem['grams']                        = $val1['grams'];
-                                $goodsItem['price']                        = round($val1['price'], 2);
-                                $goodsItem['total_discount']               = round($val1['total_discount'], 2);
-                                $goodsItem['price_set']                    = json_encode($val1['price_set'], true);
-                                $goodsItem['total_discount_set']           = json_encode($val1['total_discount_set'], true);
-                                $goodsItem['origin_location']              = json_encode($val1['origin_location'], true);
-                                $goodsItem['web_id']                       = $webId;
-                                $goodsItem['created_at']                   = $createTime;
-                                $goodsItem['updated_at']                   = $updateTime;
-                                $goodsItem['order_id']                     = $orderId;
+                                    $shopifyOrderLineItem[] = $goodsItem;
+                                }
+                            }
+                            //订单来源客户端
+                            if ( !empty($val['client_details'])){
+                                $client                    = [];
+                                $client['shopify_id']      = $orderId;
+                                $client['browser_ip']      = $val['client_details']['browser_ip'];
+                                $client['accept_language'] = $val['client_details']['accept_language'];
+                                $client['user_agent']      = $val['client_details']['user_agent'];
+                                $client['session_hash']    = $val['client_details']['session_hash'];
+                                $client['browser_width']   = $val['client_details']['browser_width'];
+                                $client['browser_height']  = $val['client_details']['browser_height'];
+                                $client['web_id']          = $webId;
+                                $client['created_at']      = $createTime;
+                                $client['add_time']        = date('Y-h-d H:i:s');
+                                $shopifyOrderClient[]      = $client;
+                            }
+                            //订单顾客
+                            if ( !empty($val['customer'])){
 
-                                $shopifyOrderLineItem[] = $goodsItem;
+                                $customer                                 = [];
+                                $customer['customer_id']                  = $val['customer']['id'] ?: 0;
+                                $customer['email']                        = $val['customer']['email'];
+                                $customer['accepts_marketing']            = $val['customer']['accepts_marketing'];
+                                $customer['created_at']                   = strtotime($val['customer']['created_at']);
+                                $customer['updated_at']                   = strtotime($val['customer']['updated_at']);
+                                $customer['first_name']                   = $val['customer']['first_name'];
+                                $customer['last_name']                    = $val['customer']['last_name'];
+                                $customer['orders_count']                 = $val['customer']['orders_count'];
+                                $customer['state']                        = $val['customer']['state'];
+                                $customer['total_spent']                  = $val['customer']['total_spent'];
+                                $customer['last_order_id']                = $val['customer']['last_order_id'];
+                                $customer['note']                         = $val['customer']['note'];
+                                $customer['verified_email']               = $val['customer']['verified_email'];
+                                $customer['multipass_identifier']         = $val['customer']['multipass_identifier'];
+                                $customer['tax_exempt']                   = $val['customer']['tax_exempt'];
+                                $customer['phone']                        = $val['customer']['phone'];
+                                $customer['tags']                         = $val['customer']['tags'];
+                                $customer['last_order_name']              = $val['customer']['last_order_name'];
+                                $customer['currency']                     = $val['customer']['currency'];
+                                $customer['accepts_marketing_updated_at'] = strtotime($val['customer']['accepts_marketing_updated_at']);
+                                $customer['marketing_opt_in_level']       = $val['customer']['marketing_opt_in_level'];
+                                $customer['admin_graphql_api_id']         = $val['customer']['admin_graphql_api_id'];
+                                $customer['web_id']                       = $webId;
+                                $customer['add_time']                     = date('Y-m-d H:i:s');
+                                $shopifyCustomer[]                        = $customer;
+
+
+                            }
+                            //用户地址
+                            if ( !empty($val['customer']['default_address'])){
+                                $address                  = [];
+                                $address['customer_id']   = $val['customer']['default_address']['customer_id'] ?: 0;
+                                $address['address_id']    = $val['customer']['default_address']['id'] ?: 0;
+                                $address['first_name']    = $val['customer']['default_address']['first_name'];
+                                $address['last_name']     = $val['customer']['default_address']['last_name'];
+                                $address['company']       = $val['customer']['default_address']['company'];
+                                $address['address1']      = $val['customer']['default_address']['address1'];
+                                $address['address2']      = $val['customer']['default_address']['address2'];
+                                $address['city']          = $val['customer']['default_address']['city'];
+                                $address['province']      = $val['customer']['default_address']['province'];
+                                $address['country']       = $val['customer']['default_address']['country'];
+                                $address['zip']           = $val['customer']['default_address']['zip'];
+                                $address['phone']         = $val['customer']['default_address']['phone'];
+                                $address['name']          = $val['customer']['default_address']['name'];
+                                $address['province_code'] = $val['customer']['default_address']['province_code'];
+                                $address['country_code']  = $val['customer']['default_address']['country_code'];
+                                $address['country_name']  = $val['customer']['default_address']['country_name'];
+                                $address['default']       = $val['customer']['default_address']['default'];
+                                $address['web_id']        = $webId;
+                                $shopifyCustomerAddress[] = $address;
                             }
                         }
-                        //订单来源客户端
-                        if ( !empty($val['client_details'])){
-                            $client                    = [];
-                            $client['shopify_id']      = $orderId;
-                            $client['browser_ip']      = $val['client_details']['browser_ip'];
-                            $client['accept_language'] = $val['client_details']['accept_language'];
-                            $client['user_agent']      = $val['client_details']['user_agent'];
-                            $client['session_hash']    = $val['client_details']['session_hash'];
-                            $client['browser_width']   = $val['client_details']['browser_width'];
-                            $client['browser_height']  = $val['client_details']['browser_height'];
-                            $client['web_id']          = $webId;
-                            $client['created_at']      = $createTime;
-                            $client['add_time']        = date('Y-h-d H:i:s');
-                            $shopifyOrderClient[]      = $client;
-                        }
-                        //订单顾客
-                        if ( !empty($val['customer'])){
-
-                            $customer                                 = [];
-                            $customer['customer_id']                  = $val['customer']['id'] ?: 0;
-                            $customer['email']                        = $val['customer']['email'];
-                            $customer['accepts_marketing']            = $val['customer']['accepts_marketing'];
-                            $customer['created_at']                   = strtotime($val['customer']['created_at']);
-                            $customer['updated_at']                   = strtotime($val['customer']['updated_at']);
-                            $customer['first_name']                   = $val['customer']['first_name'];
-                            $customer['last_name']                    = $val['customer']['last_name'];
-                            $customer['orders_count']                 = $val['customer']['orders_count'];
-                            $customer['state']                        = $val['customer']['state'];
-                            $customer['total_spent']                  = $val['customer']['total_spent'];
-                            $customer['last_order_id']                = $val['customer']['last_order_id'];
-                            $customer['note']                         = $val['customer']['note'];
-                            $customer['verified_email']               = $val['customer']['verified_email'];
-                            $customer['multipass_identifier']         = $val['customer']['multipass_identifier'];
-                            $customer['tax_exempt']                   = $val['customer']['tax_exempt'];
-                            $customer['phone']                        = $val['customer']['phone'];
-                            $customer['tags']                         = $val['customer']['tags'];
-                            $customer['last_order_name']              = $val['customer']['last_order_name'];
-                            $customer['currency']                     = $val['customer']['currency'];
-                            $customer['accepts_marketing_updated_at'] = strtotime($val['customer']['accepts_marketing_updated_at']);
-                            $customer['marketing_opt_in_level']       = $val['customer']['marketing_opt_in_level'];
-                            $customer['admin_graphql_api_id']         = $val['customer']['admin_graphql_api_id'];
-                            $customer['web_id']                       = $webId;
-                            $customer['add_time']                     = date('Y-m-d H:i:s');
-                            $shopifyCustomer[]                        = $customer;
 
 
-                        }
-                        //用户地址
-                        if ( !empty($val['customer']['default_address'])){
-                            $address                  = [];
-                            $address['customer_id']   = $val['customer']['default_address']['customer_id'] ?: 0;
-                            $address['address_id']    = $val['customer']['default_address']['id'] ?: 0;
-                            $address['first_name']    = $val['customer']['default_address']['first_name'];
-                            $address['last_name']     = $val['customer']['default_address']['last_name'];
-                            $address['company']       = $val['customer']['default_address']['company'];
-                            $address['address1']      = $val['customer']['default_address']['address1'];
-                            $address['address2']      = $val['customer']['default_address']['address2'];
-                            $address['city']          = $val['customer']['default_address']['city'];
-                            $address['province']      = $val['customer']['default_address']['province'];
-                            $address['country']       = $val['customer']['default_address']['country'];
-                            $address['zip']           = $val['customer']['default_address']['zip'];
-                            $address['phone']         = $val['customer']['default_address']['phone'];
-                            $address['name']          = $val['customer']['default_address']['name'];
-                            $address['province_code'] = $val['customer']['default_address']['province_code'];
-                            $address['country_code']  = $val['customer']['default_address']['country_code'];
-                            $address['country_name']  = $val['customer']['default_address']['country_name'];
-                            $address['default']       = $val['customer']['default_address']['default'];
-                            $address['web_id']        = $webId;
-                            $shopifyCustomerAddress[] = $address;
-                        }
+                        //修改订单状态
+                    } else {
+                        $notPrimaryIds[] = $pullLog['id'];
+                        //                        $pullLogData                = [];
+                        //                        $pullLogData['pull_time']   = date('Y-m-d H:i:s');
+                        //                        $pullLogData['pull_status'] = 2;
+                        //                        $pullLogData['spend_time']  = time() - $beginTime;
+                        //                        $pullLogData['update_time'] = date('Y-m-d H:i:s');
+                        //                        $pullLogData['err_msg']     = '订单没有数据' . json_encode($res, true);
+                        //                        DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
+                        continue;
+                        //                        ajaxReturn(4003, '订单没有数据', $res);
                     }
-
-                    $pullLogData                 = [];
-                    $pullLogData['pull_time']    = date('Y-m-d H:i:s');
-                    $pullLogData['pull_status']  = 1;
-                    $pullLogData['spend_time']   = time() - $beginTime;
-                    $pullLogData['update_time']  = date('Y-m-d H:i:s');
-                    $pullLogData['repeat_order'] = json_encode($repeatOrder, true);
+                }
+                if ( !empty($notPrimaryIds)){
+                    $pullLogData                = [];
+                    $pullLogData['pull_time']   = date('Y-m-d H:i:s');
+                    $pullLogData['pull_status'] = 2;
+                    $pullLogData['spend_time']  = time() - $beginTime;
+                    $pullLogData['update_time'] = date('Y-m-d H:i:s');
+                    $pullLogData['err_msg']     = '订单没有数据';
+                    DB::table('shopify_pull_log')->whereIn('id',$notPrimaryIds)->update($pullLogData);
+                }
+                if(!empty($primaryIds)){
                     DB::beginTransaction();
                     $pullLog['spend_time'] = time() - $beginTime;
                     try {
@@ -408,11 +431,19 @@
                         //shopify客户端信息
                         DB::table('shopify_order_client')->insert($shopifyOrderClient);
                         //日志
-                        $pullLogData['err_msg']='下载订单成功';
-                        DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
+                        $pullLogData                = [];
+                        $pullLogData['err_msg']     = '下载订单成功';
+                        $pullLogData['pull_time']   = date('Y-m-d H:i:s');
+                        $pullLogData['pull_status'] = 1;
+                        $pullLogData['spend_time']  = time() - $beginTime;
+                        $pullLogData['update_time'] = date('Y-m-d H:i:s');
+                        DB::table('shopify_pull_log')->whereIn('id',$primaryIds)->update($pullLogData);
 
                         DB::commit();
-                        ajaxReturn(200, '成功');
+                        ajaxReturn(200, '成功', [
+                            'spend_time' => time() - $beginTime,
+                            'ID'         => $primaryIds,
+                        ]);
 
                     } catch (\Exception $exception) {
 
@@ -428,21 +459,11 @@
                         $pullLogData['err_msg']             = $exception->getMessage();
                         $pullLogData['insert_data']         = json_encode($addData, true);
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
-                        ajaxReturn(4003, 'error', $exception->getMessage());
+                        //                    ajaxReturn(4003, 'error', $exception->getMessage());
 
                     }
-
-                    //修改订单状态
-                } else {
-                    $pullLogData                = [];
-                    $pullLogData['pull_time']   = date('Y-m-d H:i:s');
-                    $pullLogData['pull_status'] = 2;
-                    $pullLogData['spend_time']  = time() - $beginTime;
-                    $pullLogData['update_time'] = date('Y-m-d H:i:s');
-                    $pullLogData['err_msg']     = '订单没有数据' . json_encode($res, true);
-                    DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
-                    ajaxReturn(4003, '订单没有数据', $res);
                 }
+
             } else {
                 ajaxReturn(4004, '未查到该日志', $pullLog);
             }
@@ -530,7 +551,7 @@
                 $headers = [
                     "Content-Type: application/json",
                     "Accept: application/json",
-                    "Content-Length:" . strlen($data_string),
+                    "Content-LengtgetShippingMethodh:" . strlen($data_string),
                 ];
 
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);

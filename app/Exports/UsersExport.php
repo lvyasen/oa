@@ -23,7 +23,6 @@ class UsersExport implements FromCollection
     //业务代码
     public function createData()
     {
-        fp($this->data);
         $excelData = [];
 
         //todo 业务

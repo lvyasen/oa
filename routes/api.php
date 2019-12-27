@@ -121,6 +121,7 @@
          * 采购费用
          */
         $api->post('getOrderCostList', 'OrderCostController@getOrderCostList');//采购费用列表
+
         /**
          * 物流费用相关接口
          */
@@ -166,6 +167,7 @@
         $api->post('getDepartmentList', 'DepartmentController@getDepartmentList');
         $api->any('pullEorders', 'ErpController@pullEorders');//获取订单列表
         $api->any('pullOrderCostDetail', 'ErpController@pullOrderCostDetail');//获取订单成本
+        $api->any('pullProductSkuCost', 'ErpController@pullProductSkuCost');//获取订单成本按SKU
 
         $api->any('home', 'HomeController@homeIndex');//首页数据
 

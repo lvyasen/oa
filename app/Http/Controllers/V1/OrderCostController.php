@@ -28,22 +28,29 @@
                                    'end_time'   => 'nullable|date',
                                    //                                   'web_id'   => 'nullable|string|exists:connection.erp.siteweb',
                                ]);
-            $page        = (int)$request->page ?: 1;
-            $pageNum     = $request->pageNum ?: 10;
-            $pageStart   = ($page - 1) * $pageNum;
-            $start = $request->start_time ? strtotime($request->start_time) : strtotime("-30 day");
-            $end   = $request->end_time ? strtotime($request->end_time) : time();
-            $where = [];
-            if ( !empty($request->web_id))$where['web_id'] = $request->web_id;
-            $field = "id,reference_no,orderTotalAmount,platformCost,purchaseCost,currency_rate,pay_time,totalCost,grossProfit,sku_quantity,web_id";
-            $table = DB::table('e_order_cost');
-            $list = $table->where($where)
-                ->whereBetween('pay_time',[date("Y-m-d H:i:s",$start),date("Y-m-d H:i:s",$end)])
-                ->selectRaw($field)
-                ->offset($pageStart)
-                ->limit($pageNum)
-                ->get();
-            ajaxReturn(200,Code::$com[200],$list);
+            $page      = (int)$request->page ?: 1;
+            $pageNum   = $request->pageNum ?: 10;
+            $pageStart = ($page - 1) * $pageNum;
+            $start     = $request->start_time ? strtotime($request->start_time) : strtotime("-30 day");
+            $end       = $request->end_time ? strtotime($request->end_time) : time();
+            $where     = [];
+            if ( !empty($request->web_id)) $where['web_id'] = $request->web_id;
+            $field         = "";
+            $table         = DB::table('e_order_goods_cost');
+            $list          = $table->where($where)
+                                   ->whereBetween('pay_time', [date("Y-m-d H:i:s", $start), date("Y-m-d H:i:s", $end)])
+                //                ->selectRaw($field)
+                                   ->offset($pageStart)
+                                   ->limit($pageNum)
+                                   ->get();
+            $count         = DB::table('e_order_goods_cost')
+                               ->where($where)
+                               ->whereBetween('pay_time', [date("Y-m-d H:i:s", $start), date("Y-m-d H:i:s", $end)])
+                               ->count('id');
+            $data['list']  = $list;
+            $data['page']  = $page;
+            $data['count'] = $count;
+            ajaxReturn(200, Code::$com[200], $data);
 
         }
     }
