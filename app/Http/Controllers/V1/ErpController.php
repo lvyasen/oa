@@ -1015,6 +1015,7 @@
             if (empty($shipMethods) && $result){
                 $table->insert($result);
             };
+
             ajaxReturn(200, Code::$com[200], $result);
         }
 

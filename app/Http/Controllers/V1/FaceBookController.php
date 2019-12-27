@@ -14,7 +14,7 @@
         private static $access_token  = 'EAAHSAZC8QX2ABAIWmuZAqqmvk5kBZCCKJ42XE9nOLOclun2YbREnWp15qZB5nsRsrkxkIVcfLPn6ePJZANonuuUeUcghciFM0CnUrmcXoxbEUPIqlxkfFVNrcMiX49NLXVFtRRmHnZAVROwyP7VF3O25QTb136vV6lP4k7meWV8iBehOxZBrzMWRQcdb1NrSNsZD';
         private static $ad_account_id = '512389582708576';
         private static $app_secret    = '6d0ad231608af84f6c214a64bceb24dc';
-        private static $app_id        = '512389582708576';
+        private static $app_id        = '568673980363082';//沙箱账号
 
         //
         public function getAds(Request $request)

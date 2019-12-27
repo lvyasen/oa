@@ -45,13 +45,13 @@
         var timeline = new gapi.analytics.googleCharts.DataChart({
             reportType: 'ga',
             query: {
-                'dimensions': 'ga:date',
-                'metrics': 'ga:sessions',
+                'metrics': 'ga:productDetailViews',
+                'dimensions': 'ga:productSku',
                 'start-date': '30daysAgo',
                 'end-date': 'yesterday',
             },
             chart: {
-                type: 'LINE',
+                type: 'GEO',
                 container: 'timeline'
             }
         });
@@ -59,6 +59,7 @@
         // Step 6: Hook up the components to work together.
 
         gapi.analytics.auth.on('success', function(response) {
+
             viewSelector.execute();
         });
 
