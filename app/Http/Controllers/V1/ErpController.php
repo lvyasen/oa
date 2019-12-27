@@ -107,17 +107,21 @@
                                                   'type'     => 1,
                                               ])
                                       ->orderBy('current_page', 'desc')
-                                      ->first('current_page');
+                                      ->first();
             $page                 = empty($info) ? 1 : $info->current_page + 1;
-            $params               = [];
-            $params['getDetail']  = 1;
-            $params['getAddress'] = 1;
-            $params['page']       = $page;
-            $params['pageSize']   = 50;
-            $params['getAddress'] = 1;
+            $limit =10;
+            for ($i = 0;$i<$limit;$i++){
+                $params               = [];
+                $params['getDetail']  = 1;
+                $params['getAddress'] = 1;
+                $params['page']       = $page;
+                $params['pageSize']   = 50;
+                $params['getAddress'] = 1;
 
-            $service      = 'getOrderList';
-            $result       = self::soapRequest($service, 'EB', $params);
+                $service      = 'getOrderList';
+                $result       = self::soapRequest($service, 'EB', $params);
+            }
+
             $request_time = time();
             if ( !empty($result['data'])){
                 //                $siteList              = $this->getSiteList();
