@@ -442,7 +442,7 @@
                         DB::commit();
                         ajaxReturn(200, '成功', [
                             'spend_time' => time() - $beginTime,
-                            'ID'         => $pullLog['id'],
+                            'ID'         => $primaryIds,
                         ]);
 
                     } catch (\Exception $exception) {
