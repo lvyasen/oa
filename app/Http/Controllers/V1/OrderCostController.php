@@ -74,10 +74,13 @@
                            ->select(DB::raw("DATE_FORMAT(pay_time,'%Y-%m') as pay_time,sum(totalCost) as total_price"))
                            ->groupBy(DB::raw("DATE_FORMAT(pay_time,'%Y-%m')"))
                            ->orderBy('pay_time', 'desc')
-//                           ->selectRaw('totalCost,pay_time,web_id')
+                //                           ->selectRaw('totalCost,pay_time,web_id')
                            ->get();
             $orderList = toArr($orderList);
-            fp($orderList);
+            $orderCost = [];
+            foreach ($orderList as $key1 => $val1) {
+                $orderCost[$val1['pay_time']] = $val1['total_price'];
+            }
             #在进行图表统计的时候直接从数据库取得的数据有的月份可能是没有的,不过月份比较少可直接写死,同样也需要补全
             $year
                 = date('Y', time());
@@ -97,16 +100,14 @@
                 11 => $year . '-12',
             ];
             foreach ($month as $key => $val) {
-                $data[$key] = [
-                    'date'  => $val,
-                    'value' => 0,
-                ];
-                foreach ($orderList as $key1 => $val1) {
-                    if ($val == \date('Y-m', strtotime($val1['pay_time']))){
-                        $data[$key]['value'] = round($data[$key]['value'], 2) + round($val1['totalCost'], 2);
-                    };
-                }
+                $data['order_cost'][$key]['date'] = $val;
+                if (array_key_exists($val, $orderCost)){
+                    $data['order_cost'][$key]['total_price'] = $orderCost[$val];
+                } else {
+                    $data['order_cost'][$key]['total_price'] = 0;
+                };
             }
+
             ajaxReturn(200, Code::$com[200], $data);
         }
     }
