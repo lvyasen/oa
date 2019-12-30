@@ -692,14 +692,13 @@
             $page     = empty($info) ? 1 : $info['current_page'] + 1;
             $limit    = 20;
             $pageSize = 50;
-            if ( !empty($info) && $info['total_page']){
-                $hasPage = $info['total_page'] - $info['current_page'];
-                if ($hasPage < $limit){
-                    $limit = $hasPage;
-                };
-            }
-            for ($i = 0; $i < $limit; $i++) {
-                $page               = $page + $i;
+//            if ( !empty($info) && $info['total_page']){
+//                $hasPage = $info['total_page'] - $info['current_page'];
+//                if ($hasPage < $limit){
+//                    $limit = $hasPage;
+//                };
+//            }
+
                 $params             = [];
                 $params['page']     = $page;
                 $params['pageSize'] = $pageSize;
@@ -838,7 +837,6 @@
                     //                }
                     ajaxReturn(4001, '没有获取到数据' . $result);
                 }
-            }
 
             //            fp($result);
         }
