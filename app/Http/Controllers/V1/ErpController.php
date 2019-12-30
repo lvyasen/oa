@@ -706,7 +706,8 @@
                           ->where($where)
                           ->orderBy('current_page', 'desc')
                           ->first('current_page');
-            $page     = empty($info) ? 1 : $info->current_page + 1;
+            $info = toArr($info);
+            $page     = empty($info) ? 1 : $info['current_page'] + 1;
             $limit    = 20;
             $pageSize = 50;
             if ( !empty($info) && $info['total_page']){
