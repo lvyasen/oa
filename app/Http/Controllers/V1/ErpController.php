@@ -674,25 +674,7 @@
          */
         public function pullProductSkuCost(Request $request)
         {
-            //            $info = DB::table('pull_log')
-            //                      ->where([
-            //                                  'pull_url' => $url,
-            //                                  'status'   => 1,
-            //                                  'type'     => 1,
-            //                              ])
-            //                      ->orderBy('current_page', 'desc')
-            //                      ->first();
-            //            $info = toArr($info);
-            //            $page = empty($info) ? 1 : $info['current_page'] + 1;
-            //
-            //            $limit    = 20;
-            //            $pageSize = 50;
-            //            if ( !empty($info) && $info['total_page']){
-            //                $hasPage = $info['total_page'] - $info['current_page'];
-            //                if ($hasPage < $limit){
-            //                    $limit = $hasPage;
-            //                };
-            //            }
+
             $url       = $request->route()->getActionName();
             $beginTime = time();
             $service   = 'getOrderCostDetailSku';
@@ -706,7 +688,7 @@
                           ->where($where)
                           ->orderBy('current_page', 'desc')
                           ->first('current_page');
-            $info = toArr($info);
+            $info     = toArr($info);
             $page     = empty($info) ? 1 : $info['current_page'] + 1;
             $limit    = 20;
             $pageSize = 50;
@@ -717,14 +699,15 @@
                 };
             }
             for ($i = 0; $i < $limit; $i++) {
-                $page                        = $page + $i;
-                $params                      = [];
-                $params['page']              = $page;
-                $params['pageSize']          = $pageSize;
-                $params['dateFor']           = "2018-03-18";
-                $params['dateTo']            = \date("Y-m-d");
-                $logTable                    = DB::table('pull_log');
-                $result                      = self::soapRequest($service, 'WMS', $params);
+                $page               = $page + $i;
+                $params             = [];
+                $params['page']     = $page;
+                $params['pageSize'] = $pageSize;
+                $params['dateFor']  = "2018-03-18";
+                $params['dateTo']   = \date("Y-m-d");
+                //                $logTable                    = DB::table('pull_log');
+
+                $result = self::soapRequest($service, 'WMS', $params);
                 $pullLogData                 = [];
                 $pullLogData['pull_url']     = $url;
                 $pullLogData['current_page'] = $page;
@@ -809,9 +792,11 @@
                             $goodsCost['web_id']     = $webId;
                             $totalGoodsCost[]        = $goodsCost;
                         }
+                        $totalPage                   = ceil($result['totalCount'] / $result['pageSize']);
                         $pullLogData['current_page'] = $result['page'];
                         $pullLogData['page_size']    = $result['pageSize'];
                         $pullLogData['count']        = $result['totalCount'];
+                        $pullLogData['total_page']   = $totalPage;
                         $pullLogData['spend_time']   = time() - $beginTime;
                         //                    $logInfo                     = $logTable->where($where)->first('id');
                         DB::beginTransaction();
@@ -827,14 +812,14 @@
                             DB::rollBack();
                             $pullLogData['err_msg'] = $exception->getMessage();
                             $pullLogData['status']  = 0;
-//                            continue;
+                            //                            continue;
                             //                        if (empty($logInfo)){
                             //                            $logTable->insert($pullLogData);
                             //                        } else {
                             //                            $id = $logInfo->id;
                             //                            $logTable->where(['id' => $id])->update($pullLogData);
                             //                        }
-                                                        ajaxReturn(4003, '添加数据失败', $exception->getMessage());
+                            ajaxReturn(4003, '添加数据失败', $exception->getMessage());
                         }
                     } else {
                         //                        ajaxReturn(4002, '到头了');
@@ -851,7 +836,7 @@
                     //                    $id = $logInfo->id;
                     //                    $logTable->where(['id' => $id])->update($pullLogData);
                     //                }
-                                        ajaxReturn(4001, '没有获取到数据' . $result);
+                    ajaxReturn(4001, '没有获取到数据' . $result);
                 }
             }
 
