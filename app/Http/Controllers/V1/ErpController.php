@@ -690,7 +690,7 @@
                           ->first();
             $info     = toArr($info);
             $page     = empty($info) ? 1 : $info['current_page'] + 1;
-            $limit    = 5;
+            $limit    = 1;
             $pageSize = 50;
             if ( !empty($info) && $info['total_page']){
                 $hasPage = $info['total_page'] - $info['current_page'];
