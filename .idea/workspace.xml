@@ -3,7 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="62d8de0c-2cef-4570-a145-eda17fdf58ef" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/V1/ErpController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/V1/ErpController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/V1/OrderCostController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/V1/OrderCostController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/V1/ShipController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/V1/ShipController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Erp/ShopifyApi.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Erp/ShopifyApi.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/storage/logs/laravel-2019-12-27.log" beforeDir="false" afterPath="$PROJECT_DIR$/storage/logs/laravel-2019-12-27.log" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -230,7 +233,8 @@
       <workItem from="1577063979071" duration="23813000" />
       <workItem from="1577151667651" duration="41236000" />
       <workItem from="1577324079853" duration="18953000" />
-      <workItem from="1577431636590" duration="5227000" />
+      <workItem from="1577431636590" duration="8968000" />
+      <workItem from="1577669903568" duration="251000" />
     </task>
     <servers />
   </component>

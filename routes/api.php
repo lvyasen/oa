@@ -121,6 +121,7 @@
          * 采购费用
          */
         $api->post('getOrderCostList', 'OrderCostController@getOrderCostList');//采购费用列表
+        $api->post('getOrderCostChart', 'OrderCostController@getOrderCostChart');//采购费用列表
 
         /**
          * 物流费用相关接口

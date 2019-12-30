@@ -196,13 +196,19 @@
                          ->where([
                                      'pull_status' => 0,
                                      'type'        => 0,
+                                     'is_exec'     => 0,
                                  ])
                          ->orderBy('id', 'asc')
                          ->orderBy('current_page', 'asc')
                          ->limit(10)
                          ->get();
-
             $pullLogs = toArr($pullLog);
+            $execIds = [];
+            foreach ($pullLogs as $k => $v) {
+                $execIds[] = $v['id'];
+            }
+            DB::table('shopify_pull_log')->whereIn('id',$execIds)->update(['is_exec'=>1]);
+
             if ( !empty($pullLogs)){
                 $shopifyOrderData       = [];
                 $shopifyOrderLineItem   = [];
@@ -414,9 +420,9 @@
                     $pullLogData['spend_time']  = time() - $beginTime;
                     $pullLogData['update_time'] = date('Y-m-d H:i:s');
                     $pullLogData['err_msg']     = '订单没有数据';
-                    DB::table('shopify_pull_log')->whereIn('id',$notPrimaryIds)->update($pullLogData);
+                    DB::table('shopify_pull_log')->whereIn('id', $notPrimaryIds)->update($pullLogData);
                 }
-                if(!empty($primaryIds)){
+                if ( !empty($primaryIds)){
                     DB::beginTransaction();
                     $pullLog['spend_time'] = time() - $beginTime;
                     try {
@@ -437,7 +443,7 @@
                         $pullLogData['pull_status'] = 1;
                         $pullLogData['spend_time']  = time() - $beginTime;
                         $pullLogData['update_time'] = date('Y-m-d H:i:s');
-                        DB::table('shopify_pull_log')->whereIn('id',$primaryIds)->update($pullLogData);
+                        DB::table('shopify_pull_log')->whereIn('id', $primaryIds)->update($pullLogData);
 
                         DB::commit();
                         ajaxReturn(200, '成功', [
