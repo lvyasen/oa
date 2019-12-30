@@ -16,3 +16,4 @@ storage
 /storage/framework/cache
 /storage/framework/sessions
 /storage/logs
+/.idea
