@@ -40,6 +40,7 @@
             $list          = $table->where($where)
                                    ->whereBetween('pay_time', [date("Y-m-d H:i:s", $start), date("Y-m-d H:i:s", $end)])
                 //                ->selectRaw($field)
+                                   ->orderBy('pay_time', 'desc')
                                    ->offset($pageStart)
                                    ->limit($pageNum)
                                    ->get();
