@@ -785,8 +785,8 @@
                         $goodsCost['factoryGrossMargin']         = round($val['factoryGrossMargin'], 3);
                         $goodsCost['asinOrItem']                 = $val['asinOrItem'];
                         $goodsCost['destinationCountry']         = $val['destinationCountry'];
-                        $goodsCost['dateRelease']                = $val['dateRelease'];
-                        $goodsCost['soShipTime']                 = $val['soShipTime'];
+                        $goodsCost['dateRelease']                = $val['dateRelease']?:null;
+                        $goodsCost['soShipTime']                 = $val['soShipTime']?:null;
                         $goodsCost['developResponsibleName']     = $val['developResponsibleName'];
                         $goodsCost['sellerResponsibleName']      = $val['sellerResponsibleName'];
                         $goodsCost['buyerName']                  = $val['buyerName'];
