@@ -68,7 +68,6 @@
         {
             $where = [];
             if ( !empty($request->web_id)) $where['web_id'] = $request->web_id;
-
             $orderList = DB::table('e_order_goods_cost')
                            ->where($where)
                            ->select(DB::raw("DATE_FORMAT(pay_time,'%Y-%m') as pay_time,sum(totalCost) as total_price"))
