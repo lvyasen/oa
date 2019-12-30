@@ -228,7 +228,7 @@
             $where['status'] = 1;
             $startTime       = $request->start_time ? strtotime($request->start_time) : 0;
             $endTime         = $request->end_time ? strtotime($request->end) : time();
-            if ( !empty($webId)) $where['webId '] = $webId;
+            if ( !empty($webId)) $where['webId'] = $webId;
             $table = DB::table('ship');
             $table->whereBetween('dateWarehouseShipping', [$startTime, $endTime]);
             $list          = $table
