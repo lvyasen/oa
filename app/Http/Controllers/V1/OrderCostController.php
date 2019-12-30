@@ -3,9 +3,12 @@
     namespace App\Http\Controllers\V1;
 
     use App\Dictionary\Code;
+    use App\Exports\MaterialExport;
+    use App\Exports\OrderCostExport;
     use App\Http\Controllers\Controller;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
+    use Maatwebsite\Excel\Facades\Excel;
     use function GuzzleHttp\Psr7\str;
 
     class OrderCostController extends Controller
@@ -48,6 +51,9 @@
                                ->where($where)
                                ->whereBetween('pay_time', [date("Y-m-d H:i:s", $start), date("Y-m-d H:i:s", $end)])
                                ->count('id');
+            if(!empty($request->download)){
+                return Excel::download(new OrderCostExport(toArr($list)), 'test.xlsx');
+            }
             $data['list']  = $list;
             $data['page']  = $page;
             $data['count'] = $count;
