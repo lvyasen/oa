@@ -966,16 +966,15 @@
             if ( !empty($request->web_id)){
                 $where['web_id'] = $request->web_id;
             }
-
             switch ($request->type) {
                 case '1'://总销售价格
-
+                    $where['financial_status'] = 'paid';
                     $totalOrderSale      = DB::table('shopify_order')
                                              ->whereBetween('created_at', [$start, $end])
                                              ->select(DB::raw("sum(total_price_usd) as total_pirce"))
                                              ->where($where)
                                              ->first();
-                    $totalOrderSale      = $totalOrderSale->total_pirce ?: 0;//订单总销售额
+                    $totalOrderSale      = $totalOrderSale ?$totalOrderSale->total_pirce: 0;//订单总销售额
                     $data['order_sales'] = $totalOrderSale;
                     break;
 
@@ -986,7 +985,7 @@
                                              ->groupBy('email')
                                              ->where($where)
                                              ->first();
-                    $countUser           = $countUser->user_nums ?: 0;
+                    $countUser           = $countUser ?$countUser->user_nums: 0;
                     $data['order_users'] = $countUser;
                     break;
                 case '3':
