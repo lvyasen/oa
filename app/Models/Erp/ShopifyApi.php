@@ -461,7 +461,7 @@
                         $addData['shopify_customer']        = $shopifyCustomer;
                         $addData['shopify_address']         = $shopifyCustomerAddress;
                         $addData['shopify_order_client']    = $shopifyOrderClient;
-                        $pullLogData['pull_status']         = 2;
+                        $pullLogData['pull_status']         = 3;
                         $pullLogData['err_msg']             = $exception->getMessage();
                         $pullLogData['insert_data']         = json_encode($addData, true);
                         DB::table('shopify_pull_log')->where(['id' => $pullLog['id']])->update($pullLogData);
