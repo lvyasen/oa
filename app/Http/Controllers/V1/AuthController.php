@@ -27,26 +27,26 @@
         public function signUp(Request $request)
         {
             $request->validate([
-                                   'mobile'        => 'required|string|unique:users',
-                                   'email'         => 'required|string|email|unique:users',
-                                   'password'      => 'required|string',
-                                   'age'           => 'string',
-                                   'name'          => 'required|string',
-                                   'sex'           => 'string',
-                                   'department_id' => 'required|string',
+                                   'mobile'   => 'required|string|unique:users',
+                                   'email'    => 'required|string|email|unique:users',
+                                   'password' => 'required|string',
+                                   'age'      => 'string',
+                                   'name'     => 'required|string',
+                                   'note'     => 'required|string',
+                                   'sex'      => 'string',
                                ]);
 
-            $user = new User([
-                                 'name'          => $request->name,
-                                 'email'         => $request->email,
-                                 'age'           => $request->age,
-                                 'mobile'        => $request->mobile,
-                                 'sex'           => $request->sex,
-                                 'department_id' => $request->department_id,
-                                 'password'      => bcrypt($request->password),
-                                 'login_ip'      => $request->getClientIp(),
-                             ]);
-            $role_list = json_decode($request->role_list,true);
+            $user      = new User([
+                                      'name'     => $request->name,
+                                      'email'    => $request->email,
+                                      'age'      => $request->age,
+                                      'mobile'   => $request->mobile,
+                                      'sex'      => $request->sex,
+                                      'note'     => $request->note,
+                                      'password' => bcrypt($request->password),
+                                      'login_ip' => $request->getClientIp(),
+                                  ]);
+            $role_list = json_decode($request->role_list, true);
             if ( !empty($role_list)) \App\Models\V1\User::addUserRole($request->user()->id, $role_list);
             $user->save();
             ajaxReturn(200, Code::$com[200]);
