@@ -4,11 +4,14 @@
 
     use App\Dictionary\Code;
     use App\Http\Controllers\Controller;
+    use App\Imports\PersonnelImport;
     use App\Models\V1\Department;
     use App\Models\V1\System;
     use App\Models\V1\User;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Facades\Storage;
+    use Maatwebsite\Excel\Facades\Excel;
 
     /**
      * 部门控制器
@@ -209,6 +212,26 @@
             $data['count'] = $count;
             ajaxReturn(200, Code::$com[200], $data);
         }
+
+        /**
+         * 人事部门导入数据库
+         * @param Request $request
+         * personnelImport
+         * author: walker
+         * Date: 2020/1/2
+         * Time: 10:12
+         * Note:
+         */
+        public function personnelImport(Request $request)
+        {
+            if ($request->file('personnel_excel')){
+                $path            = $request->file('image')->store("public");
+            };
+            return view('person');
+//            Excel::import(new PersonnelImport,)
+        }
+
+
 
 
     }

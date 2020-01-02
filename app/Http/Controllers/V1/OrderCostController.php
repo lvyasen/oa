@@ -52,7 +52,7 @@
                                ->whereBetween('pay_time', [date("Y-m-d H:i:s", $start), date("Y-m-d H:i:s", $end)])
                                ->count('id');
             if(!empty($request->download)){
-                return Excel::download(new OrderCostExport(toArr($list)), 'test.xlsx');
+                return Excel::download(new OrderCostExport(toArr($list)), 'order_cost.xlsx');
             }
             $data['list']  = $list;
             $data['page']  = $page;

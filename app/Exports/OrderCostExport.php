@@ -29,7 +29,8 @@
             $excelData   = [];
             $excelData[] = [
                 'id',
-                '仓库SKU',
+                '平台销售SKU',
+                '产品代码',
                 '产品标题',
                 '采购负责人',
                 '采购数量',
@@ -43,7 +44,8 @@
             foreach ($this->data as $key => $val) {
                 $excelData[] = [
                     $val['id'],
-                    $val['opPlatformSalesSkuQuantity'],
+                    $val['opPlatformSalesSku'],
+                    $val['productBarcode'],
                     $val['productTitle'],
                     $val['buyerName'],
                     $val['quantity'],
