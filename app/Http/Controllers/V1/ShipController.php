@@ -268,7 +268,7 @@
         {
             $shipList = DB::table('ship')
                           ->where(['webId' => 0, 'type' => 0])
-                          ->limit(50)
+                          ->limit(10)
                           ->selectRaw('id,saleOrderCode')
                           ->get();
             $shipList = toArr($shipList);
@@ -276,6 +276,7 @@
             $change = [];
             foreach ($shipList as $key => $val) {
                 $info = $model->where(['source_id'=>$val['saleOrderCode']])->first('source_id');
+                print_r($info);
                 if(!empty($info)){
                     $web_id = $info->source_id;
                     $change[]=$val['id'];
