@@ -815,19 +815,20 @@
                     $pullLogData['spend_time']   = time() - $beginTime;
                     $totalPullLog[]              = $pullLogData;
                 }
+                DB::beginTransaction();
+                try {
+                    DB::table('e_order_goods_cost')->insert($totalGoodsCost);
+                    DB::table('pull_log')->insert($totalPullLog);
+                    DB::commit();
+                    //                            ajaxReturn(200, '下载订单费用和成本明细(按SKU)成功', ['spend_time' => time() - $beginTime]);
+                } catch (\Exception $exception) {
+                    DB::rollBack();
+                    $pullLogData['err_msg'] = $exception->getMessage();
+                    $pullLogData['status']  = 0;
+                    ajaxReturn(4003, '添加数据失败', $exception->getMessage());
+                }
             }
-            DB::beginTransaction();
-            try {
-                DB::table('e_order_goods_cost')->insert($totalGoodsCost);
-                DB::table('pull_log')->insert($totalPullLog);
-                DB::commit();
-                //                            ajaxReturn(200, '下载订单费用和成本明细(按SKU)成功', ['spend_time' => time() - $beginTime]);
-            } catch (\Exception $exception) {
-                DB::rollBack();
-                $pullLogData['err_msg'] = $exception->getMessage();
-                $pullLogData['status']  = 0;
-                ajaxReturn(4003, '添加数据失败', $exception->getMessage());
-            }
+    
             //            fp($result);
         }
 
