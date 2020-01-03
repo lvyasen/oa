@@ -5,6 +5,7 @@
     use App\Dictionary\Code;
     use App\Exports\LogisticsExport;
     use App\Http\Controllers\Controller;
+    use App\Models\Erp\OrderInfo;
     use App\Models\V1\Ship;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
@@ -239,8 +240,8 @@
                 ->get();
             $count         = $table->where($where)->count();
             $list          = toArr($list);
-            $model  = new  ErpController();
-            $shipMethodMap =$model->getShippingMethodMap();
+            $model         = new  ErpController();
+            $shipMethodMap = $model->getShippingMethodMap();
             foreach ($list as $key => $val) {
                 $list[$key]['shippingMethod'] = $shipMethodMap[$val['shippingMethod']];
             }
@@ -252,6 +253,36 @@
             $data['page']  = $page;
             $data['count'] = $count;
             ajaxReturn(200, Code::$com[200], $data);
+        }
+
+        /**
+         * 运费数据补充
+         * @param Request $request
+         * getShipWebId
+         * author: walker
+         * Date: 2020/1/3
+         * Time: 15:14
+         * Note:
+         */
+        public function getShipWebId(Request $request)
+        {
+            $shipList = DB::table('ship')
+                          ->where(['webId' => 0, 'type' => 0])
+                          ->limit(50)
+                          ->selectRaw('id,saleOrderCode')
+                          ->get();
+            $shipList = toArr($shipList);
+            $model = new OrderInfo();
+            $change = [];
+            foreach ($shipList as $key => $val) {
+                $info = $model->where(['source_id'=>$val['saleOrderCode']])->first('source_id');
+                if(!empty($info)){
+                    $web_id = $info->source_id;
+                    $change[]=$val['id'];
+                    DB::table('ship')->where(['id'=>$val['id']])->update(['webId'=>$web_id]);
+                }
+            }
+            ajaxReturn(200,'success',$change);
         }
 
 

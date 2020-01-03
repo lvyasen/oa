@@ -828,9 +828,10 @@
                     ajaxReturn(4003, '添加数据失败', $exception->getMessage());
                 }
             }
-    
+
             //            fp($result);
         }
+
 
         /**
          * 费用总数据走势图

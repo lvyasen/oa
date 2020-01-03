@@ -178,6 +178,7 @@
         $api->any('home', 'HomeController@homeIndex');//首页数据
 
         $api->any('personnelImport', 'UserQuotaController@personnelImport');//人事部门导入excelv
+        $api->any('getShipWebId', 'ShipController@getShipWebId');//缺失费用补充
 
         //        $api->post();
         //        $api->post('test', 'CommonController@test');//测试站点
