@@ -47,6 +47,9 @@
         $api->post('addJobNeeds', 'DepartmentController@addJobNeeds');//添加人事部门需求
         $api->post('editJobNeeds', 'DepartmentController@editJobNeeds');//修改人事部门需求
         $api->post('getJobNeedsInfo', 'DepartmentController@getJobNeedsInfo');//获取人事部门需求信息
+        $api->post('getTaskUser', 'DepartmentController@getTaskUser');//获取人事部门人员列表
+        $api->post('getJobNeedsList', 'DepartmentController@getJobNeedsList');//获取人事部门需求列表
+        $api->post('delJobNeeds', 'DepartmentController@delJobNeeds');//删除人事需求
         /**
          * 物料管理
          */

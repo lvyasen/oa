@@ -268,21 +268,24 @@
         {
             $shipList = DB::table('ship')
                           ->where(['webId' => 0, 'type' => 0])
-                          ->limit(10)
+                          ->limit(100)
+                ->orderBy('dateWarehouseShipping','asc')
                           ->selectRaw('id,saleOrderCode')
                           ->get();
             $shipList = toArr($shipList);
             $model = new OrderInfo();
             $change = [];
             foreach ($shipList as $key => $val) {
-                $info = $model->where(['source_id'=>$val['saleOrderCode']])->first('source_id');
-                print_r($info);
-                if(!empty($info)){
-                    $web_id = $info->source_id;
-                    $change[]=$info;
-                    DB::table('ship')->where(['id'=>$val['id']])->update(['webId'=>$web_id]);
-                }
+                $change[] = $val['saleOrderCode'];
+//                $info = $model->where(['source_id'=>$val['saleOrderCode']])->get();
+//                $info = toArr($info);
+//                if(!empty($info)){
+//                    $web_id = $info->source_id;
+//                    $change[]=$info;
+////                    DB::table('ship')->where(['id'=>$val['id']])->update(['webId'=>$web_id]);
+//                }
             }
+           fp($shipList);
             ajaxReturn(200,'success',$change);
         }
 

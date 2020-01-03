@@ -214,6 +214,18 @@
             ajaxReturn(200, Code::$com[200], $data);
         }
 
+        /***
+         *###########################    人事部门相关    ###########################
+         *                 .-~~~~~~~~~-._       _.-~~~~~~~~~-.
+         *             __.'              ~.   .~              `.__
+         *           .'//                  \./                  \\`.
+         *         .'//                     |                     \\`.
+         *       .'// .-~"""""""~~~~-._     |     _,-~~~~"""""""~-. \\`.
+         *     .'//.-"                 `-.  |  .-'                 "-.\\`.
+         *   .'//______.============-..   \ | /   ..-============.______\\`.
+         * .'______________________________\|/______________________________`.
+         *
+         */
         /**
          * 添加职位需求
          *
@@ -312,15 +324,16 @@
         public function getJobNeedsInfo(Request $request)
         {
             $request->validate([
-                                   'job_needs_id'  => 'required|string|exists:job_needs,id',
+                                   'job_needs_id' => 'required|string|exists:job_needs,id',
                                ]);
-            $model                = JobNeeds::find($request->job_needs_id);
-            $info = $model->get()->toArray();
-            ajaxReturn(200,'成功',$info);
+            $model = JobNeeds::find($request->job_needs_id);
+            $info  = $model->get()->toArray();
+            ajaxReturn(200, '成功', $info);
         }
 
         /**
          * 获取人事指派人员列表
+         *
          * @param Request $request
          * getTaskUser
          * author: walker
@@ -330,10 +343,107 @@
          */
         public function getTaskUser(Request $request)
         {
-            $manageUserId = DB::table('department')
-                ->where(['department_id'=>2])
-                ->first('manager_user_id');
-
+            $request->validate([
+                                   'department_id' => 'required|string|exists:department',
+                               ]);
+            //            $manageUserId = DB::table('department')
+            //                              ->where(['department_id' => $request->department_id])
+            //                              ->first('manager_user_id');
+            $userList     = DB::table('users')
+                              ->where(['department_id' => $request->department_id, 'status' => 1])
+                              ->selectRaw('name,id,status')
+                              ->get();
+            $data['list'] = $userList;
+            ajaxReturn(200, '成功', $data);
         }
+
+        /**
+         * 删除职位需求信息
+         *
+         * @param Request $request
+         * delJobNeeds
+         * author: walker
+         * Date: 2020/1/3
+         * Time: 17:00
+         * Note:
+         */
+        public function delJobNeeds(Request $request)
+        {
+            $request->validate([
+                                   'job_needs_id' => 'required|string|exists:job_needs,id',
+                               ]);
+
+            $model            = JobNeeds::find($request->job_needs_id);
+            $model->is_delete = 1;
+            $result           = $model->save();
+            if (empty($result)) ajaxReturn(4002, Code::$com[4002]);
+            SystemController::sysLog($request, '删除职位需求信息');
+            ajaxReturn(200, Code::$com[200]);
+        }
+
+        /**
+         * 获取任务列表
+         *
+         * @param Request $request
+         * getJobNeedsList
+         * author: walker
+         * Date: 2020/1/3
+         * Time: 17:09
+         * Note:
+         */
+        public function getJobNeedsList(Request $request)
+        {
+            $request->validate([
+                                   'type' => 'required|string',
+                               ]);
+            $type      = $request->type;
+            $page      = (int)$request->page ?: 1;
+            $pageNum   = $request->pageNum ?: 10;
+            $pageStart = ($page - 1) * $pageNum;
+            $userId    = $request->user()->id;
+            $where     = [];
+            $startTime = $request->start_time ? strtotime($request->start_time) : 0;
+            $endTime   = $request->end_time ? strtotime($request->end) : time();
+            if ( !empty($request->complete)) $where['complete'] = $request->complete;
+            if ( !empty($request->department_id)) $where['department_id'] = $request->department_id;
+            $where['is_delete'] = 0;
+            $table              = DB::table('job_needs');
+            $table->whereBetween('add_time', [date("Y-m-d H:i:s", $startTime), date("Y-m-d H:i:s", $endTime)]);
+            if ($type == '1'){
+                $list  = $table
+                    ->where($where)
+                    ->offset($pageStart)
+                    ->limit($pageNum)
+                    ->get();
+                $count = $table->where($where)->count();
+            } elseif ($type == '2') {
+                $list  = $table
+                    ->where($where)
+                    ->where('task_user', 'like', '%' . $userId . '%')
+                    ->offset($pageStart)
+                    ->limit($pageNum)
+                    ->get();
+                $count = $table->where($where)->where('task_user', 'like', '%' . $userId . '%')->count();
+            };
+            if ( !empty($list)){
+                $list = toArr($list);
+                foreach ($list as $key => $val) {
+                    if(!empty($val['task_user'])){
+                        $users = DB::table('users')->whereIn('id',explode(',',$val['task_user']))->selectRaw('name')->get();
+                        $users = toArr($users);
+                        $list[$key]['task_user_name']=$users;
+                    }else{
+                        $list[$key]['task_user_name']=null;
+                    }
+//                    $list['task_user_name']
+                }
+            }
+            $data          = [];
+            $data['list']  = $list;
+            $data['page']  = $page;
+            $data['count'] = $count;
+            ajaxReturn(200, Code::$com[200], $data);
+        }
+
 
     }
