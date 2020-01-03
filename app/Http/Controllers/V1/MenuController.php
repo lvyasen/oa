@@ -52,17 +52,62 @@
          * Time: 11:43
          * Note:
          */
-        public function getMenuList()
+        public function getMenuList(Request $request)
         {
             $model           = new Menu();
+            $userId = $request->user()->id;
+            if(empty($userId)){
+                ajaxReturn(4001,'未登录');
+            }
             $where           = [];
             $where['is_del'] = 0;
-            $menuList        = Menu::where($where)->get()->toArray();
+            $menuList        = Menu::where($where)->orderBy('menu_id','asc')->get()->toArray();
+
             $treeList        = getMenuTree($menuList);
             ajaxReturn(200, Code::$com[200], $treeList);
         }
 
+        /**
+         * 获取用户菜单
+         * @param Request $request
+         * getUserMenuList
+         * author: walker
+         * Date: 2020/1/3
+         * Time: 11:52
+         * Note:
+         */
+        public function getUserMenuList(Request $request)
+        {
+            $model           = new Menu();
+            $userId = $request->user()->id;
+            if(empty($userId)){
+                ajaxReturn(4001,'未登录');
+            }
+            $where           = [];
+            $where['is_del'] = 0;
+            $menuList        = Menu::where($where)->orderBy('menu_id','asc')->get()->toArray();
+            $roleListArr = DB::table('user_role as ur')
+                             ->leftJoin('role as r','ur.role_id','=','r.role_id')
+                             ->where(['ur.user_id'=>$userId])
+                             ->selectRaw('menu_list')
+                             ->get();
+            $roleListArr= toArr($roleListArr);
+            $roleList = [];
+            foreach ($roleListArr as $key => $val) {
+                $roleList = array_merge($roleList,json_decode($val['menu_list'],true));
+            }
+            $roleList = array_unique($roleList);
+            sort($roleList);
 
+
+            foreach ($menuList as $key1 => $val1) {
+                if(!in_array($val1['menu_id'],$roleList)){
+                    unset($menuList[$key1]);
+                };
+            }
+            $treeList        = getMenuTree($menuList);
+            ajaxReturn(200, Code::$com[200], $treeList);
+        }
         /**
          * 修改菜单状态
          *

@@ -12,6 +12,14 @@ class PersonnelImport implements ToCollection
     */
     public function collection(Collection $collection)
     {
-        //
+        //如果需要去除表头
+        unset($collection[0]);
+        //$collection是数组形式
+        $this->createData($collection);
+    }
+
+    public function createData($collection)
+    {
+        fp($collection);
     }
 }

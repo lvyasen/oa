@@ -97,6 +97,7 @@
          */
         public function pullEorders(Request $request)
         {
+
             $url       = $request->route()->getActionName();
             $beginTime = time();
 
@@ -111,17 +112,18 @@
             $info = toArr($info);
             $page = empty($info) ? 1 : $info['current_page'] + 1;
 
-            $limit    = 20;
+//            $limit    = 20;
             $pageSize = 50;
-            if ( !empty($info) && $info['total_page']){
-                $hasPage = $info['total_page'] - $info['current_page'];
-                if ($hasPage < $limit){
-                    $limit = $hasPage;
-                };
-            }
-            if ($limit){
-                for ($i = 0; $i < $limit; $i++) {
-                    $currentPage          = $page + $i;
+//            if ( !empty($info) && $info['total_page']){
+//                $hasPage = $info['total_page'] - $info['current_page'];
+//                if ($hasPage < $limit){
+//                    $limit = $hasPage;
+//                };
+//            }
+//            if ($limit){
+//                for ($i = 0; $i < $limit; $i++) {
+//                    $currentPage          = $page + $i;
+                    $currentPage          = $page;
                     $params               = [];
                     $params['getDetail']  = 1;
                     $params['getAddress'] = 1;
@@ -289,7 +291,7 @@
 
                             DB::commit();
                             $endTime = time();
-                            continue;
+//                            continue;
                             //                                ajaxReturn(200, 'success', [
                             //                                    'spend_time'   => $endTime - $beginTime,
                             //                                    'request_time' => $endTime - $request_time,
@@ -306,13 +308,12 @@
 
                     } else {
 
-                        continue;
                         //                        ajaxReturn(4001, 'not find data', $result);
                     }
-                }
+//                }
 
 
-            };
+//            };
 
 
         }

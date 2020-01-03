@@ -4,11 +4,14 @@
 
     use App\Dictionary\Code;
     use App\Http\Controllers\Controller;
+    use App\Imports\PersonnelImport;
     use App\Models\V1\Department;
     use App\Models\V1\User;
     use App\Models\V1\UserQuota;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Facades\Storage;
+    use Maatwebsite\Excel\Facades\Excel;
 
     class UserQuotaController extends Controller
     {
@@ -366,6 +369,32 @@
             $data['quota_list']      = $departmentQuota;
             $data['user_quota_list'] = $departmentUser;
             ajaxReturn(200, Code::$com[200], $data);
+        }
+
+        /**
+         * 人事部门导入数据库
+         *
+         * @param Request $request
+         * personnelImport
+         * author: walker
+         * Date: 2020/1/2
+         * Time: 10:12
+         * Note:
+         */
+        public function personnelImport(Request $request)
+        {
+            $request->validate([
+                                   'user_quota_id' => 'required|string|exists:user_quota',
+                               ]);
+            if ($request->isMethod('post')){
+                if ($request->file('personnel_excel')){
+                    $path = $request->file('personnel_excel')->store("public/excel");
+                    $url  = Storage::url($path);
+                    //                    $filePath = Storage::get($path);
+                    Excel::import(new PersonnelImport, base_path("/public/" . $url));
+                };
+            };
+
         }
 
     }

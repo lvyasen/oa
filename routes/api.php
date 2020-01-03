@@ -44,6 +44,9 @@
         $api->post('editDepartment', 'DepartmentController@editDepartment');//修改部门
         $api->post('getDepartmentAllList', 'DepartmentController@getDepartmentAllList');//修改部门
         $api->post('getDepartmentUsers', 'DepartmentController@getDepartmentUsers');//获取部门用户列表
+        $api->post('addJobNeeds', 'DepartmentController@addJobNeeds');//添加人事部门需求
+        $api->post('editJobNeeds', 'DepartmentController@editJobNeeds');//修改人事部门需求
+        $api->post('getJobNeedsInfo', 'DepartmentController@getJobNeedsInfo');//获取人事部门需求信息
         /**
          * 物料管理
          */
@@ -81,6 +84,7 @@
         $api->post('editQuota', 'QuotaController@editQuota');//修改部门指标
         $api->post('delQuota', 'QuotaController@delQuota');//删除部门指标
         $api->post('getQuotaList', 'QuotaController@getQuotaList');//获取部门列表
+        $api->post('getLastWeight', 'QuotaController@getLastWeight');//获取部门列表
         /**
          * 用户指标管理
          */
@@ -91,6 +95,7 @@
         $api->post('getDepartmentQuotaList', 'UserQuotaController@getDepartmentQuotaList');//部门负责人指标
         $api->post('getDepartmentQuotaDetail', 'UserQuotaController@getDepartmentQuotaDetail');//部门负责人指标
         $api->post('getDepartmentQuotaAnalytics', 'UserQuotaController@getDepartmentQuotaAnalytics');//部门负责人指标
+
         /**
          * 站点管理
          */
@@ -171,6 +176,8 @@
         $api->any('pullProductSkuCost', 'ErpController@pullProductSkuCost');//获取订单成本按SKU
 
         $api->any('home', 'HomeController@homeIndex');//首页数据
+
+        $api->any('personnelImport', 'UserQuotaController@personnelImport');//人事部门导入excelv
 
         //        $api->post();
         //        $api->post('test', 'CommonController@test');//测试站点
