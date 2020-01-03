@@ -279,7 +279,7 @@
                 print_r($info);
                 if(!empty($info)){
                     $web_id = $info->source_id;
-                    $change[]=$val['id'];
+                    $change[]=$info;
                     DB::table('ship')->where(['id'=>$val['id']])->update(['webId'=>$web_id]);
                 }
             }
