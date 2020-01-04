@@ -190,6 +190,7 @@
         $api->any('pullProductSkuCost', 'ErpController@pullProductSkuCost');//获取订单成本按SKU
 
         $api->any('home', 'HomeController@homeIndex');//首页数据
+        $api->any('salesCount', 'HomeController@salesCount');//数据汇总
 
         $api->any('personnelImport', 'UserQuotaController@personnelImport');//人事部门导入excelv
         $api->any('getShipWebId', 'ShipController@getShipWebId');//缺失费用补充
