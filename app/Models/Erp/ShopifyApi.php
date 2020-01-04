@@ -39,6 +39,7 @@
             $pullLogData       = [];
             $pullTotalInfoData = [];
             $limit             = 100;
+            //
             if ( !empty($webLists)){
                 foreach ($webLists as $k => $v) {
                     $t       = time();
