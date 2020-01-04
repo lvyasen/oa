@@ -21,7 +21,7 @@
         private static $scope = "read_orders,write_products,read_customers,read_product_listings,read_analytics,read_checkouts,read_reports,write_reports,read_resource_feedbacks,read_shopify_payments_payouts,read_fulfillments";
 
         /**
-         * 统计订单
+         * 下载订单队列
          *
          * @param Request $request
          * countProducts

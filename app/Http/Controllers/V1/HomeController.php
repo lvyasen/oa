@@ -62,4 +62,18 @@
 
             ajaxReturn(200,Code::$com[200],$data);
         }
+
+        /**
+         *
+         * @param Request $request
+         * todaySales
+         * author: walker
+         * Date: 2020/1/4
+         * Time: 16:12
+         * Note:
+         */
+        public function todaySales(Request $request)
+        {
+            
+        }
     }
