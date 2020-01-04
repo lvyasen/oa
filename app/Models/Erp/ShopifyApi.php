@@ -30,17 +30,13 @@
         public function countData($downTime = '', $type = 0)
         {
             $webModel = new SiteWeb();
-            $webLists = $webModel->where(['type' => 1])->get()->toArray();
+            $webLists = $webModel->where(['type' => 1,'is_delete'=>0])->get()->toArray();
             $webModel = new SiteWeb();
             foreach ($webLists as $k => $v) {
                 $t     = time();
                 $info  = $v;
                 $webId = $v['web_id'];
-                //            $info = $webModel
-                //                ->where(['web_id' => $webId])
-                //                ->first();
-                //            if (empty($info)) return false;
-                //            $info    = toArr($info);
+
                 $pullLog = DB::table('shopify_pull_info')
                              ->where(['web_id' => $webId, 'type' => 0])
                              ->orderBy('end_time', 'desc')
@@ -162,7 +158,6 @@
                         continue;
                     }
 
-
                 }
             }
 
@@ -234,10 +229,8 @@
                             $insertData['shopify_id'] = $orderId;
                             $insertData['created_at'] = strtotime($val['created_at']);
                             $insertData['updated_at'] = strtotime($val['updated_at']);
-
                             $insertData['create_time'] = date('Y-m-d H:i:s', strtotime($val['created_at']));
                             $insertData['update_time'] = date('Y-m-d H:i:s', strtotime($val['updated_at']));
-
                             $insertData['number']                  = $val['number'];
                             $insertData['note']                    = $val['note'];
                             $insertData['token']                   = $val['token'];

@@ -32,7 +32,7 @@
                                    'password' => 'required|string',
                                    'age'      => 'string',
                                    'name'     => 'required|string',
-                                   'note'     => 'required|string',
+//                                   'note'     => 'required|string',
                                    'sex'      => 'string',
                                ]);
 
