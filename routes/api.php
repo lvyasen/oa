@@ -44,12 +44,23 @@
         $api->post('editDepartment', 'DepartmentController@editDepartment');//修改部门
         $api->post('getDepartmentAllList', 'DepartmentController@getDepartmentAllList');//修改部门
         $api->post('getDepartmentUsers', 'DepartmentController@getDepartmentUsers');//获取部门用户列表
-        $api->post('addJobNeeds', 'DepartmentController@addJobNeeds');//添加人事部门需求
-        $api->post('editJobNeeds', 'DepartmentController@editJobNeeds');//修改人事部门需求
-        $api->post('getJobNeedsInfo', 'DepartmentController@getJobNeedsInfo');//获取人事部门需求信息
-        $api->post('getTaskUser', 'DepartmentController@getTaskUser');//获取人事部门人员列表
-        $api->post('getJobNeedsList', 'DepartmentController@getJobNeedsList');//获取人事部门需求列表
-        $api->post('delJobNeeds', 'DepartmentController@delJobNeeds');//删除人事需求
+        /**
+         * 职位需求管理
+         */
+        $api->post('addJobNeeds', 'JobController@addJobNeeds');//添加人事部门需求
+        $api->post('editJobNeeds', 'JobController@editJobNeeds');//修改人事部门需求
+        $api->post('getJobNeedsInfo', 'JobController@getJobNeedsInfo');//获取人事部门需求信息
+        $api->post('getTaskUser', 'JobController@getTaskUser');//获取人事部门人员列表
+        $api->post('getJobNeedsList', 'JobController@getJobNeedsList');//获取人事部门需求列表
+        $api->post('delJobNeeds', 'JobController@delJobNeeds');//删除人事需求
+        /**
+         * 人才库管理
+         */
+        $api->post('addTalent', 'TalentController@addTalent');//添加简历
+        $api->post('editTalent', 'TalentController@editTalent');//修改简历
+        $api->post('delTalent', 'TalentController@delTalent');//删除简历
+        $api->post('getTalentList', 'TalentController@getTalentList');//简历列表
+        $api->post('downloadAnnex', 'TalentController@downloadAnnex');//下载简历简历
         /**
          * 物料管理
          */
